@@ -18,7 +18,9 @@ import {
   isAdaptableCategory,
 } from "./types";
 
-export const PACKAGE_SCHEMA = "aura.mission-package/v3";
+export const PACKAGE_SCHEMA = "aura.mission-package/v4";
+/** Esquemas que ya llevan política de adaptación (v4 añade la autoevaluación). */
+export const ADAPTATION_SCHEMAS = ["aura.mission-package/v3", PACKAGE_SCHEMA];
 
 // En el paquete, cada MET viaja dos veces: en segundos (para calcular) y como
 // etiqueta DD/HH:MM[:SS] (para mostrar).
@@ -79,6 +81,14 @@ export interface MissionPackage {
   adaptationPolicy: AdaptationPolicy;
   /** crewId → un elemento por día de vuelo, con actividades ordenadas por MET. */
   plans: Record<string, { day: number; activities: PackageActivity[] }[]>;
+  /** Capacidades con semáforo en la interfaz y qué hacer en ámbar o rojo. */
+  capacities: AppState["capacities"];
+  /** Señales objetivas; simulated = la interfaz genera valores simulados. */
+  signals: AppState["signals"];
+  /** Cuestionario diario: bloque fijo, banco con disparadores y umbrales. */
+  questionnaire: AppState["questionnaire"];
+  /** Todos los umbrales de capacities, signals y questionnaire son de demostración. */
+  thresholdsAreDemo: true;
   /** Avisos e informaciones vigentes al publicar (nunca bloqueos). */
   validation: Issue[];
 }
@@ -147,6 +157,10 @@ export function buildPackageBody(
       report: { endpoint: "/api/adaptations", method: "POST", blocking: false },
     },
     plans,
+    capacities: state.capacities,
+    signals: state.signals,
+    questionnaire: state.questionnaire,
+    thresholdsAreDemo: true,
     validation: validate(state),
   };
 }

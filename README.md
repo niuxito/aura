@@ -30,6 +30,7 @@ Cronograma **planificado** de Artemis II, del «Artemis II Overview Timeline» d
 - **Plan de misión:** días de vuelo con su MET, fases, entorno gravitatorio, transiciones, carga operativa (CO) y eventos.
 - **Plan de prevención:** cronograma del día de vuelo sobre un eje MET y actividades de cada tripulante con su MET.
 - **Catálogo:** acciones asignables. La herramienta no inventa dosis; se publican como se registren.
+- **Cuestionario:** cuestionario diario del astronauta (bloque fijo y banco con disparadores), capacidades con semáforo y señales objetivas. Solo lectura por ahora; se edita en `lib/questionnaire.ts`.
 - **Publicar:** validación del plan y publicación del paquete.
 - **Adaptaciones:** registro de los cambios que la interfaz del astronauta ha hecho por su cuenta, para validarlos u objetarlos.
 
@@ -44,6 +45,16 @@ El paquete publica la política (`adaptationPolicy`) y marca cada bloque y cada 
 
 Cada adaptación se aplica a bordo sin esperar respuesta y se envía a `POST /api/adaptations`. El servidor la registra siempre, la comprueba contra la política y señala las que se salen de ella; control de misión la valida o la objeta en la pestaña Adaptaciones. `GET /api/adaptations?crewId=` devuelve el registro con el resultado de la revisión. Se guardan en `data/adaptations.json`.
 
+## Cuestionario y semáforo (`lib/questionnaire.ts`)
+
+Control de misión define y publica en el paquete lo que la interfaz usa para evaluar al astronauta:
+
+- **Capacidades** con semáforo (verde, ámbar, rojo y gris por falta de datos) y qué hace la interfaz en ámbar (una adaptación permitida) y en rojo (remitir y avisar).
+- **Señales** objetivas: reloj (real), prueba de coordinación (real) y ropa inteligente (**simulada** en la demo).
+- **Cuestionario diario:** 3 preguntas fijas con redacción rotativa y 2 del banco, elegidas por disparadores (cambio de gravedad, entorno, días en microgravedad, EVA, señales). Procede del documento del equipo «ARTEMIS-MED», adaptado a los principios de AURA: no diagnostica, no certifica aptitud y no usa cámara, analítica ni miometría.
+
+No depende de la misión: los disparadores usan entornos gravitatorios y días de vuelo, así que sirve igual para la Luna, Marte o una estación. Todos los umbrales son de demostración (`thresholdsAreDemo: true`).
+
 ## Reglas de validación (`lib/rules.ts`)
 
 | Regla | Gravedad |
@@ -55,6 +66,8 @@ Cada adaptación se aplica a bordo sin esperar respuesta y se envía a `POST /ap
 | Actividad programada dentro de un periodo de sueño o fuera de la misión | Aviso |
 | Astronauta sin plan en un día de vuelo | Aviso |
 | Día sin cuestionario de fatiga, suplementos sin dosis, actividades condicionales | Informativo |
+| Cuestionario incoherente (capacidad, señal o acción inexistente, umbrales fuera de escala) | Bloqueo |
+| Pregunta del banco sin disparadores disponibles | Informativo |
 
 Son reglas de diseño del demostrador, no criterios clínicos.
 
@@ -64,7 +77,7 @@ Son reglas de diseño del demostrador, no criterios clínicos.
 - `GET /api/package?version=N`: una versión concreta.
 - `GET /api/package?list=1`: resumen de versiones.
 
-El formato (`aura.mission-package/v3`) está definido en `lib/package.ts`. Los paquetes se guardan en `data/packages/`.
+El formato (`aura.mission-package/v4`) está definido en `lib/package.ts`. Los paquetes se guardan en `data/packages/`.
 
 ## Datos
 

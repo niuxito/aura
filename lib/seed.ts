@@ -1,4 +1,5 @@
 import { met } from "./met";
+import { seedCapacities, seedQuestionnaire, seedSignals } from "./questionnaire";
 import {
   SCHEMA_VERSION,
   type AppState,
@@ -594,6 +595,9 @@ export function createSeedState(): AppState {
     blocks,
     catalog: seedCatalog,
     plan,
+    capacities: seedCapacities,
+    signals: seedSignals,
+    questionnaire: seedQuestionnaire,
     updatedAt: new Date().toISOString(),
   };
 }

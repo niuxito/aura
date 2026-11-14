@@ -2,7 +2,7 @@
 // Todos los tiempos son MET (Mission Elapsed Time) en segundos; ver lib/met.ts.
 
 /** Cambia cuando el estado guardado deja de ser compatible. */
-export const SCHEMA_VERSION = 3;
+export const SCHEMA_VERSION = 4;
 
 export type Gravity = "tierra" | "micro" | "luna" | "marte";
 export type LoadLevel = "baja" | "media" | "alta" | "critica";
@@ -16,7 +16,8 @@ export type Category =
 /** CA = carga de acondicionamiento, RE = recuperación. */
 export type LoadType = "CA" | "RE" | "ninguna";
 export type EntryStatus = "autorizado" | "condicional";
-export type EventKind = "maniobra" | "hito" | "prueba" | "operacion";
+/** eva = actividad extravehicular (salida al exterior o a la superficie). */
+export type EventKind = "maniobra" | "hito" | "prueba" | "operacion" | "eva";
 export type BlockKind =
   | "sueno"
   | "presueno"
@@ -193,6 +194,136 @@ export const ADAPTATION_TYPE_LABEL: Record<AdaptationType, string> = {
   omision: "Omisión",
 };
 
+// ---------- Autoevaluación: capacidades, señales y cuestionario diario ----------
+//
+// Definido por control de misión y publicado en el paquete; la interfaz del
+// astronauta lo aplica. No depende de la misión: los disparadores se expresan
+// con entornos gravitatorios, días de vuelo y tipos de evento.
+// Todos los umbrales son de demostración, no criterios clínicos.
+
+/** Estado de una capacidad en la interfaz. gris = datos insuficientes. */
+export type CapacityLevel = "verde" | "ambar" | "rojo" | "gris";
+
+/** Capacidad que lleva semáforo en la interfaz del astronauta. */
+export interface Capacity {
+  id: string;
+  name: string;
+  description: string;
+  /** Qué hace la interfaz en ámbar, siempre dentro de adaptationPolicy. */
+  onAmbar: string;
+  /** Qué hace la interfaz en rojo: remite y avisa; no decide por su cuenta. */
+  onRojo: string;
+}
+
+/** De dónde sale una señal objetiva. */
+export type SignalSource = "reloj" | "ropa" | "prueba";
+
+/** Medida objetiva que la interfaz puede tener y cómo se gradúa. */
+export interface Signal {
+  id: string;
+  name: string;
+  unit: string;
+  source: SignalSource;
+  /**
+   * true = no hay dispositivo real en la demo: la interfaz genera valores
+   * simulados, guardados y mostrados como «simulado».
+   */
+  simulated: boolean;
+  capacityId: string;
+  kind: "number" | "boolean";
+  /** Solo numéricas: qué sentido es peor. */
+  worseWhen?: "mayor" | "menor";
+  /** Solo numéricas: a partir de qué valor (incluido) pasa a ámbar o rojo. null = no aplica. */
+  ambar?: number | null;
+  rojo?: number | null;
+  /** Solo booleanas: nivel cuando la señal es verdadera. */
+  whenTrue?: "ambar" | "rojo";
+  description: string;
+}
+
+export interface QuestionScale {
+  min: number;
+  max: number;
+}
+
+export interface QuestionVariant {
+  id: string;
+  text: string;
+  /** Rótulos de los extremos de la escala tal como se muestran. */
+  minLabel: string;
+  maxLabel: string;
+  /**
+   * true = formulada en positivo (alto = mejor). La interfaz la normaliza con
+   * (max + min) − valor para que, en todo el sistema, alto = peor.
+   */
+  inverted: boolean;
+}
+
+/** Cuándo entra una pregunta del banco en el cuestionario del día. */
+export type QuestionTrigger = { priority: number; reason: string } & (
+  | {
+      /** Días de vuelo antes o después de uno con transición gravitatoria. */
+      kind: "transicion";
+      daysBefore: number;
+      daysAfter: number;
+      /** Solo transiciones hacia estos entornos. Vacío = cualquiera. */
+      toGravity: Gravity[];
+      /** Solo si se llevan al menos estos días de vuelo seguidos en microgravedad. */
+      minDaysInMicro?: number;
+    }
+  | { kind: "entorno"; gravity: Gravity[] }
+  | { kind: "dias-micro"; min: number }
+  | { kind: "evento"; eventKind: EventKind; withinDays: number }
+  | {
+      kind: "senal";
+      signalId: string;
+      /** Para booleanas: dispara cuando es verdadera; op y value se ignoran. */
+      op?: ">=" | "<=";
+      value?: number;
+    }
+  /** Relleno cuando no hay suficientes preguntas disparadas. */
+  | { kind: "relleno" }
+);
+
+export interface QuestionItem {
+  id: string;
+  /** fijo = bloque A, todos los días; banco = bloque B, según disparadores. */
+  block: "fijo" | "banco";
+  domain: string;
+  capacityId: string;
+  scale: QuestionScale;
+  /** Instrumento en el que se inspira. Una pregunta suelta no es el instrumento validado. */
+  inspiredBy: string;
+  variants: QuestionVariant[];
+  /** Sobre el valor normalizado (alto = peor), incluido. null = no aplica. */
+  ambar: number | null;
+  rojo: number | null;
+  triggers: QuestionTrigger[];
+}
+
+/** Coherencia entre autoinforme y sensor: detecta infrarreporte. */
+export interface ConsistencyCheck {
+  id: string;
+  questionId: string;
+  /** Respuesta normalizada igual o menor que esta = el astronauta dice estar bien. */
+  answerAtMost: number;
+  signalId: string;
+  op: ">=" | "<=";
+  value: number;
+  message: string;
+}
+
+export interface Questionnaire {
+  /** Actividad del catálogo que lo programa en el plan. */
+  catalogItemId: string;
+  name: string;
+  source: string;
+  fixedPerDay: number;
+  bankPerDay: number;
+  items: QuestionItem[];
+  consistencyChecks: ConsistencyCheck[];
+}
+
 export interface AppState {
   schemaVersion: number;
   mission: Mission;
@@ -202,6 +333,9 @@ export interface AppState {
   blocks: TimelineBlock[];
   catalog: CatalogItem[];
   plan: PlanEntry[];
+  capacities: Capacity[];
+  signals: Signal[];
+  questionnaire: Questionnaire;
   updatedAt: string;
 }
 
@@ -288,6 +422,7 @@ export const EVENT_KIND_LABEL: Record<EventKind, string> = {
   hito: "Hito",
   prueba: "Prueba (FTO/DFTO)",
   operacion: "Operación",
+  eva: "EVA",
 };
 
 export const BLOCK_KIND_LABEL: Record<BlockKind, string> = {

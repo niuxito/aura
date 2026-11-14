@@ -23,7 +23,7 @@ interface Props {
 
 const GRAVITIES: Gravity[] = ["tierra", "micro", "luna", "marte"];
 const LOADS: LoadLevel[] = ["baja", "media", "alta", "critica"];
-const EVENT_KINDS: EventKind[] = ["maniobra", "hito", "prueba", "operacion"];
+const EVENT_KINDS: EventKind[] = ["maniobra", "hito", "prueba", "operacion", "eva"];
 
 export default function MissionView({ state, issues, selectedDay, onSelect, update }: Props) {
   const patchDay = (day: number, patch: Partial<FlightDay>) =>

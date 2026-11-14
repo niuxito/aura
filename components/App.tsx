@@ -9,14 +9,16 @@ import GravityStrip from "./GravityStrip";
 import MissionView from "./MissionView";
 import PreventionView from "./PreventionView";
 import PublishView from "./PublishView";
+import QuestionnaireView from "./QuestionnaireView";
 
-type Tab = "mision" | "prevencion" | "catalogo" | "publicar" | "adaptaciones";
+type Tab = "mision" | "prevencion" | "catalogo" | "cuestionario" | "publicar" | "adaptaciones";
 type SaveStatus = "guardado" | "guardando" | "error";
 
 const TABS: { id: Tab; label: string }[] = [
   { id: "mision", label: "Plan de misión" },
   { id: "prevencion", label: "Plan de prevención" },
   { id: "catalogo", label: "Catálogo" },
+  { id: "cuestionario", label: "Cuestionario" },
   { id: "publicar", label: "Publicar" },
   { id: "adaptaciones", label: "Adaptaciones" },
 ];
@@ -225,6 +227,7 @@ export default function App() {
           />
         ) : null}
         {tab === "catalogo" ? <CatalogView state={state} update={update} /> : null}
+        {tab === "cuestionario" ? <QuestionnaireView state={state} /> : null}
         {tab === "adaptaciones" ? (
           <AdaptationsView
             state={state}

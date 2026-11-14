@@ -1338,3 +1338,71 @@ tr:last-child td {
     display: none;
   }
 }
+
+/* ---------- Cuestionario ---------- */
+
+.q-summary,
+.q-demo {
+  margin: 0 0 8px;
+  max-width: 90ch;
+  line-height: 1.5;
+}
+
+.q-demo {
+  padding: 8px 10px;
+  border-left: 3px solid var(--sev-aviso);
+  background: var(--panel-2);
+  font-size: 13px;
+}
+
+.q-table {
+  min-width: 980px;
+}
+
+.q-table td {
+  vertical-align: top;
+  padding: 9px 8px;
+}
+
+.q-table td strong {
+  display: block;
+  font-weight: 600;
+}
+
+.q-table td small {
+  display: block;
+  margin-top: 2px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.q-table td .code {
+  margin-bottom: 4px;
+}
+
+.q-variants,
+.q-triggers,
+.q-checks {
+  margin: 0;
+  padding-left: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.q-checks {
+  padding-left: 0;
+  list-style: none;
+}
+
+.q-checks li {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.badge.q-sim {
+  margin-left: 6px;
+  border-color: var(--sev-aviso);
+  color: var(--sev-aviso);
+}

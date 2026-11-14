@@ -11,7 +11,10 @@ export async function PUT(request: Request) {
     state?.schemaVersion !== SCHEMA_VERSION ||
     !state.mission ||
     !Array.isArray(state.days) ||
-    !Array.isArray(state.plan)
+    !Array.isArray(state.plan) ||
+    !state.questionnaire ||
+    !Array.isArray(state.capacities) ||
+    !Array.isArray(state.signals)
   ) {
     return Response.json({ error: "Estado no válido" }, { status: 400 });
   }

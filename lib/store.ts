@@ -18,10 +18,33 @@ import {
 const readJson = <T>(collection: string, name: string) => getDoc<T>(collection, name);
 const STATE = ["state", "current"] as const;
 
+/**
+ * v3 → v4: añade capacidades, señales y cuestionario de la demo sin tocar el
+ * plan de misión ni el de prevención que ya se hubieran editado.
+ */
+function migrate(saved: AppState): AppState | null {
+  if (saved.schemaVersion === SCHEMA_VERSION) return saved;
+  if (saved.schemaVersion === 3) {
+    const seed = createSeedState();
+    return {
+      ...saved,
+      schemaVersion: SCHEMA_VERSION,
+      capacities: seed.capacities,
+      signals: seed.signals,
+      questionnaire: seed.questionnaire,
+    };
+  }
+  return null;
+}
+
 export async function readState(): Promise<AppState> {
   const saved = await readJson<AppState>(...STATE);
-  // Un estado de un esquema anterior no se migra: se sustituye por la demo.
-  if (saved?.schemaVersion === SCHEMA_VERSION) return saved;
+  const migrated = saved ? migrate(saved) : null;
+  if (migrated) {
+    if (migrated !== saved) await setDoc(...STATE, migrated);
+    return migrated;
+  }
+  // Un estado de un esquema más antiguo no se migra: se sustituye por la demo.
   const seed = createSeedState();
   await setDoc(...STATE, seed);
   return seed;

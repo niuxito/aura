@@ -1,5 +1,5 @@
 import { formatMet } from "./met";
-import { PACKAGE_SCHEMA, type MissionPackage } from "./package";
+import { ADAPTATION_SCHEMAS, type MissionPackage } from "./package";
 import type { Adaptation, AdaptationEvidence, AdaptationInput, AdaptationType } from "./types";
 
 const TYPES: AdaptationType[] = ["sustitucion", "reprogramacion", "omision"];
@@ -74,7 +74,7 @@ export function checkPolicy(
   });
 
   if (!pkg) return fail(`No existe el paquete v${input.packageVersion}.`);
-  if (pkg.schema !== PACKAGE_SCHEMA) {
+  if (!ADAPTATION_SCHEMAS.includes(pkg.schema)) {
     return fail(`El paquete v${input.packageVersion} es de un esquema anterior, sin política de adaptación.`);
   }
 

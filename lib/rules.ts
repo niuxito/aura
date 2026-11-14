@@ -175,6 +175,66 @@ export function validate(state: AppState): Issue[] {
     });
   }
 
+  issues.push(...validateQuestionnaire(state));
+  return issues;
+}
+
+/**
+ * Coherencia del cuestionario: lo que la interfaz no podría aplicar bloquea la
+ * publicación; las preguntas que nunca se seleccionarán se informan.
+ */
+function validateQuestionnaire(state: AppState): Issue[] {
+  const issues: Issue[] = [];
+  const q = state.questionnaire;
+  const add = (rule: string, severity: Issue["severity"], message: string, suffix: string) =>
+    issues.push({ id: `${rule}-${suffix}`, rule, severity, day: null, crewId: null, message });
+
+  const capacityIds = new Set(state.capacities.map((c) => c.id));
+  const signalIds = new Set(state.signals.map((s) => s.id));
+  const itemIds = new Set(q.items.map((i) => i.id));
+
+  if (!state.catalog.some((c) => c.id === q.catalogItemId)) {
+    add("cuestionario", "bloqueo", `El cuestionario apunta a la acción ${q.catalogItemId}, que no está en el catálogo.`, "catalogo");
+  }
+  for (const s of state.signals) {
+    if (!capacityIds.has(s.capacityId)) {
+      add("cuestionario", "bloqueo", `La señal ${s.id} apunta a una capacidad inexistente (${s.capacityId}).`, `senal-${s.id}`);
+    }
+  }
+  for (const item of q.items) {
+    const where = `Pregunta ${item.id}`;
+    if (!capacityIds.has(item.capacityId)) {
+      add("cuestionario", "bloqueo", `${where}: capacidad inexistente (${item.capacityId}).`, `cap-${item.id}`);
+    }
+    if (item.variants.length === 0) {
+      add("cuestionario", "bloqueo", `${where}: no tiene ninguna redacción.`, `var-${item.id}`);
+    }
+    const inScale = (n: number | null) => n === null || (n >= item.scale.min && n <= item.scale.max);
+    if (!inScale(item.ambar) || !inScale(item.rojo) || (item.ambar !== null && item.rojo !== null && item.rojo < item.ambar)) {
+      add("cuestionario", "bloqueo", `${where}: umbrales fuera de la escala ${item.scale.min}–${item.scale.max} o desordenados.`, `umbral-${item.id}`);
+    }
+    for (const t of item.triggers) {
+      if (t.kind === "senal" && !signalIds.has(t.signalId)) {
+        add("cuestionario", "bloqueo", `${where}: el disparador usa una señal inexistente (${t.signalId}).`, `trig-${item.id}-${t.signalId}`);
+      }
+    }
+    if (item.block === "banco" && item.triggers.length === 0) {
+      add("cuestionario", "info", `${where} (${item.domain}): sin disparadores disponibles; no se seleccionará nunca.`, `nunca-${item.id}`);
+    }
+  }
+  for (const c of q.consistencyChecks) {
+    if (!itemIds.has(c.questionId) || !signalIds.has(c.signalId)) {
+      add("cuestionario", "bloqueo", `Comprobación ${c.id}: pregunta o señal inexistente.`, `coh-${c.id}`);
+    }
+  }
+  const fixed = q.items.filter((i) => i.block === "fijo").length;
+  if (fixed < q.fixedPerDay) {
+    add("cuestionario", "bloqueo", `El bloque fijo pide ${q.fixedPerDay} preguntas y solo hay ${fixed}.`, "fijas");
+  }
+  const fillers = q.items.filter((i) => i.triggers.some((t) => t.kind === "relleno")).length;
+  if (fillers < q.bankPerDay) {
+    add("cuestionario", "aviso", `Hay ${fillers} preguntas de relleno para ${q.bankPerDay} huecos del banco: algunos días faltarán preguntas.`, "relleno");
+  }
   return issues;
 }
 
