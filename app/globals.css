@@ -1309,6 +1309,39 @@ tr:last-child td {
 }
 
 .review-status.review-pendiente { color: var(--sev-aviso); }
+
+/* ---------- Alertas ---------- */
+
+.alerts {
+  list-style: none;
+  margin: 12px 0 0;
+  padding: 0;
+  border-top: 1px solid var(--line-strong);
+}
+
+.alert-item {
+  padding: 12px 0 12px 12px;
+  border-bottom: 1px solid var(--line);
+  border-left: 3px solid var(--sev-aviso);
+}
+
+.alert-item.level-rojo { border-left-color: var(--sev-bloqueo); }
+.alert-item.ack-atendida { border-left-color: var(--line-strong); opacity: 0.75; }
+.alert-item p { margin: 6px 0; }
+
+.badge.alert-level-rojo {
+  background: var(--red);
+  border-color: var(--red);
+  color: #fff;
+}
+
+.badge.alert-level-aviso {
+  border-color: var(--sev-aviso);
+  color: var(--sev-aviso);
+}
+
+.review-status.ack-nueva { color: var(--sev-bloqueo); }
+.review-status.ack-vista { color: var(--sev-aviso); }
 .review-status.review-objetada { color: var(--sev-bloqueo); }
 
 @media (max-width: 900px) {

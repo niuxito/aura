@@ -2,8 +2,9 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { countBySeverity, validate } from "@/lib/rules";
-import type { Adaptation, AppState } from "@/lib/types";
+import type { Adaptation, Alert, AppState } from "@/lib/types";
 import AdaptationsView from "./AdaptationsView";
+import AlertsView from "./AlertsView";
 import CatalogView from "./CatalogView";
 import GravityStrip from "./GravityStrip";
 import MissionView from "./MissionView";
@@ -11,7 +12,7 @@ import PreventionView from "./PreventionView";
 import PublishView from "./PublishView";
 import QuestionnaireView from "./QuestionnaireView";
 
-type Tab = "mision" | "prevencion" | "catalogo" | "cuestionario" | "publicar" | "adaptaciones";
+type Tab = "mision" | "prevencion" | "catalogo" | "cuestionario" | "publicar" | "adaptaciones" | "alertas";
 type SaveStatus = "guardado" | "guardando" | "error";
 
 const TABS: { id: Tab; label: string }[] = [
@@ -21,10 +22,11 @@ const TABS: { id: Tab; label: string }[] = [
   { id: "cuestionario", label: "Cuestionario" },
   { id: "publicar", label: "Publicar" },
   { id: "adaptaciones", label: "Adaptaciones" },
+  { id: "alertas", label: "Alertas" },
 ];
 
 const SAVE_DELAY_MS = 500;
-/** Cada cuánto se consulta si la interfaz ha enviado adaptaciones nuevas. */
+/** Cada cuánto se consulta si la interfaz ha enviado adaptaciones o alertas nuevas. */
 const ADAPTATIONS_POLL_MS = 15000;
 
 /** Permite enlazar a una pestaña concreta con ?tab=adaptaciones. */
@@ -56,6 +58,16 @@ async function fetchAdaptations(): Promise<AdaptationsResponse | null> {
   }
 }
 
+/** null si el servidor no responde: se reintenta en la siguiente consulta. */
+async function fetchAlerts(): Promise<Alert[] | null> {
+  try {
+    const res = await fetch("/api/alerts");
+    return res.ok ? ((await res.json()) as { alerts: Alert[] }).alerts : null;
+  } catch {
+    return null;
+  }
+}
+
 export default function App() {
   const [state, setState] = useState<AppState | null>(null);
   const [loadError, setLoadError] = useState(false);
@@ -65,6 +77,7 @@ export default function App() {
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [adaptations, setAdaptations] = useState<Adaptation[]>([]);
   const [latestPackageVersion, setLatestPackageVersion] = useState<number | null>(null);
+  const [alerts, setAlerts] = useState<Alert[]>([]);
 
   const applyAdaptations = useCallback((data: AdaptationsResponse | null) => {
     if (!data) return;
@@ -77,12 +90,23 @@ export default function App() {
     [applyAdaptations],
   );
 
+  const refreshAlerts = useCallback(
+    () =>
+      fetchAlerts().then((data) => {
+        if (data) setAlerts(data);
+      }),
+    [],
+  );
+
   useEffect(() => {
-    const load = () => void fetchAdaptations().then(applyAdaptations);
+    const load = () => {
+      void fetchAdaptations().then(applyAdaptations);
+      void refreshAlerts();
+    };
     load();
     const interval = setInterval(load, ADAPTATIONS_POLL_MS);
     return () => clearInterval(interval);
-  }, [applyAdaptations]);
+  }, [applyAdaptations, refreshAlerts]);
 
   useEffect(() => {
     fetch("/api/state")
@@ -138,6 +162,8 @@ export default function App() {
 
   const counts = countBySeverity(issues);
   const pendingAdaptations = adaptations.filter((a) => a.review.status === "pendiente").length;
+  const newAlerts = alerts.filter((a) => a.ack.status === "nueva");
+  const newRedAlerts = newAlerts.filter((a) => a.level === "rojo").length;
   const goToDay = (day: number) => {
     setSelectedDay(day);
     setTab("prevencion");
@@ -195,6 +221,9 @@ export default function App() {
             {t.id === "adaptaciones" && pendingAdaptations > 0 ? (
               <span className="pill sev-aviso">{pendingAdaptations}</span>
             ) : null}
+            {t.id === "alertas" && newAlerts.length > 0 ? (
+              <span className={`pill ${newRedAlerts > 0 ? "sev-bloqueo" : "sev-aviso"}`}>{newAlerts.length}</span>
+            ) : null}
           </button>
         ))}
       </nav>
@@ -236,6 +265,7 @@ export default function App() {
             refresh={refreshAdaptations}
           />
         ) : null}
+        {tab === "alertas" ? <AlertsView state={state} alerts={alerts} refresh={refreshAlerts} /> : null}
         {tab === "publicar" ? (
           <PublishView state={state} issues={issues} onSelectDay={goToDay} />
         ) : null}

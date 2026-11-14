@@ -7,6 +7,9 @@ import {
   SCHEMA_VERSION,
   type Adaptation,
   type AdaptationInput,
+  type Alert,
+  type AlertInput,
+  type AlertStatus,
   type AppState,
   type PackageSummary,
   type ReviewStatus,
@@ -163,3 +166,52 @@ export async function reviewAdaptation(
   await setDoc("adaptations", target.id, target);
   return target;
 }
+
+// ---------- Alertas de la interfaz del astronauta ----------
+
+export async function listAlerts(): Promise<Alert[]> {
+  const names = await listDocs("alerts");
+  const all = await Promise.all(names.map((n) => readJson<Alert>("alerts", n)));
+  return all
+    .filter((a): a is Alert => a !== null)
+    .sort((a, b) => a.receivedAt.localeCompare(b.receivedAt));
+}
+
+/**
+ * Registra alertas. Nunca las rechaza por su contenido.
+ * Reenviar una alerta ya registrada (mismo id) no la duplica.
+ */
+export async function receiveAlerts(inputs: AlertInput[]): Promise<Alert[]> {
+  const all = await listAlerts();
+  const result: Alert[] = [];
+  for (const input of inputs) {
+    const existing = all.find((a) => a.id === input.id);
+    if (existing) {
+      result.push(existing);
+      continue;
+    }
+    const alert: Alert = {
+      ...input,
+      receivedAt: new Date().toISOString(),
+      ack: { status: "nueva", note: "", at: null },
+    };
+    await setDoc("alerts", alert.id, alert);
+    all.push(alert);
+    result.push(alert);
+  }
+  return result;
+}
+
+export async function acknowledgeAlert(
+  id: string,
+  status: AlertStatus,
+  note: string,
+): Promise<Alert | null> {
+  const all = await listAlerts();
+  const target = all.find((a) => a.id === id);
+  if (!target) return null;
+  target.ack = { status, note, at: status === "nueva" ? null : new Date().toISOString() };
+  await setDoc("alerts", target.id, target);
+  return target;
+}
+

@@ -188,6 +188,48 @@ export interface Adaptation extends AdaptationInput {
   review: { status: ReviewStatus; note: string; reviewedAt: string | null };
 }
 
+// ---------- Alertas de la interfaz del astronauta ----------
+//
+// Lo que la interfaz no resuelve adaptando el plan y debe conocer control de misión:
+// una capacidad en rojo, una adaptación que quita una medida de preparación de la
+// transición o una incoherencia entre autoinforme y sensor. Como las adaptaciones,
+// se envían sin bloquear y el servidor nunca las rechaza por su contenido.
+
+export type AlertKind = "capacidad-roja" | "preparacion-perdida" | "incoherencia";
+export type AlertLevel = "rojo" | "aviso";
+export type AlertStatus = "nueva" | "vista" | "atendida";
+
+export interface AlertInput {
+  /** Generado por la interfaz; permite reenviar sin duplicar. */
+  id: string;
+  packageVersion: number;
+  crewId: string;
+  kind: AlertKind;
+  level: AlertLevel;
+  /** Capacidad afectada (capacities[].id), si aplica. */
+  capacityId?: string;
+  /** Actividad del plan afectada (activities[].entryId), si aplica. */
+  entryId?: string;
+  /** MET en el que la interfaz generó la alerta. */
+  met: number;
+  /** Texto que vio el astronauta. */
+  message: string;
+  evidence: AdaptationEvidence[];
+  source: "interfaz" | "simulada";
+}
+
+/** Alerta registrada en control de misión, con su acuse. */
+export interface Alert extends AlertInput {
+  receivedAt: string;
+  ack: { status: AlertStatus; note: string; at: string | null };
+}
+
+export const ALERT_KIND_LABEL: Record<AlertKind, string> = {
+  "capacidad-roja": "Capacidad en rojo",
+  "preparacion-perdida": "Medida de preparación perdida",
+  incoherencia: "Incoherencia autoinforme/sensor",
+};
+
 export const ADAPTATION_TYPE_LABEL: Record<AdaptationType, string> = {
   sustitucion: "Sustitución",
   reprogramacion: "Reprogramación",

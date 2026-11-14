@@ -33,6 +33,7 @@ Cronograma **planificado** de Artemis II, del «Artemis II Overview Timeline» d
 - **Cuestionario:** cuestionario diario del astronauta (bloque fijo y banco con disparadores), capacidades con semáforo y señales objetivas. Solo lectura por ahora; se edita en `lib/questionnaire.ts`.
 - **Publicar:** validación del plan y publicación del paquete.
 - **Adaptaciones:** registro de los cambios que la interfaz del astronauta ha hecho por su cuenta, para validarlos u objetarlos.
+- **Alertas:** lo que la interfaz no resuelve adaptando (capacidad en rojo, medida de preparación de la transición perdida, incoherencia entre autoinforme y sensor), para marcarlo como visto o atendido.
 
 ## Fijo y adaptable
 
@@ -44,6 +45,10 @@ La interfaz del astronauta puede adaptar por sí misma una parte acotada del pla
 El paquete publica la política (`adaptationPolicy`) y marca cada bloque y cada actividad con `adaptable`. La interfaz puede sustituir una actividad adaptable por otra de la misma categoría sin aumentar la carga, moverla dentro de su periodo u omitirla.
 
 Cada adaptación se aplica a bordo sin esperar respuesta y se envía a `POST /api/adaptations`. El servidor la registra siempre, la comprueba contra la política y señala las que se salen de ella; control de misión la valida o la objeta en la pestaña Adaptaciones. `GET /api/adaptations?crewId=` devuelve el registro con el resultado de la revisión. Se guardan en `data/adaptations.json`.
+
+## Alertas de la interfaz (`lib/alerts.ts`)
+
+`POST /api/alerts` recibe una alerta o una lista: `{ id, packageVersion, crewId, kind, level, capacityId?, entryId?, met, message, evidence[], source }`, con `kind` `capacidad-roja`, `preparacion-perdida` o `incoherencia` y `level` `rojo` o `aviso`. Como las adaptaciones, se registra siempre (`202`), reenviar el mismo `id` no duplica y solo responde `400` si el mensaje está mal formado. `GET /api/alerts?crewId=` devuelve el registro con el acuse (`ack.status`: `nueva`, `vista` o `atendida`, y `ack.note`), que la interfaz muestra al astronauta. Control de misión lo marca en la pestaña Alertas (`PATCH /api/alerts`). Se guardan en la colección `alerts` (ficheros en local, Postgres en Vercel).
 
 ## Cuestionario y semáforo (`lib/questionnaire.ts`)
 
