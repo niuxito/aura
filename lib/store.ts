@@ -2,6 +2,16 @@ import { createHash } from "crypto";
 import { buildPackageBody, canonicalJson, type MissionPackage } from "./package";
 import { createSeedState } from "./seed";
 import { checkPolicy } from "./adaptations";
+import { isLocalizedText } from "./i18n";
+import {
+  legacyAdaptationType,
+  legacyAlertKind,
+  legacyAlertLevel,
+  legacyAlertStatus,
+  legacyEvidenceSource,
+  legacyReportSource,
+  legacyReviewStatus,
+} from "./legacy";
 import { getDoc, listDocs, setDoc } from "./storage";
 import {
   SCHEMA_VERSION,
@@ -15,29 +25,19 @@ import {
   type ReviewStatus,
 } from "./types";
 
-// Estado, paquetes y adaptaciones de AURA Manager. Dónde se guardan lo decide
-// lib/storage.ts: ficheros en local, Postgres en el despliegue.
+// AURA Manager state, packages, adaptations and alerts. Where they are stored
+// is decided by lib/storage.ts: files locally, Postgres when deployed.
 
 const readJson = <T>(collection: string, name: string) => getDoc<T>(collection, name);
 const STATE = ["state", "current"] as const;
 
 /**
- * v3 → v4: añade capacidades, señales y cuestionario de la demo sin tocar el
- * plan de misión ni el de prevención que ya se hubieran editado.
+ * Saved state of an older schema. v5 changed every code to English and every
+ * text to a multilingual one, so an older state is not migrated: it is
+ * replaced by the demo mission (as was already the rule before v4).
  */
 function migrate(saved: AppState): AppState | null {
-  if (saved.schemaVersion === SCHEMA_VERSION) return saved;
-  if (saved.schemaVersion === 3) {
-    const seed = createSeedState();
-    return {
-      ...saved,
-      schemaVersion: SCHEMA_VERSION,
-      capacities: seed.capacities,
-      signals: seed.signals,
-      questionnaire: seed.questionnaire,
-    };
-  }
-  return null;
+  return saved.schemaVersion === SCHEMA_VERSION ? saved : null;
 }
 
 export async function readState(): Promise<AppState> {
@@ -47,7 +47,7 @@ export async function readState(): Promise<AppState> {
     if (migrated !== saved) await setDoc(...STATE, migrated);
     return migrated;
   }
-  // Un estado de un esquema más antiguo no se migra: se sustituye por la demo.
+  // State of an older schema is not migrated: it is replaced by the demo.
   const seed = createSeedState();
   await setDoc(...STATE, seed);
   return seed;
@@ -106,24 +106,51 @@ export async function publishPackage(state: AppState): Promise<MissionPackage> {
   return pkg;
 }
 
-// ---------- Adaptaciones recibidas de la interfaz del astronauta ----------
+// ---------- Adaptations received from the astronaut interface ----------
 
 export async function latestPackageVersion(): Promise<number | null> {
   return (await packageVersions()).at(-1) ?? null;
 }
 
+/**
+ * Adaptations recorded before v5 carry Spanish codes and single-language
+ * violations: convert the codes and recompute the policy check so its
+ * messages exist in every language. Saved back once converted.
+ */
+async function upgradeAdaptation(a: Adaptation): Promise<Adaptation> {
+  const legacy = a.policy.violations.some((v) => !isLocalizedText(v));
+  const upgraded: Adaptation = {
+    ...a,
+    type: legacyAdaptationType(a.type) as Adaptation["type"],
+    source: legacyReportSource(a.source) as Adaptation["source"],
+    evidence: a.evidence.map((e) => ({
+      ...e,
+      source: legacyEvidenceSource(e.source) as typeof e.source,
+    })),
+    review: { ...a.review, status: legacyReviewStatus(a.review.status) as ReviewStatus },
+  };
+  if (legacy) {
+    const { original, policy } = checkPolicy(await readPackage(a.packageVersion), upgraded);
+    upgraded.original = original;
+    upgraded.policy = policy;
+  }
+  if (JSON.stringify(upgraded) !== JSON.stringify(a)) await setDoc("adaptations", a.id, upgraded);
+  return upgraded;
+}
+
 export async function listAdaptations(): Promise<Adaptation[]> {
   const names = await listDocs("adaptations");
   const all = await Promise.all(names.map((n) => readJson<Adaptation>("adaptations", n)));
-  return all
-    .filter((a): a is Adaptation => a !== null)
-    .sort((a, b) => a.receivedAt.localeCompare(b.receivedAt));
+  const found = all.filter((a): a is Adaptation => a !== null);
+  return (await Promise.all(found.map(upgradeAdaptation))).sort((a, b) =>
+    a.receivedAt.localeCompare(b.receivedAt),
+  );
 }
 
 /**
- * Registra adaptaciones. Nunca las rechaza por su contenido: las que se salen
- * de la política quedan marcadas para que control de misión las revise.
- * Reenviar una adaptación ya registrada (mismo id) no la duplica.
+ * Records adaptations. Never rejects them for their content: those outside the
+ * policy are flagged for mission control to review.
+ * Resending an already recorded adaptation (same id) does not duplicate it.
  */
 export async function receiveAdaptations(inputs: AdaptationInput[]): Promise<Adaptation[]> {
   const all = await listAdaptations();
@@ -141,7 +168,7 @@ export async function receiveAdaptations(inputs: AdaptationInput[]): Promise<Ada
       receivedAt: new Date().toISOString(),
       original,
       policy,
-      review: { status: "pendiente", note: "", reviewedAt: null },
+      review: { status: "pending", note: "", reviewedAt: null },
     };
     await setDoc("adaptations", adaptation.id, adaptation);
     all.push(adaptation);
@@ -161,25 +188,43 @@ export async function reviewAdaptation(
   target.review = {
     status,
     note,
-    reviewedAt: status === "pendiente" ? null : new Date().toISOString(),
+    reviewedAt: status === "pending" ? null : new Date().toISOString(),
   };
   await setDoc("adaptations", target.id, target);
   return target;
 }
 
-// ---------- Alertas de la interfaz del astronauta ----------
+// ---------- Alerts from the astronaut interface ----------
 
 export async function listAlerts(): Promise<Alert[]> {
   const names = await listDocs("alerts");
   const all = await Promise.all(names.map((n) => readJson<Alert>("alerts", n)));
-  return all
-    .filter((a): a is Alert => a !== null)
-    .sort((a, b) => a.receivedAt.localeCompare(b.receivedAt));
+  const found = all.filter((a): a is Alert => a !== null);
+  return (await Promise.all(found.map(upgradeAlert))).sort((a, b) =>
+    a.receivedAt.localeCompare(b.receivedAt),
+  );
+}
+
+/** Alerts recorded before v5 carry Spanish codes: convert and save them back. */
+async function upgradeAlert(a: Alert): Promise<Alert> {
+  const upgraded: Alert = {
+    ...a,
+    kind: legacyAlertKind(a.kind) as Alert["kind"],
+    level: legacyAlertLevel(a.level) as Alert["level"],
+    source: legacyReportSource(a.source) as Alert["source"],
+    evidence: a.evidence.map((e) => ({
+      ...e,
+      source: legacyEvidenceSource(e.source) as typeof e.source,
+    })),
+    ack: { ...a.ack, status: legacyAlertStatus(a.ack.status) as AlertStatus },
+  };
+  if (JSON.stringify(upgraded) !== JSON.stringify(a)) await setDoc("alerts", a.id, upgraded);
+  return upgraded;
 }
 
 /**
- * Registra alertas. Nunca las rechaza por su contenido.
- * Reenviar una alerta ya registrada (mismo id) no la duplica.
+ * Records alerts. Never rejects them for their content.
+ * Resending an already recorded alert (same id) does not duplicate it.
  */
 export async function receiveAlerts(inputs: AlertInput[]): Promise<Alert[]> {
   const all = await listAlerts();
@@ -193,7 +238,7 @@ export async function receiveAlerts(inputs: AlertInput[]): Promise<Alert[]> {
     const alert: Alert = {
       ...input,
       receivedAt: new Date().toISOString(),
-      ack: { status: "nueva", note: "", at: null },
+      ack: { status: "new", note: "", at: null },
     };
     await setDoc("alerts", alert.id, alert);
     all.push(alert);
@@ -210,7 +255,7 @@ export async function acknowledgeAlert(
   const all = await listAlerts();
   const target = all.find((a) => a.id === id);
   if (!target) return null;
-  target.ack = { status, note, at: status === "nueva" ? null : new Date().toISOString() };
+  target.ack = { status, note, at: status === "new" ? null : new Date().toISOString() };
   await setDoc("alerts", target.id, target);
   return target;
 }

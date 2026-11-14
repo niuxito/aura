@@ -16,12 +16,12 @@ export async function PUT(request: Request) {
     !Array.isArray(state.capacities) ||
     !Array.isArray(state.signals)
   ) {
-    return Response.json({ error: "Estado no válido" }, { status: 400 });
+    return Response.json({ error: "Invalid state" }, { status: 400 });
   }
   return Response.json(await writeState(state));
 }
 
-/** Restaura la misión demo. */
+/** Restores the demo mission. */
 export async function DELETE() {
   return Response.json(await resetState());
 }

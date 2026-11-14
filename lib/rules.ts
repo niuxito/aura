@@ -1,30 +1,34 @@
+import { DEFAULT_LOCALE, LOCALES, collectTexts, msg, tr, type Messages } from "./i18n";
 import { formatFlightDay, formatMet } from "./met";
-import type { AppState, CatalogItem, Issue, PlanEntry } from "./types";
-import { ADAPTABLE_WINDOW, BLOCK_KIND_LABEL, GRAVITY_SHORT, flightDayOf } from "./types";
+import type { AppState, CatalogItem, Issue, LocalizedText, PlanEntry } from "./types";
+import { ADAPTABLE_WINDOW, flightDayOf } from "./types";
 
-// Reglas de planificación derivadas de la especificación v0.4. Son reglas de
-// diseño para el demostrador, no criterios clínicos.
+// Planning rules derived from specification v0.4. They are design rules for
+// the demonstrator, not clinical criteria. Every message is a LocalizedText:
+// validation warnings travel in the package and are shown in any language.
 
-/** Días de vuelo previos en los que una preparación de transición cuenta. */
+/** Previous flight days in which a transition preparation counts. */
 const TRANSITION_PREP_WINDOW = 2;
 
 export function validate(state: AppState): Issue[] {
   const issues: Issue[] = [];
   const items = new Map<string, CatalogItem>(state.catalog.map((c) => [c.id, c]));
   const dayByNumber = new Map(state.days.map((d) => [d.day, d]));
-  const sleepBlocks = state.blocks.filter((b) => b.kind === "sueno");
+  const sleepBlocks = state.blocks.filter((b) => b.kind === "sleep");
+  const nameOf = (entry: PlanEntry): LocalizedText =>
+    items.get(entry.itemId)?.name ?? { [DEFAULT_LOCALE]: entry.itemId };
 
   const byCrewDay = new Map<string, PlanEntry[]>();
   for (const entry of state.plan) {
     const day = flightDayOf(state.days, entry.met);
     if (day === null) {
       issues.push({
-        id: `fuera-de-mision-${entry.id}`,
-        rule: "fuera-de-mision",
-        severity: "aviso",
+        id: `outside-mission-${entry.id}`,
+        rule: "outside-mission",
+        severity: "warning",
         day: null,
         crewId: entry.crewId,
-        message: `${items.get(entry.itemId)?.name ?? entry.itemId} en MET ${formatMet(entry.met)}: fuera de los días de vuelo de la misión.`,
+        message: msg((m, l) => m.rules.outsideMission(tr(nameOf(entry), l), formatMet(entry.met))),
       });
       continue;
     }
@@ -42,7 +46,7 @@ export function validate(state: AppState): Issue[] {
       const push = (
         rule: string,
         severity: Issue["severity"],
-        message: string,
+        message: LocalizedText,
         suffix = "",
       ) =>
         issues.push({
@@ -55,7 +59,7 @@ export function validate(state: AppState): Issue[] {
         });
 
       if (entries.length === 0) {
-        push("sin-plan", "aviso", "Sin plan de prevención asignado para este día de vuelo.");
+        push("no-plan", "warning", msg((m) => m.rules.noPlan));
         continue;
       }
 
@@ -65,13 +69,16 @@ export function validate(state: AppState): Issue[] {
       for (const entry of entries) {
         const item = items.get(entry.itemId);
         if (!item) continue;
+        const at = formatMet(entry.met);
 
         const sleep = sleepBlocks.find((b) => entry.met >= b.startMet && entry.met < b.endMet);
         if (sleep && item.loadType !== "RE") {
           push(
-            "en-sueno",
-            "aviso",
-            `${item.name} en MET ${formatMet(entry.met)}: cae dentro del periodo de sueño (${formatMet(sleep.startMet)} – ${formatMet(sleep.endMet)}).`,
+            "during-sleep",
+            "warning",
+            msg((m, l) =>
+              m.rules.inSleep(tr(item.name, l), at, formatMet(sleep.startMet), formatMet(sleep.endMet)),
+            ),
             entry.id,
           );
         }
@@ -85,44 +92,49 @@ export function validate(state: AppState): Issue[] {
           )
         ) {
           push(
-            "adaptable-fuera-de-periodo",
+            "adaptable-outside-window",
             "info",
-            `${item.name} en MET ${formatMet(entry.met)}: es adaptable pero no está dentro de un bloque de «${BLOCK_KIND_LABEL[windowKind]}»; la interfaz podrá sustituirla u omitirla, no moverla.`,
+            msg((m, l) =>
+              m.rules.adaptableOutsideWindow(tr(item.name, l), at, m.labels.blockKind[windowKind]),
+            ),
             entry.id,
           );
         }
 
         if (!item.intense) continue;
-        const authorized = entry.status === "autorizado";
-        if (day.co === "critica") {
+        const authorized = entry.status === "authorized";
+        if (day.opLoad === "critical") {
           push(
-            "intenso-en-critico",
-            authorized ? "bloqueo" : "aviso",
-            `${item.name}: no se añade carga exigente a un día de carga operativa crítica (${day.milestone}).`,
+            "intense-on-critical",
+            authorized ? "blocker" : "warning",
+            msg((m, l) => m.rules.intenseOnCritical(tr(item.name, l), tr(day.milestone, l))),
             entry.id,
           );
-        } else if (next?.co === "critica") {
+        } else if (next?.opLoad === "critical") {
           push(
-            "intenso-en-vispera",
-            authorized ? "aviso" : "info",
-            `${item.name} en la víspera de ${formatFlightDay(next.day)} («${next.milestone}»): proteger el descanso previo.`,
+            "intense-on-eve",
+            authorized ? "warning" : "info",
+            msg((m, l) =>
+              m.rules.intenseOnEve(tr(item.name, l), formatFlightDay(next.day), tr(next.milestone, l)),
+            ),
             entry.id,
           );
         }
       }
 
       if (
-        prev?.co === "critica" &&
+        prev?.opLoad === "critical" &&
         !entries.some((e) => items.get(e.itemId)?.loadType === "RE")
       ) {
         push(
-          "sin-recuperacion",
-          "aviso",
-          `Sin ventana de recuperación tras ${formatFlightDay(prev.day)} («${prev.milestone}»).`,
+          "no-recovery",
+          "warning",
+          msg((m, l) => m.rules.noRecovery(formatFlightDay(prev.day), tr(prev.milestone, l))),
         );
       }
 
-      if (day.transitionFrom && day.gravity !== "micro") {
+      const from = day.transitionFrom;
+      if (from && day.gravity !== "micro") {
         let prepared = false;
         for (let d = day.day; d >= day.day - TRANSITION_PREP_WINDOW; d--) {
           if (entriesFor(member.id, d).some((e) => items.get(e.itemId)?.transitionPrep)) {
@@ -132,61 +144,64 @@ export function validate(state: AppState): Issue[] {
         }
         if (!prepared) {
           push(
-            "transicion-sin-preparar",
-            "aviso",
-            `Transición ${GRAVITY_SHORT[day.transitionFrom]} → ${GRAVITY_SHORT[day.gravity]} sin preparación gravitatoria en los ${TRANSITION_PREP_WINDOW} días de vuelo previos.`,
+            "unprepared-transition",
+            "warning",
+            msg((m) =>
+              m.rules.unpreparedTransition(
+                m.labels.gravityShort[from],
+                m.labels.gravityShort[day.gravity],
+                TRANSITION_PREP_WINDOW,
+              ),
+            ),
           );
         }
       }
 
       if (!entries.some((e) => items.get(e.itemId)?.selfReport)) {
-        push(
-          "sin-autoinforme",
-          "info",
-          "Sin cuestionario de fatiga: el monitor mostrará gris (datos insuficientes).",
-        );
+        push("no-self-report", "info", msg((m) => m.rules.noSelfReport));
       }
     }
   }
 
   const usedItemIds = new Set(state.plan.map((e) => e.itemId));
   for (const item of state.catalog) {
-    if (item.category === "suplemento" && item.dose === null && usedItemIds.has(item.id)) {
+    if (item.category === "supplement" && item.dose === null && usedItemIds.has(item.id)) {
       issues.push({
-        id: `suplemento-sin-dosis-${item.id}`,
-        rule: "suplemento-sin-dosis",
+        id: `supplement-without-dose-${item.id}`,
+        rule: "supplement-without-dose",
         severity: "info",
         day: null,
         crewId: null,
-        message: `${item.name}: dosis pendiente de protocolo médico; el paquete lo publica sin dosis.`,
+        message: msg((m, l) => m.rules.supplementNoDose(tr(item.name, l))),
       });
     }
   }
 
-  const conditional = state.plan.filter((e) => e.status === "condicional").length;
+  const conditional = state.plan.filter((e) => e.status === "conditional").length;
   if (conditional > 0) {
     issues.push({
-      id: "condicionales",
-      rule: "condicionales",
+      id: "conditionals",
+      rule: "conditionals",
       severity: "info",
       day: null,
       crewId: null,
-      message: `${conditional} actividades condicionales: dependen de confirmar equipo, protocolo o recuperación.`,
+      message: msg((m) => m.rules.conditionals(conditional)),
     });
   }
 
   issues.push(...validateQuestionnaire(state));
+  issues.push(...validateTranslations(state));
   return issues;
 }
 
 /**
- * Coherencia del cuestionario: lo que la interfaz no podría aplicar bloquea la
- * publicación; las preguntas que nunca se seleccionarán se informan.
+ * Questionnaire consistency: what the interface could not apply blocks
+ * publishing; questions that will never be selected are reported.
  */
 function validateQuestionnaire(state: AppState): Issue[] {
   const issues: Issue[] = [];
   const q = state.questionnaire;
-  const add = (rule: string, severity: Issue["severity"], message: string, suffix: string) =>
+  const add = (rule: string, severity: Issue["severity"], message: LocalizedText, suffix: string) =>
     issues.push({ id: `${rule}-${suffix}`, rule, severity, day: null, crewId: null, message });
 
   const capacityIds = new Set(state.capacities.map((c) => c.id));
@@ -194,54 +209,104 @@ function validateQuestionnaire(state: AppState): Issue[] {
   const itemIds = new Set(q.items.map((i) => i.id));
 
   if (!state.catalog.some((c) => c.id === q.catalogItemId)) {
-    add("cuestionario", "bloqueo", `El cuestionario apunta a la acción ${q.catalogItemId}, que no está en el catálogo.`, "catalogo");
+    add("questionnaire", "blocker", msg((m) => m.rules.q.catalogMissing(q.catalogItemId)), "catalog");
   }
   for (const s of state.signals) {
     if (!capacityIds.has(s.capacityId)) {
-      add("cuestionario", "bloqueo", `La señal ${s.id} apunta a una capacidad inexistente (${s.capacityId}).`, `senal-${s.id}`);
+      add("questionnaire", "blocker", msg((m) => m.rules.q.signalCapacity(s.id, s.capacityId)), `signal-${s.id}`);
     }
   }
   for (const item of q.items) {
-    const where = `Pregunta ${item.id}`;
+    const where = (m: Messages) => m.rules.q.question(item.id);
     if (!capacityIds.has(item.capacityId)) {
-      add("cuestionario", "bloqueo", `${where}: capacidad inexistente (${item.capacityId}).`, `cap-${item.id}`);
+      add("questionnaire", "blocker", msg((m) => m.rules.q.capacityMissing(where(m), item.capacityId)), `cap-${item.id}`);
     }
     if (item.variants.length === 0) {
-      add("cuestionario", "bloqueo", `${where}: no tiene ninguna redacción.`, `var-${item.id}`);
+      add("questionnaire", "blocker", msg((m) => m.rules.q.noVariants(where(m))), `var-${item.id}`);
     }
     const inScale = (n: number | null) => n === null || (n >= item.scale.min && n <= item.scale.max);
-    if (!inScale(item.ambar) || !inScale(item.rojo) || (item.ambar !== null && item.rojo !== null && item.rojo < item.ambar)) {
-      add("cuestionario", "bloqueo", `${where}: umbrales fuera de la escala ${item.scale.min}–${item.scale.max} o desordenados.`, `umbral-${item.id}`);
+    if (
+      !inScale(item.amber) ||
+      !inScale(item.red) ||
+      (item.amber !== null && item.red !== null && item.red < item.amber)
+    ) {
+      add(
+        "questionnaire",
+        "blocker",
+        msg((m) => m.rules.q.thresholds(where(m), item.scale.min, item.scale.max)),
+        `threshold-${item.id}`,
+      );
     }
     for (const t of item.triggers) {
-      if (t.kind === "senal" && !signalIds.has(t.signalId)) {
-        add("cuestionario", "bloqueo", `${where}: el disparador usa una señal inexistente (${t.signalId}).`, `trig-${item.id}-${t.signalId}`);
+      if (t.kind === "signal" && !signalIds.has(t.signalId)) {
+        add(
+          "questionnaire",
+          "blocker",
+          msg((m) => m.rules.q.triggerSignal(where(m), t.signalId)),
+          `trig-${item.id}-${t.signalId}`,
+        );
       }
     }
-    if (item.block === "banco" && item.triggers.length === 0) {
-      add("cuestionario", "info", `${where} (${item.domain}): sin disparadores disponibles; no se seleccionará nunca.`, `nunca-${item.id}`);
+    if (item.block === "bank" && item.triggers.length === 0) {
+      add(
+        "questionnaire",
+        "info",
+        msg((m, l) => m.rules.q.neverSelected(where(m), tr(item.domain, l))),
+        `never-${item.id}`,
+      );
     }
   }
   for (const c of q.consistencyChecks) {
     if (!itemIds.has(c.questionId) || !signalIds.has(c.signalId)) {
-      add("cuestionario", "bloqueo", `Comprobación ${c.id}: pregunta o señal inexistente.`, `coh-${c.id}`);
+      add("questionnaire", "blocker", msg((m) => m.rules.q.checkMissing(c.id)), `check-${c.id}`);
     }
   }
-  const fixed = q.items.filter((i) => i.block === "fijo").length;
+  const fixed = q.items.filter((i) => i.block === "fixed").length;
   if (fixed < q.fixedPerDay) {
-    add("cuestionario", "bloqueo", `El bloque fijo pide ${q.fixedPerDay} preguntas y solo hay ${fixed}.`, "fijas");
+    add("questionnaire", "blocker", msg((m) => m.rules.q.fixedShort(q.fixedPerDay, fixed)), "fixed");
   }
-  const fillers = q.items.filter((i) => i.triggers.some((t) => t.kind === "relleno")).length;
+  const fillers = q.items.filter((i) => i.triggers.some((t) => t.kind === "filler")).length;
   if (fillers < q.bankPerDay) {
-    add("cuestionario", "aviso", `Hay ${fillers} preguntas de relleno para ${q.bankPerDay} huecos del banco: algunos días faltarán preguntas.`, "relleno");
+    add("questionnaire", "warning", msg((m) => m.rules.q.fillers(fillers, q.bankPerDay)), "filler");
+  }
+  return issues;
+}
+
+/** Texts with no version in a supported language: informational, never blocks. */
+function validateTranslations(state: AppState): Issue[] {
+  const texts = collectTexts({ ...state, updatedAt: undefined });
+  const issues: Issue[] = [];
+  for (const locale of LOCALES) {
+    if (locale === DEFAULT_LOCALE) continue;
+    const missing = texts.filter((t) => !t[locale] && Object.values(t).some((v) => v)).length;
+    if (missing === 0) continue;
+    issues.push({
+      id: `missing-translation-${locale}`,
+      rule: "missing-translation",
+      severity: "info",
+      day: null,
+      crewId: null,
+      message: msg((m) => m.rules.missingTranslation(missing, m.languageName[locale])),
+    });
+  }
+  const missingEnglish = texts.filter((t) => !t[DEFAULT_LOCALE] && Object.values(t).some((v) => v)).length;
+  if (missingEnglish > 0) {
+    issues.push({
+      id: `missing-translation-${DEFAULT_LOCALE}`,
+      rule: "missing-translation",
+      severity: "warning",
+      day: null,
+      crewId: null,
+      message: msg((m) => m.rules.missingEnglish(missingEnglish)),
+    });
   }
   return issues;
 }
 
 export function countBySeverity(issues: Issue[]) {
   return {
-    bloqueo: issues.filter((i) => i.severity === "bloqueo").length,
-    aviso: issues.filter((i) => i.severity === "aviso").length,
+    blocker: issues.filter((i) => i.severity === "blocker").length,
+    warning: issues.filter((i) => i.severity === "warning").length,
     info: issues.filter((i) => i.severity === "info").length,
   };
 }

@@ -1,3 +1,4 @@
+import { DEFAULT_LOCALE, DICTIONARIES, LOCALES, localized, type Locale, type LocalizedText } from "./i18n";
 import { formatFlightDay, formatMet } from "./met";
 import { validate } from "./rules";
 import type {
@@ -18,54 +19,65 @@ import {
   isAdaptableCategory,
 } from "./types";
 
-export const PACKAGE_SCHEMA = "aura.mission-package/v4";
-/** Esquemas que ya llevan política de adaptación (v4 añade la autoevaluación). */
-export const ADAPTATION_SCHEMAS = ["aura.mission-package/v3", PACKAGE_SCHEMA];
+export const PACKAGE_SCHEMA = "aura.mission-package/v5";
+/**
+ * Schemas that carry an adaptation policy (v4 added self-assessment; v5 uses
+ * English codes and multilingual texts).
+ */
+export const ADAPTATION_SCHEMAS = [
+  "aura.mission-package/v3",
+  "aura.mission-package/v4",
+  PACKAGE_SCHEMA,
+];
 
-// En el paquete, cada MET viaja dos veces: en segundos (para calcular) y como
-// etiqueta DD/HH:MM[:SS] (para mostrar).
+// In the package every MET travels twice: in seconds (to compute with) and as
+// a DD/HH:MM[:SS] label (to display). Every human-readable text is a
+// LocalizedText ({ "en": "…", "es": "…" }); the interface picks its language
+// and falls back to defaultLanguage.
 
 export interface PackageActivity {
-  /** Referencia estable de la actividad; es la que citan las adaptaciones. */
+  /** Stable reference of the activity; adaptations cite it. */
   entryId: string;
   itemId: string;
   met: number;
   metLabel: string;
   status: EntryStatus;
-  /** true = la interfaz puede adaptarla según adaptationPolicy. */
+  /** true = the interface may adapt it according to adaptationPolicy. */
   adaptable: boolean;
-  note?: string;
+  note?: LocalizedText;
 }
 
-/** Qué puede cambiar la interfaz por su cuenta y cómo debe informarlo. */
+/** What the interface may change on its own and how it must report it. */
 export interface AdaptationPolicy {
-  /** Categorías adaptables → tipo de bloque en el que pueden moverse. */
+  /** Adaptable categories → block kind within which they may move. */
   windows: Partial<Record<Category, string>>;
   allowed: AdaptationType[];
-  rules: string[];
+  rules: LocalizedText[];
   report: { endpoint: string; method: "POST"; blocking: false };
 }
 
-export const ADAPTATION_RULES = [
-  "Solo se adaptan las actividades con adaptable: true. Las demás, y todos los bloques con adaptable: false (maniobras, pruebas, sueño, operaciones), no se modifican nunca desde la interfaz.",
-  "Sustitución: solo por otra acción del catálogo de la misma categoría.",
-  "Una sustitución no puede aumentar la carga: no se cambia una acción por otra con intense: true si la original no lo era.",
-  "Reprogramación: solo a un MET dentro de un bloque adaptable de su categoría y en el mismo día de vuelo.",
-  "Omisión: permitida en actividades adaptables, siempre con motivo.",
-  "Cada adaptación se aplica a bordo sin esperar respuesta y se envía a control de misión para su registro y validación. Si no hay conexión, se guarda y se envía después.",
-];
+/** Adaptation rules, one LocalizedText per rule. */
+export function adaptationRules(): LocalizedText[] {
+  return DICTIONARIES[DEFAULT_LOCALE].policy.rules.map((_, i) =>
+    localized((l) => DICTIONARIES[l].policy.rules[i] ?? DICTIONARIES[DEFAULT_LOCALE].policy.rules[i]),
+  );
+}
 
-/** Contrato que consume la interfaz del astronauta (offline). */
+/** Contract consumed by the astronaut interface (offline). */
 export interface MissionPackage {
   schema: typeof PACKAGE_SCHEMA;
   packageVersion: number;
   publishedAt: string;
-  /** sha256 del JSON canónico del paquete sin este campo. */
+  /** sha256 of the canonical JSON of the package without this field. */
   checksum: string;
-  /** true si el plan de prevención es un ejemplo, no una prescripción. */
+  /** Languages every LocalizedText is written in (some texts may lack one). */
+  languages: Locale[];
+  /** Language to fall back to when a text is missing in the requested one. */
+  defaultLanguage: Locale;
+  /** true if the prevention plan is an example, not a prescription. */
   simulated: boolean;
   mission: AppState["mission"];
-  /** Gravedad relativa a la Tierra de cada entorno. */
+  /** Gravity of each environment relative to Earth. */
   gravityReference: typeof GRAVITY_G;
   crew: AppState["crew"];
   days: (FlightDay & { label: string; startMetLabel: string; endMetLabel: string })[];
@@ -73,23 +85,23 @@ export interface MissionPackage {
   blocks: (TimelineBlock & {
     startMetLabel: string;
     endMetLabel: string;
-    /** true = periodo cuyo contenido puede adaptar la interfaz. */
+    /** true = period whose content the interface may adapt. */
     adaptable: boolean;
     adaptableCategories: Category[];
   })[];
   catalog: AppState["catalog"];
   adaptationPolicy: AdaptationPolicy;
-  /** crewId → un elemento por día de vuelo, con actividades ordenadas por MET. */
+  /** crewId → one element per flight day, with activities sorted by MET. */
   plans: Record<string, { day: number; activities: PackageActivity[] }[]>;
-  /** Capacidades con semáforo en la interfaz y qué hacer en ámbar o rojo. */
+  /** Traffic-light capacities in the interface and what to do in amber or red. */
   capacities: AppState["capacities"];
-  /** Señales objetivas; simulated = la interfaz genera valores simulados. */
+  /** Objective signals; simulated = the interface generates simulated values. */
   signals: AppState["signals"];
-  /** Cuestionario diario: bloque fijo, banco con disparadores y umbrales. */
+  /** Daily questionnaire: fixed block, triggered bank and thresholds. */
   questionnaire: AppState["questionnaire"];
-  /** Todos los umbrales de capacities, signals y questionnaire son de demostración. */
+  /** Every threshold in capacities, signals and questionnaire is for demonstration. */
   thresholdsAreDemo: true;
-  /** Avisos e informaciones vigentes al publicar (nunca bloqueos). */
+  /** Warnings and information in force when publishing (never blockers). */
   validation: Issue[];
 }
 
@@ -114,7 +126,7 @@ export function buildPackageBody(
           met: e.met,
           metLabel: formatMet(e.met),
           status: e.status,
-          adaptable: e.adaptable && isAdaptableCategory(categoryOf.get(e.itemId) ?? "evaluacion"),
+          adaptable: e.adaptable && isAdaptableCategory(categoryOf.get(e.itemId) ?? "assessment"),
           ...(e.note ? { note: e.note } : {}),
         })),
     }));
@@ -123,6 +135,8 @@ export function buildPackageBody(
     schema: PACKAGE_SCHEMA,
     packageVersion,
     publishedAt,
+    languages: [...LOCALES],
+    defaultLanguage: DEFAULT_LOCALE,
     simulated: state.mission.simulated,
     mission: state.mission,
     gravityReference: GRAVITY_G,
@@ -152,8 +166,8 @@ export function buildPackageBody(
     catalog: state.catalog,
     adaptationPolicy: {
       windows: ADAPTABLE_WINDOW,
-      allowed: ["sustitucion", "reprogramacion", "omision"],
-      rules: ADAPTATION_RULES,
+      allowed: ["substitution", "reschedule", "omission"],
+      rules: adaptationRules(),
       report: { endpoint: "/api/adaptations", method: "POST", blocking: false },
     },
     plans,
@@ -165,7 +179,7 @@ export function buildPackageBody(
   };
 }
 
-/** JSON con claves ordenadas y sin espacios, para un checksum reproducible. */
+/** JSON with sorted keys and no whitespace, for a reproducible checksum. */
 export function canonicalJson(value: unknown): string {
   if (Array.isArray(value)) return `[${value.map(canonicalJson).join(",")}]`;
   if (value && typeof value === "object") {

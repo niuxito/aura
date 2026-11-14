@@ -1,16 +1,11 @@
 "use client";
 
+import { withText } from "@/lib/i18n";
 import { formatFlightDay, formatMet } from "@/lib/met";
-import type {
-  AppState,
-  EventKind,
-  FlightDay,
-  Gravity,
-  Issue,
-  LoadLevel,
-  MissionEvent,
-} from "@/lib/types";
-import { EVENT_KIND_LABEL, GRAVITY_SHORT, LOAD_LABEL, flightDayOf } from "@/lib/types";
+import type { AppState, EventKind, FlightDay, Gravity, Issue, LoadLevel, MissionEvent } from "@/lib/types";
+import { EVENT_KINDS, GRAVITIES, LOAD_LEVELS, flightDayOf } from "@/lib/types";
+import { useI18n } from "./I18n";
+import LocalizedInput from "./LocalizedInput";
 import MetInput from "./MetInput";
 
 interface Props {
@@ -21,11 +16,9 @@ interface Props {
   update: (fn: (s: AppState) => AppState) => void;
 }
 
-const GRAVITIES: Gravity[] = ["tierra", "micro", "luna", "marte"];
-const LOADS: LoadLevel[] = ["baja", "media", "alta", "critica"];
-const EVENT_KINDS: EventKind[] = ["maniobra", "hito", "prueba", "operacion", "eva"];
-
 export default function MissionView({ state, issues, selectedDay, onSelect, update }: Props) {
+  const { t, tx, locale } = useI18n();
+
   const patchDay = (day: number, patch: Partial<FlightDay>) =>
     update((s) => ({
       ...s,
@@ -44,6 +37,9 @@ export default function MissionView({ state, issues, selectedDay, onSelect, upda
       }),
     }));
 
+  const patchMission = (patch: Partial<AppState["mission"]>) =>
+    update((s) => ({ ...s, mission: { ...s.mission, ...patch } }));
+
   const patchEvent = (id: string, patch: Partial<MissionEvent>) =>
     update((s) => ({
       ...s,
@@ -56,8 +52,8 @@ export default function MissionView({ state, issues, selectedDay, onSelect, upda
       const event: MissionEvent = {
         id: crypto.randomUUID(),
         met: day.startMet,
-        name: "Nuevo evento",
-        kind: "hito",
+        name: withText(undefined, locale, t.mission.newEvent),
+        kind: "milestone",
         approx: false,
       };
       return { ...s, events: [...s.events, event] };
@@ -75,58 +71,44 @@ export default function MissionView({ state, issues, selectedDay, onSelect, upda
     <div className="stack">
       <section className="panel">
         <div className="panel-head">
-          <h2>Misión</h2>
-          <span className="muted">Cronograma: {state.mission.timelineSource}</span>
+          <h2>{t.mission.title}</h2>
+          <span className="muted">{t.mission.timeline(state.mission.timelineSource)}</span>
         </div>
         <div className="form-grid">
           <label>
-            Nombre
-            <input
-              value={state.mission.name}
-              onChange={(e) =>
-                update((s) => ({ ...s, mission: { ...s.mission, name: e.target.value } }))
-              }
-            />
+            {t.mission.name}
+            <LocalizedInput value={state.mission.name} onChange={(name) => patchMission({ name })} />
           </label>
           <label>
-            Destino
-            <input
+            {t.mission.destination}
+            <LocalizedInput
               value={state.mission.destination}
-              onChange={(e) =>
-                update((s) => ({ ...s, mission: { ...s.mission, destination: e.target.value } }))
-              }
+              onChange={(destination) => patchMission({ destination })}
             />
           </label>
           <label>
-            Despegue en UTC (MET 00/00:00), opcional
+            {t.mission.launchUtc}
             <input
-              placeholder="AAAA-MM-DDTHH:MM:SSZ"
+              placeholder={t.mission.launchPlaceholder}
               value={state.mission.launchUtc ?? ""}
-              onChange={(e) =>
-                update((s) => ({
-                  ...s,
-                  mission: { ...s.mission, launchUtc: e.target.value.trim() || null },
-                }))
-              }
+              onChange={(e) => patchMission({ launchUtc: e.target.value.trim() || null })}
             />
           </label>
           <label className="wide">
-            Descripción
-            <textarea
+            {t.mission.description}
+            <LocalizedInput
               rows={2}
               value={state.mission.description}
-              onChange={(e) =>
-                update((s) => ({ ...s, mission: { ...s.mission, description: e.target.value } }))
-              }
+              onChange={(description) => patchMission({ description })}
             />
           </label>
         </div>
-        <h3>Tripulación</h3>
+        <h3>{t.mission.crew}</h3>
         <div className="crew-grid">
           {state.crew.map((member) => (
             <div key={member.id} className="crew-card">
               <input
-                aria-label="Nombre"
+                aria-label={t.mission.crewName}
                 value={member.name}
                 onChange={(e) =>
                   update((s) => ({
@@ -137,15 +119,13 @@ export default function MissionView({ state, issues, selectedDay, onSelect, upda
                   }))
                 }
               />
-              <input
-                aria-label="Función"
+              <LocalizedInput
+                ariaLabel={t.mission.crewRole}
                 value={member.role}
-                onChange={(e) =>
+                onChange={(role) =>
                   update((s) => ({
                     ...s,
-                    crew: s.crew.map((c) =>
-                      c.id === member.id ? { ...c, role: e.target.value } : c,
-                    ),
+                    crew: s.crew.map((c) => (c.id === member.id ? { ...c, role } : c)),
                   }))
                 }
               />
@@ -156,24 +136,22 @@ export default function MissionView({ state, issues, selectedDay, onSelect, upda
 
       <section className="panel">
         <div className="panel-head">
-          <h2>Días de vuelo · {state.days.length}</h2>
-          <span className="muted">
-            Límites en MET según el cronograma; fase, gravedad y carga operativa (CO) editables
-          </span>
+          <h2>{t.mission.daysTitle(state.days.length)}</h2>
+          <span className="muted">{t.mission.daysHint}</span>
         </div>
         <div className="table-wrap">
           <table className="days-table">
             <thead>
               <tr>
-                <th>FD</th>
-                <th>MET inicio</th>
-                <th>MET fin</th>
-                <th>Fase</th>
-                <th>Hito principal</th>
-                <th>Transición desde</th>
-                <th>Gravedad</th>
-                <th>CO</th>
-                <th>Avisos</th>
+                <th>{t.mission.colFd}</th>
+                <th>{t.mission.colStart}</th>
+                <th>{t.mission.colEnd}</th>
+                <th>{t.mission.colPhase}</th>
+                <th>{t.mission.colMilestone}</th>
+                <th>{t.mission.colTransition}</th>
+                <th>{t.mission.colGravity}</th>
+                <th>{t.mission.colLoad}</th>
+                <th>{t.mission.colWarnings}</th>
               </tr>
             </thead>
             <tbody>
@@ -187,12 +165,12 @@ export default function MissionView({ state, issues, selectedDay, onSelect, upda
                   <td className="num">{formatMet(d.startMet)}</td>
                   <td className="num">{formatMet(d.endMet)}</td>
                   <td>
-                    <input value={d.phase} onChange={(e) => patchDay(d.day, { phase: e.target.value })} />
+                    <LocalizedInput value={d.phase} onChange={(phase) => patchDay(d.day, { phase })} />
                   </td>
                   <td>
-                    <input
+                    <LocalizedInput
                       value={d.milestone}
-                      onChange={(e) => patchDay(d.day, { milestone: e.target.value })}
+                      onChange={(milestone) => patchDay(d.day, { milestone })}
                     />
                   </td>
                   <td>
@@ -203,7 +181,7 @@ export default function MissionView({ state, issues, selectedDay, onSelect, upda
                       <option value="">—</option>
                       {GRAVITIES.filter((g) => g !== d.gravity).map((g) => (
                         <option key={g} value={g}>
-                          {GRAVITY_SHORT[g]}
+                          {t.labels.gravityShort[g]}
                         </option>
                       ))}
                     </select>
@@ -217,7 +195,7 @@ export default function MissionView({ state, issues, selectedDay, onSelect, upda
                       >
                         {GRAVITIES.map((g) => (
                           <option key={g} value={g}>
-                            {GRAVITY_SHORT[g]}
+                            {t.labels.gravityShort[g]}
                           </option>
                         ))}
                       </select>
@@ -225,14 +203,14 @@ export default function MissionView({ state, issues, selectedDay, onSelect, upda
                   </td>
                   <td>
                     <span className="cell-with-swatch">
-                      <i className={`swatch co-${d.co}`} />
+                      <i className={`swatch ol-${d.opLoad}`} />
                       <select
-                        value={d.co}
-                        onChange={(e) => patchDay(d.day, { co: e.target.value as LoadLevel })}
+                        value={d.opLoad}
+                        onChange={(e) => patchDay(d.day, { opLoad: e.target.value as LoadLevel })}
                       >
-                        {LOADS.map((l) => (
+                        {LOAD_LEVELS.map((l) => (
                           <option key={l} value={l}>
-                            {LOAD_LABEL[l]}
+                            {t.labels.load[l]}
                           </option>
                         ))}
                       </select>
@@ -248,20 +226,20 @@ export default function MissionView({ state, issues, selectedDay, onSelect, upda
 
       <section className="panel">
         <div className="panel-head">
-          <h2>Eventos de misión · {events.length}</h2>
+          <h2>{t.mission.eventsTitle(events.length)}</h2>
           <button type="button" className="btn" onClick={addEvent}>
-            + Añadir evento en {formatFlightDay(selectedDay)}
+            {t.mission.addEvent(formatFlightDay(selectedDay))}
           </button>
         </div>
         <div className="table-wrap">
           <table className="events-table">
             <thead>
               <tr>
-                <th>MET</th>
-                <th>FD</th>
-                <th>Evento</th>
-                <th>Tipo</th>
-                <th title="El cronograma lo da como aproximado">~</th>
+                <th>{t.mission.colMet}</th>
+                <th>{t.mission.colFd}</th>
+                <th>{t.mission.colEvent}</th>
+                <th>{t.mission.colKind}</th>
+                <th title={t.mission.approxTitle}>~</th>
                 <th />
               </tr>
             </thead>
@@ -274,27 +252,27 @@ export default function MissionView({ state, issues, selectedDay, onSelect, upda
                       <MetInput
                         key={e.met}
                         value={e.met}
-                        ariaLabel={`MET de ${e.name}`}
+                        ariaLabel={t.common.metOf(tx(e.name))}
                         onCommit={(met) => patchEvent(e.id, { met })}
                       />
                     </td>
                     <td className="num">{fd === null ? "—" : formatFlightDay(fd)}</td>
                     <td>
-                      <input
+                      <LocalizedInput
                         value={e.name}
-                        aria-label="Nombre del evento"
-                        onChange={(ev) => patchEvent(e.id, { name: ev.target.value })}
+                        ariaLabel={t.mission.eventName}
+                        onChange={(name) => patchEvent(e.id, { name })}
                       />
                     </td>
                     <td>
                       <select
                         value={e.kind}
-                        aria-label="Tipo de evento"
+                        aria-label={t.mission.eventKind}
                         onChange={(ev) => patchEvent(e.id, { kind: ev.target.value as EventKind })}
                       >
                         {EVENT_KINDS.map((k) => (
                           <option key={k} value={k}>
-                            {EVENT_KIND_LABEL[k]}
+                            {t.labels.eventKind[k]}
                           </option>
                         ))}
                       </select>
@@ -303,7 +281,7 @@ export default function MissionView({ state, issues, selectedDay, onSelect, upda
                       <input
                         type="checkbox"
                         checked={e.approx}
-                        aria-label="MET aproximado"
+                        aria-label={t.mission.approx}
                         onChange={(ev) => patchEvent(e.id, { approx: ev.target.checked })}
                       />
                     </td>
@@ -312,7 +290,7 @@ export default function MissionView({ state, issues, selectedDay, onSelect, upda
                         type="button"
                         className="icon-btn"
                         onClick={() => removeEvent(e.id)}
-                        aria-label={`Eliminar ${e.name}`}
+                        aria-label={t.common.remove(tx(e.name))}
                       >
                         ×
                       </button>

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { formatMet, parseMet } from "@/lib/met";
+import { useI18n } from "./I18n";
 
 interface Props {
   value: number;
@@ -10,11 +11,12 @@ interface Props {
 }
 
 /**
- * Campo de texto para un MET (DD/HH:MM[:SS]). Confirma al salir o con Intro;
- * si el texto no es un MET válido, vuelve al valor anterior.
- * Úsalo con key={value} para que refleje cambios hechos desde fuera.
+ * Text field for a MET (DD/HH:MM[:SS]). Commits on blur or Enter; if the text
+ * is not a valid MET, it reverts to the previous value.
+ * Use it with key={value} so it reflects changes made from outside.
  */
 export default function MetInput({ value, onCommit, ariaLabel }: Props) {
+  const { t } = useI18n();
   const [text, setText] = useState(formatMet(value));
 
   const commit = () => {
@@ -29,7 +31,7 @@ export default function MetInput({ value, onCommit, ariaLabel }: Props) {
       className="met-input"
       value={text}
       aria-label={ariaLabel}
-      title="MET · DD/HH:MM o DD/HH:MM:SS"
+      title={t.metInput.title}
       onChange={(e) => setText(e.target.value)}
       onBlur={commit}
       onKeyDown={(e) => {

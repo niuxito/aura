@@ -1,20 +1,22 @@
 import { parseAlertInput } from "@/lib/alerts";
+import { legacyAlertStatus } from "@/lib/legacy";
 import { acknowledgeAlert, listAlerts, receiveAlerts } from "@/lib/store";
 import type { AlertInput, AlertStatus } from "@/lib/types";
 
-// Alertas de la interfaz del astronauta: lo que no se resuelve adaptando el plan.
+// Alerts from the astronaut interface: what is not resolved by adapting the plan.
 //
-//   POST  /api/alerts   La interfaz envía una alerta o una lista. No bloquea: el
-//                       servidor las registra siempre; reenviar el mismo id no duplica.
-//   GET   /api/alerts   Registro completo; ?crewId= filtra por tripulante. La interfaz
-//                       lo usa para saber si control de misión la ha visto o atendido.
-//   PATCH /api/alerts   Control de misión marca una alerta como vista o atendida.
+//   POST  /api/alerts   The interface sends one alert or a list. Non-blocking: the
+//                       server always records them; resending the same id does not
+//                       duplicate. v4 (Spanish) codes are still accepted.
+//   GET   /api/alerts   Full record; ?crewId= filters by crew member. The interface
+//                       uses it to learn whether mission control has seen or handled it.
+//   PATCH /api/alerts   Mission control marks an alert as seen or handled.
 const CORS = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
   "Access-Control-Allow-Headers": "Content-Type",
 };
-const ACK_STATUSES: AlertStatus[] = ["nueva", "vista", "atendida"];
+const ACK_STATUSES: AlertStatus[] = ["new", "seen", "handled"];
 
 export async function OPTIONS() {
   return new Response(null, { status: 204, headers: CORS });
@@ -34,7 +36,7 @@ export async function POST(request: Request) {
   try {
     body = await request.json();
   } catch {
-    return Response.json({ error: "JSON no válido" }, { status: 400, headers: CORS });
+    return Response.json({ error: "Invalid JSON" }, { status: 400, headers: CORS });
   }
   const inputs: AlertInput[] = [];
   for (const raw of Array.isArray(body) ? body : [body]) {
@@ -49,11 +51,12 @@ export async function POST(request: Request) {
 }
 
 export async function PATCH(request: Request) {
-  const body = (await request.json()) as { id?: string; status?: AlertStatus; note?: string };
-  if (!body.id || !body.status || !ACK_STATUSES.includes(body.status)) {
-    return Response.json({ error: "Faltan id o status" }, { status: 400 });
+  const body = (await request.json()) as { id?: string; status?: string; note?: string };
+  const status = legacyAlertStatus(body.status) as AlertStatus;
+  if (!body.id || !ACK_STATUSES.includes(status)) {
+    return Response.json({ error: "Missing id or status" }, { status: 400 });
   }
-  const alert = await acknowledgeAlert(body.id, body.status, body.note?.trim() ?? "");
-  if (!alert) return Response.json({ error: "Alerta no encontrada" }, { status: 404 });
+  const alert = await acknowledgeAlert(body.id, status, body.note?.trim() ?? "");
+  if (!alert) return Response.json({ error: "Alert not found" }, { status: 404 });
   return Response.json({ alert });
 }

@@ -3,7 +3,8 @@
 import { useEffect, useState } from "react";
 import { formatFlightDay, formatMet } from "@/lib/met";
 import type { Alert, AlertStatus, AppState } from "@/lib/types";
-import { ALERT_KIND_LABEL, flightDayOf } from "@/lib/types";
+import { flightDayOf } from "@/lib/types";
+import { useI18n } from "./I18n";
 
 interface Props {
   state: AppState;
@@ -11,25 +12,21 @@ interface Props {
   refresh: () => Promise<void>;
 }
 
-const dateFormat = new Intl.DateTimeFormat("es-ES", { dateStyle: "short", timeStyle: "medium" });
-
-const STATUS_LABEL: Record<AlertStatus, string> = {
-  nueva: "Nueva",
-  vista: "Vista",
-  atendida: "Atendida",
-};
-
-/** Rojas sin atender primero; dentro de cada grupo, las más recientes arriba. */
+/** Unhandled red ones first; within each group, the most recent on top. */
 function order(a: Alert, b: Alert): number {
-  const rank = (x: Alert) => (x.ack.status === "atendida" ? 2 : x.level === "rojo" ? 0 : 1);
+  const rank = (x: Alert) => (x.ack.status === "handled" ? 2 : x.level === "red" ? 0 : 1);
   return rank(a) - rank(b) || b.receivedAt.localeCompare(a.receivedAt);
 }
 
 export default function AlertsView({ state, alerts, refresh }: Props) {
+  const { t, tx, formatDate } = useI18n();
   const [notes, setNotes] = useState<Record<string, string>>({});
   const [error, setError] = useState<string | null>(null);
   const crewName = (id: string) => state.crew.find((c) => c.id === id)?.name ?? id;
-  const capacityName = (id?: string) => state.capacities.find((c) => c.id === id)?.name ?? id;
+  const capacityName = (id?: string) => {
+    const capacity = state.capacities.find((c) => c.id === id);
+    return capacity ? tx(capacity.name) : id;
+  };
 
   useEffect(() => {
     void refresh();
@@ -42,36 +39,30 @@ export default function AlertsView({ state, alerts, refresh }: Props) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ id: a.id, status, note: notes[a.id] ?? a.ack.note }),
     });
-    if (!res.ok) setError("No se pudo guardar el acuse.");
+    if (!res.ok) setError(t.alerts.saveError);
     await refresh();
   };
 
   const count = (s: AlertStatus) => alerts.filter((a) => a.ack.status === s).length;
-  const openRed = alerts.filter((a) => a.level === "rojo" && a.ack.status !== "atendida").length;
+  const openRed = alerts.filter((a) => a.level === "red" && a.ack.status !== "handled").length;
 
   return (
     <div className="stack">
       <section className="panel">
         <div className="panel-head">
-          <h2>Alertas de la interfaz del astronauta</h2>
+          <h2>{t.alerts.title}</h2>
           <div className="counts">
-            <span className="count sev-bloqueo">{openRed} en rojo sin atender</span>
-            <span className="count sev-aviso">{count("nueva")} nuevas</span>
-            <span className="count">{count("vista")} vistas</span>
-            <span className="count">{count("atendida")} atendidas</span>
+            <span className="count sev-blocker">{t.alerts.openRed(openRed)}</span>
+            <span className="count sev-warning">{t.alerts.new(count("new"))}</span>
+            <span className="count">{t.alerts.seen(count("seen"))}</span>
+            <span className="count">{t.alerts.handled(count("handled"))}</span>
           </div>
         </div>
-        <p className="muted">
-          Lo que la interfaz no resuelve adaptando el plan: una capacidad en rojo (la interfaz no
-          decide más y remite al procedimiento de misión), una adaptación que quita una medida de
-          preparación de la transición o una incoherencia entre lo que declara el astronauta y lo
-          que mide el sensor. Los umbrales son de demostración; la interfaz no diagnostica. Marcar
-          una alerta como vista o atendida se lo comunica al astronauta.
-        </p>
+        <p className="muted">{t.alerts.intro}</p>
         {error ? <p className="error">{error}</p> : null}
 
         {alerts.length === 0 ? (
-          <p className="muted">Todavía no se ha recibido ninguna alerta.</p>
+          <p className="muted">{t.alerts.none}</p>
         ) : (
           <ul className="alerts">
             {[...alerts].sort(order).map((a) => {
@@ -80,17 +71,20 @@ export default function AlertsView({ state, alerts, refresh }: Props) {
                 <li key={a.id} className={`alert-item level-${a.level} ack-${a.ack.status}`}>
                   <div className="adaptation-head">
                     <span className={`badge alert-level-${a.level}`}>
-                      {a.level === "rojo" ? "Rojo" : "Aviso"}
+                      {t.labels.alertLevel[a.level]}
                     </span>
                     <strong>{crewName(a.crewId)}</strong>
-                    <span className="badge">{ALERT_KIND_LABEL[a.kind]}</span>
+                    <span className="badge">{t.labels.alertKind[a.kind]}</span>
                     {a.capacityId ? <span className="badge">{capacityName(a.capacityId)}</span> : null}
                     <span className="num">
                       {fd === null ? "—" : formatFlightDay(fd)} · MET {formatMet(a.met)}
                     </span>
-                    {a.source === "simulada" ? <span className="badge">Simulada</span> : null}
+                    {a.source === "simulated" ? <span className="badge">{t.common.simulated}</span> : null}
                     <span className="muted adaptation-meta">
-                      Paquete v{a.packageVersion} · recibida {dateFormat.format(new Date(a.receivedAt))}
+                      {t.common.received(
+                        a.packageVersion,
+                        formatDate(a.receivedAt, { dateStyle: "short", timeStyle: "medium" }),
+                      )}
                     </span>
                   </div>
                   <p>{a.message}</p>
@@ -104,7 +98,7 @@ export default function AlertsView({ state, alerts, refresh }: Props) {
                             {e.unit ? ` ${e.unit}` : ""}
                           </span>{" "}
                           <span className="muted">
-                            ({e.source}
+                            ({t.labels.evidenceSource[e.source]}
                             {e.met !== undefined ? `, MET ${formatMet(e.met)}` : ""})
                           </span>
                         </li>
@@ -112,28 +106,28 @@ export default function AlertsView({ state, alerts, refresh }: Props) {
                     </ul>
                   ) : null}
                   <div className="adaptation-review">
-                    <span className={`review-status ack-${a.ack.status}`}>{STATUS_LABEL[a.ack.status]}</span>
+                    <span className={`review-status ack-${a.ack.status}`}>{t.labels.alertStatus[a.ack.status]}</span>
                     <input
-                      placeholder="Nota para el astronauta (opcional)"
-                      aria-label="Nota de control de misión"
+                      placeholder={t.alerts.notePlaceholder}
+                      aria-label={t.alerts.noteLabel}
                       value={notes[a.id] ?? a.ack.note}
                       onChange={(e) => setNotes({ ...notes, [a.id]: e.target.value })}
                     />
                     <button
                       type="button"
                       className="btn"
-                      disabled={a.ack.status !== "nueva"}
-                      onClick={() => acknowledge(a, "vista")}
+                      disabled={a.ack.status !== "new"}
+                      onClick={() => acknowledge(a, "seen")}
                     >
-                      Marcar vista
+                      {t.alerts.markSeen}
                     </button>
                     <button
                       type="button"
                       className="btn primary"
-                      disabled={a.ack.status === "atendida"}
-                      onClick={() => acknowledge(a, "atendida")}
+                      disabled={a.ack.status === "handled"}
+                      onClick={() => acknowledge(a, "handled")}
                     >
-                      Atendida
+                      {t.alerts.markHandled}
                     </button>
                   </div>
                 </li>

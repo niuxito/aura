@@ -2,7 +2,7 @@ import { validate } from "@/lib/rules";
 import { listPackages, publishPackage, writeState } from "@/lib/store";
 import { SCHEMA_VERSION, type AppState } from "@/lib/types";
 
-/** Guarda el estado recibido, lo valida y publica una nueva versión del paquete. */
+/** Saves the received state, validates it and publishes a new package version. */
 export async function POST(request: Request) {
   const state = (await request.json()) as AppState;
   if (
@@ -14,12 +14,12 @@ export async function POST(request: Request) {
     !Array.isArray(state.capacities) ||
     !Array.isArray(state.signals)
   ) {
-    return Response.json({ error: "Estado no válido" }, { status: 400 });
+    return Response.json({ error: "Invalid state" }, { status: 400 });
   }
-  const blockers = validate(state).filter((i) => i.severity === "bloqueo");
+  const blockers = validate(state).filter((i) => i.severity === "blocker");
   if (blockers.length > 0) {
     return Response.json(
-      { error: "El plan tiene bloqueos sin resolver", blockers },
+      { error: "The plan has unresolved blockers", blockers },
       { status: 409 },
     );
   }

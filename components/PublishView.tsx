@@ -1,9 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { languageList } from "@/lib/i18n";
 import { formatFlightDay } from "@/lib/met";
 import { countBySeverity } from "@/lib/rules";
 import type { AppState, Issue, PackageSummary } from "@/lib/types";
+import { useI18n } from "./I18n";
+
+const SEVERITY_ORDER: Issue["severity"][] = ["blocker", "warning", "info"];
 
 interface Props {
   state: AppState;
@@ -11,9 +15,8 @@ interface Props {
   onSelectDay: (day: number) => void;
 }
 
-const dateFormat = new Intl.DateTimeFormat("es-ES", { dateStyle: "medium", timeStyle: "short" });
-
 export default function PublishView({ state, issues, onSelectDay }: Props) {
+  const { t, tx, locale, formatDate } = useI18n();
   const [packages, setPackages] = useState<PackageSummary[] | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -27,7 +30,7 @@ export default function PublishView({ state, issues, onSelectDay }: Props) {
         if (!cancelled) setPackages(list);
       })
       .catch(() => {
-        if (!cancelled) setError("No se pudo leer la lista de paquetes.");
+        if (!cancelled) setError("list");
       });
     return () => {
       cancelled = true;
@@ -44,10 +47,10 @@ export default function PublishView({ state, issues, onSelectDay }: Props) {
         body: JSON.stringify(state),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error ?? "No se pudo publicar");
+      if (!res.ok) throw new Error(data.error ?? "");
       setPackages(data.packages);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "No se pudo publicar");
+      setError(err instanceof Error && err.message ? err.message : "publish");
     } finally {
       setBusy(false);
     }
@@ -56,37 +59,36 @@ export default function PublishView({ state, issues, onSelectDay }: Props) {
   const crewName = (id: string | null) => state.crew.find((c) => c.id === id)?.name;
   const ordered = [...issues].sort(
     (a, b) =>
-      ["bloqueo", "aviso", "info"].indexOf(a.severity) -
-        ["bloqueo", "aviso", "info"].indexOf(b.severity) || (a.day ?? 0) - (b.day ?? 0),
+      SEVERITY_ORDER.indexOf(a.severity) - SEVERITY_ORDER.indexOf(b.severity) || (a.day ?? 0) - (b.day ?? 0),
   );
 
   return (
     <div className="stack">
       <section className="panel">
         <div className="panel-head">
-          <h2>Validación del plan</h2>
+          <h2>{t.publish.validationTitle}</h2>
           <div className="counts">
-            <span className="count sev-bloqueo">{counts.bloqueo} bloqueos</span>
-            <span className="count sev-aviso">{counts.aviso} avisos</span>
-            <span className="count sev-info">{counts.info} informativos</span>
+            <span className="count sev-blocker">{t.publish.blockers(counts.blocker)}</span>
+            <span className="count sev-warning">{t.publish.warnings(counts.warning)}</span>
+            <span className="count sev-info">{t.publish.infos(counts.info)}</span>
           </div>
         </div>
         {ordered.length === 0 ? (
-          <p className="muted">El plan no tiene avisos.</p>
+          <p className="muted">{t.publish.noIssues}</p>
         ) : (
           <ul className="issues">
             {ordered.map((issue) => (
               <li key={issue.id} className={`issue sev-${issue.severity}`}>
-                <span className="issue-tag">{issue.severity}</span>
+                <span className="issue-tag">{t.labels.severity[issue.severity]}</span>
                 <span>
                   {issue.day !== null ? (
                     <button type="button" className="link" onClick={() => onSelectDay(issue.day!)}>
                       {formatFlightDay(issue.day)}
                     </button>
                   ) : (
-                    <em>Misión</em>
+                    <em>{t.publish.missionScope}</em>
                   )}
-                  {crewName(issue.crewId) ? ` · ${crewName(issue.crewId)}` : ""} — {issue.message}
+                  {crewName(issue.crewId) ? ` · ${crewName(issue.crewId)}` : ""} — {tx(issue.message)}
                 </span>
               </li>
             ))}
@@ -96,38 +98,40 @@ export default function PublishView({ state, issues, onSelectDay }: Props) {
 
       <section className="panel">
         <div className="panel-head">
-          <h2>Publicar paquete de misión</h2>
+          <h2>{t.publish.title}</h2>
           <button
             type="button"
             className="btn primary"
-            disabled={busy || counts.bloqueo > 0}
+            disabled={busy || counts.blocker > 0}
             onClick={publish}
           >
-            {busy ? "Publicando…" : `Publicar versión ${(packages?.[0]?.packageVersion ?? 0) + 1}`}
+            {busy ? t.publish.publishing : t.publish.publishVersion((packages?.[0]?.packageVersion ?? 0) + 1)}
           </button>
         </div>
         <p className="muted">
-          {counts.bloqueo > 0
-            ? "Resuelve los bloqueos para poder publicar."
-            : "Los avisos no impiden publicar: viajan dentro del paquete para que el monitor los muestre."}{" "}
-          El monitor del astronauta descarga el último paquete desde <code>/api/package</code> y
-          trabaja sin conexión a partir de él.
+          {counts.blocker > 0 ? t.publish.resolveBlockers : t.publish.warningsTravel}{" "}
+          {t.publish.monitorBefore} <code>/api/package</code> {t.publish.monitorAfter}{" "}
+          {t.publish.languages(languageList(locale))}
         </p>
-        {error ? <p className="error">{error}</p> : null}
+        {error ? (
+          <p className="error">
+            {error === "list" ? t.publish.listError : error === "publish" ? t.publish.publishError : error}
+          </p>
+        ) : null}
 
         {packages === null ? (
-          <p className="muted">Cargando versiones…</p>
+          <p className="muted">{t.publish.loadingVersions}</p>
         ) : packages.length === 0 ? (
-          <p className="muted">Todavía no se ha publicado ningún paquete.</p>
+          <p className="muted">{t.publish.noPackages}</p>
         ) : (
           <table className="packages-table">
             <thead>
               <tr>
-                <th>Versión</th>
-                <th>Publicado</th>
-                <th>Misión</th>
-                <th>Esquema</th>
-                <th>Checksum</th>
+                <th>{t.publish.colVersion}</th>
+                <th>{t.publish.colPublished}</th>
+                <th>{t.publish.colMission}</th>
+                <th>{t.publish.colSchema}</th>
+                <th>{t.publish.colChecksum}</th>
                 <th />
               </tr>
             </thead>
@@ -135,8 +139,8 @@ export default function PublishView({ state, issues, onSelectDay }: Props) {
               {packages.map((p) => (
                 <tr key={p.packageVersion}>
                   <td className="num">v{p.packageVersion}</td>
-                  <td>{dateFormat.format(new Date(p.publishedAt))}</td>
-                  <td>{p.missionName}</td>
+                  <td>{formatDate(p.publishedAt, { dateStyle: "medium", timeStyle: "short" })}</td>
+                  <td>{typeof p.missionName === "string" ? p.missionName : tx(p.missionName)}</td>
                   <td>
                     <code>{p.schema.split("/")[1]}</code>
                   </td>
@@ -148,7 +152,7 @@ export default function PublishView({ state, issues, onSelectDay }: Props) {
                       href={`/api/package?version=${p.packageVersion}`}
                       download={`aura-mission-package-v${p.packageVersion}.json`}
                     >
-                      Descargar JSON
+                      {t.publish.download}
                     </a>
                   </td>
                 </tr>

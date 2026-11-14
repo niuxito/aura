@@ -2,7 +2,8 @@
 
 import { formatFlightDay, formatMet } from "@/lib/met";
 import type { FlightDay, Issue } from "@/lib/types";
-import { GRAVITY_G, GRAVITY_LABEL, GRAVITY_SHORT, LOAD_LABEL } from "@/lib/types";
+import { GRAVITY_G, LOAD_LEVELS } from "@/lib/types";
+import { useI18n } from "./I18n";
 
 interface Props {
   days: FlightDay[];
@@ -11,14 +12,15 @@ interface Props {
   onSelect: (day: number) => void;
 }
 
-/** Altura de la barra de gravedad, con un mínimo visible para microgravedad. */
+/** Height of the gravity bar, with a visible minimum for microgravity. */
 const barHeight = (g: number) => `${Math.max(4, g * 100)}%`;
 
 export default function GravityStrip({ days, issues, selectedDay, onSelect }: Props) {
+  const { t, tx } = useI18n();
   const worst = new Map<number, Issue["severity"]>();
   for (const issue of issues) {
     if (issue.day === null || issue.severity === "info") continue;
-    if (issue.severity === "bloqueo" || !worst.has(issue.day)) {
+    if (issue.severity === "blocker" || !worst.has(issue.day)) {
       worst.set(issue.day, issue.severity);
     }
   }
@@ -27,14 +29,14 @@ export default function GravityStrip({ days, issues, selectedDay, onSelect }: Pr
   return (
     <section className="panel strip-panel">
       <div className="panel-head">
-        <h2>Perfil gravitatorio y carga operativa por día de vuelo</h2>
+        <h2>{t.strip.title}</h2>
         <div className="legend">
-          {(["tierra", "marte", "luna", "micro"] as const)
+          {(["earth", "mars", "moon", "micro"] as const)
             .filter((g) => present.has(g))
             .map((g) => (
               <span key={g} className="legend-item">
                 <i className={`swatch g-${g}`} />
-                {GRAVITY_LABEL[g]}
+                {t.labels.gravity[g]}
               </span>
             ))}
         </div>
@@ -48,7 +50,14 @@ export default function GravityStrip({ days, issues, selectedDay, onSelect }: Pr
               type="button"
               className={`strip-day${d.day === selectedDay ? " selected" : ""}`}
               onClick={() => onSelect(d.day)}
-              title={`${formatFlightDay(d.day)} · MET ${formatMet(d.startMet)} – ${formatMet(d.endMet)} · ${d.milestone} · ${GRAVITY_SHORT[d.gravity]} · CO ${LOAD_LABEL[d.co]}`}
+              title={t.strip.dayTitle(
+                formatFlightDay(d.day),
+                formatMet(d.startMet),
+                formatMet(d.endMet),
+                tx(d.milestone),
+                t.labels.gravityShort[d.gravity],
+                t.labels.load[d.opLoad],
+              )}
             >
               <span className="strip-flag">
                 {d.transitionFrom ? "▲" : ""}
@@ -63,7 +72,7 @@ export default function GravityStrip({ days, issues, selectedDay, onSelect }: Pr
                 ) : null}
                 <i className={`bar g-${d.gravity}`} style={{ height: barHeight(GRAVITY_G[d.gravity]) }} />
               </span>
-              <span className={`strip-co co-${d.co}`} />
+              <span className={`strip-ol ol-${d.opLoad}`} />
               <span className="strip-num">
                 <strong>{formatFlightDay(d.day)}</strong>
                 <small>{formatMet(d.startMet)}</small>
@@ -73,10 +82,14 @@ export default function GravityStrip({ days, issues, selectedDay, onSelect }: Pr
         })}
       </div>
       <p className="hint">
-        Bajo cada día de vuelo, su MET de inicio · ▲ transición gravitatoria · franja: carga
-        operativa (<span className="co-text co-baja">baja</span>,{" "}
-        <span className="co-text co-media">media</span>, <span className="co-text co-alta">alta</span>,{" "}
-        <span className="co-text co-critica">crítica</span>)
+        {t.strip.hint} (
+        {LOAD_LEVELS.map((l, i) => (
+          <span key={l}>
+            {i > 0 ? ", " : ""}
+            <span className={`ol-text ol-${l}`}>{t.labels.load[l].toLowerCase()}</span>
+          </span>
+        ))}
+        )
       </p>
     </section>
   );

@@ -1,56 +1,58 @@
 "use client";
 
-import type { AppState, QuestionItem, QuestionTrigger, Signal } from "@/lib/types";
-import { EVENT_KIND_LABEL, GRAVITY_SHORT } from "@/lib/types";
+import type { Messages } from "@/lib/i18n";
+import type { AppState, LocalizedText, QuestionItem, QuestionTrigger, Signal } from "@/lib/types";
+import { useI18n } from "./I18n";
 
 interface Props {
   state: AppState;
 }
 
-const SOURCE_LABEL: Record<Signal["source"], string> = {
-  reloj: "Reloj",
-  ropa: "Ropa inteligente",
-  prueba: "Prueba de coordinación",
-};
-
 const threshold = (value: number | null | undefined) =>
   value === null || value === undefined ? "—" : String(value);
 
-function describeTrigger(t: QuestionTrigger, signals: Map<string, Signal>): string {
-  switch (t.kind) {
-    case "transicion": {
-      const to = t.toGravity.length
-        ? ` hacia ${t.toGravity.map((g) => GRAVITY_SHORT[g]).join(", ")}`
+function describeTrigger(
+  trigger: QuestionTrigger,
+  signals: Map<string, Signal>,
+  t: Messages,
+  tx: (text: LocalizedText) => string,
+): string {
+  const m = t.questionnaire.trigger;
+  switch (trigger.kind) {
+    case "transition": {
+      const to = trigger.toGravity.length
+        ? m.transitionTo(trigger.toGravity.map((g) => t.labels.gravityShort[g]).join(", "))
         : "";
-      const micro = t.minDaysInMicro ? `, tras ≥ ${t.minDaysInMicro} FD en micro-g` : "";
-      return `Cambio de gravedad${to}: ${t.daysBefore} FD antes a ${t.daysAfter} FD después${micro}`;
+      const micro = trigger.minDaysInMicro ? m.transitionMicro(trigger.minDaysInMicro) : "";
+      return m.transition(to, trigger.daysBefore, trigger.daysAfter, micro);
     }
-    case "entorno":
-      return `En ${t.gravity.map((g) => GRAVITY_SHORT[g]).join(", ")}`;
-    case "dias-micro":
-      return `≥ ${t.min} FD seguidos en micro-g`;
-    case "evento":
-      return `${EVENT_KIND_LABEL[t.eventKind]} en los últimos ${t.withinDays} FD`;
-    case "senal": {
-      const s = signals.get(t.signalId);
-      const name = s?.name ?? t.signalId;
+    case "environment":
+      return m.environment(trigger.gravity.map((g) => t.labels.gravityShort[g]).join(", "));
+    case "micro-days":
+      return m.microDays(trigger.min);
+    case "event":
+      return m.event(t.labels.eventKind[trigger.eventKind], trigger.withinDays);
+    case "signal": {
+      const s = signals.get(trigger.signalId);
+      const name = s ? tx(s.name) : trigger.signalId;
       if (s?.kind === "boolean") return name;
-      return `${name} ${t.op} ${t.value}${s?.unit ? ` ${s.unit}` : ""}`;
+      return `${name} ${trigger.op} ${trigger.value}${s?.unit ? ` ${s.unit}` : ""}`;
     }
-    case "relleno":
-      return "Relleno si faltan preguntas";
+    case "filler":
+      return m.filler;
   }
 }
 
 function Variants({ item }: { item: QuestionItem }) {
+  const { t, tx } = useI18n();
   return (
     <ol className="q-variants">
       {item.variants.map((v) => (
         <li key={v.id}>
-          {v.text}
+          {tx(v.text)}
           <small>
-            {item.scale.min} = {v.minLabel} · {item.scale.max} = {v.maxLabel}
-            {v.inverted ? " · invertida (alto = mejor)" : ""}
+            {item.scale.min} = {tx(v.minLabel)} · {item.scale.max} = {tx(v.maxLabel)}
+            {v.inverted ? t.questionnaire.inverted : ""}
           </small>
         </li>
       ))}
@@ -59,57 +61,59 @@ function Variants({ item }: { item: QuestionItem }) {
 }
 
 export default function QuestionnaireView({ state }: Props) {
+  const { t, tx } = useI18n();
   const q = state.questionnaire;
-  const capacityName = new Map(state.capacities.map((c) => [c.id, c.name]));
+  const capacityName = (id: string) => {
+    const capacity = state.capacities.find((c) => c.id === id);
+    return capacity ? tx(capacity.name) : id;
+  };
   const signals = new Map(state.signals.map((s) => [s.id, s]));
-  const fixed = q.items.filter((i) => i.block === "fijo");
-  const bank = q.items.filter((i) => i.block === "banco");
+  const fixed = q.items.filter((i) => i.block === "fixed");
+  const bank = q.items.filter((i) => i.block === "bank");
   const catalogItem = state.catalog.find((c) => c.id === q.catalogItemId);
 
   return (
     <div className="stack">
       <section className="panel">
         <div className="panel-head">
-          <h2>{q.name}</h2>
+          <h2>{tx(q.name)}</h2>
           <span className="muted">
-            Se publica en el paquete y lo aplica la interfaz del astronauta cada vez que el plan
-            programa {catalogItem ? `«${catalogItem.code} · ${catalogItem.name}»` : q.catalogItemId}.
+            {t.questionnaire.appliesTo(
+              catalogItem ? `“${catalogItem.code} · ${tx(catalogItem.name)}”` : q.catalogItemId,
+            )}
           </span>
         </div>
         <p className="q-summary">
-          Cada día: <strong>{q.fixedPerDay} preguntas fijas</strong> (una redacción en rotación) y{" "}
-          <strong>{q.bankPerDay} del banco</strong>, elegidas por prioridad según los disparadores.
-          Sin respuesta, la capacidad se muestra en gris. Procedencia: {q.source}.
+          {t.questionnaire.perDayStart} <strong>{t.questionnaire.fixedCount(q.fixedPerDay)}</strong>{" "}
+          {t.questionnaire.perDayMid} <strong>{t.questionnaire.bankCount(q.bankPerDay)}</strong>
+          {t.questionnaire.perDayEnd(tx(q.source))}
         </p>
-        <p className="q-demo">
-          Umbrales de demostración, no criterios clínicos. Cada pregunta se inspira en un
-          instrumento publicado, pero una pregunta suelta no equivale a ese instrumento validado.
-        </p>
+        <p className="q-demo">{t.questionnaire.demo}</p>
       </section>
 
       <section className="panel">
         <div className="panel-head">
-          <h2>Capacidades con semáforo</h2>
-          <span className="muted">Qué hace la interfaz en cada nivel, siempre dentro de la política de adaptación.</span>
+          <h2>{t.questionnaire.capacitiesTitle}</h2>
+          <span className="muted">{t.questionnaire.capacitiesHint}</span>
         </div>
         <div className="table-wrap">
           <table className="q-table">
             <thead>
               <tr>
-                <th>Capacidad</th>
-                <th>En ámbar</th>
-                <th>En rojo</th>
+                <th>{t.questionnaire.colCapacity}</th>
+                <th>{t.questionnaire.colInAmber}</th>
+                <th>{t.questionnaire.colInRed}</th>
               </tr>
             </thead>
             <tbody>
               {state.capacities.map((c) => (
                 <tr key={c.id}>
                   <td>
-                    <strong>{c.name}</strong>
-                    <small>{c.description}</small>
+                    <strong>{tx(c.name)}</strong>
+                    <small>{tx(c.description)}</small>
                   </td>
-                  <td>{c.onAmbar}</td>
-                  <td>{c.onRojo}</td>
+                  <td>{tx(c.onAmber)}</td>
+                  <td>{tx(c.onRed)}</td>
                 </tr>
               ))}
             </tbody>
@@ -118,36 +122,38 @@ export default function QuestionnaireView({ state }: Props) {
       </section>
 
       {[
-        { title: "Bloque A · preguntas fijas", items: fixed, showTriggers: false },
-        { title: "Bloque B · banco de preguntas", items: bank, showTriggers: true },
-      ].map(({ title, items, showTriggers }) => (
-        <section className="panel" key={title}>
+        { id: "fixed", title: t.questionnaire.blockA, items: fixed, showTriggers: false },
+        { id: "bank", title: t.questionnaire.blockB, items: bank, showTriggers: true },
+      ].map(({ id, title, items, showTriggers }) => (
+        <section className="panel" key={id}>
           <div className="panel-head">
             <h2>{title}</h2>
-            <span className="muted">
-              Umbrales sobre el valor normalizado (alto = peor), incluidos.
-            </span>
+            <span className="muted">{t.questionnaire.thresholdsHint}</span>
           </div>
           <div className="table-wrap">
             <table className="q-table">
               <thead>
                 <tr>
-                  <th>Pregunta</th>
-                  <th>Redacciones</th>
-                  {showTriggers ? <th>Disparadores (prioridad)</th> : null}
-                  <th>Ámbar</th>
-                  <th>Rojo</th>
+                  <th>{t.questionnaire.colQuestion}</th>
+                  <th>{t.questionnaire.colWordings}</th>
+                  {showTriggers ? <th>{t.questionnaire.colTriggers}</th> : null}
+                  <th>{t.questionnaire.colAmber}</th>
+                  <th>{t.questionnaire.colRed}</th>
                 </tr>
               </thead>
               <tbody>
                 {items.map((item) => (
                   <tr key={item.id}>
                     <td>
-                      <span className="code cat-evaluacion">{item.id}</span>
-                      <strong>{item.domain}</strong>
+                      <span className="code cat-assessment">{item.id}</span>
+                      <strong>{tx(item.domain)}</strong>
                       <small>
-                        {capacityName.get(item.capacityId) ?? item.capacityId} · escala{" "}
-                        {item.scale.min}–{item.scale.max} · inspirada en {item.inspiredBy}
+                        {t.questionnaire.itemMeta(
+                          capacityName(item.capacityId),
+                          item.scale.min,
+                          item.scale.max,
+                          tx(item.inspiredBy),
+                        )}
                       </small>
                     </td>
                     <td>
@@ -156,20 +162,21 @@ export default function QuestionnaireView({ state }: Props) {
                     {showTriggers ? (
                       <td>
                         {item.triggers.length === 0 ? (
-                          <span className="muted">Sin disparador disponible</span>
+                          <span className="muted">{t.questionnaire.noTrigger}</span>
                         ) : (
                           <ul className="q-triggers">
-                            {item.triggers.map((t, i) => (
-                              <li key={i}>
-                                {describeTrigger(t, signals)} <span className="muted">({t.priority})</span>
+                            {item.triggers.map((trigger, i) => (
+                              <li key={i} title={tx(trigger.reason)}>
+                                {describeTrigger(trigger, signals, t, tx)}{" "}
+                                <span className="muted">({trigger.priority})</span>
                               </li>
                             ))}
                           </ul>
                         )}
                       </td>
                     ) : null}
-                    <td className="num">{threshold(item.ambar)}</td>
-                    <td className="num">{threshold(item.rojo)}</td>
+                    <td className="num">{threshold(item.amber)}</td>
+                    <td className="num">{threshold(item.red)}</td>
                   </tr>
                 ))}
               </tbody>
@@ -180,49 +187,46 @@ export default function QuestionnaireView({ state }: Props) {
 
       <section className="panel">
         <div className="panel-head">
-          <h2>Señales objetivas</h2>
-          <span className="muted">
-            Las de la ropa inteligente se simulan en la demo: la interfaz las guarda y muestra como
-            «simulado».
-          </span>
+          <h2>{t.questionnaire.signalsTitle}</h2>
+          <span className="muted">{t.questionnaire.signalsHint}</span>
         </div>
         <div className="table-wrap">
           <table className="q-table">
             <thead>
               <tr>
-                <th>Señal</th>
-                <th>Origen</th>
-                <th>Capacidad</th>
-                <th>Ámbar</th>
-                <th>Rojo</th>
+                <th>{t.questionnaire.colSignal}</th>
+                <th>{t.questionnaire.colOrigin}</th>
+                <th>{t.questionnaire.colCapacity}</th>
+                <th>{t.questionnaire.colAmber}</th>
+                <th>{t.questionnaire.colRed}</th>
               </tr>
             </thead>
             <tbody>
               {state.signals.map((s) => (
                 <tr key={s.id}>
                   <td>
-                    <strong>{s.name}</strong>
-                    <small>{s.description}</small>
+                    <strong>{tx(s.name)}</strong>
+                    <small>{tx(s.description)}</small>
                   </td>
                   <td>
-                    {SOURCE_LABEL[s.source]}
-                    {s.simulated ? <span className="badge q-sim">Simulada</span> : null}
+                    {t.labels.signalSource[s.source]}
+                    {s.simulated ? <span className="badge q-sim">{t.common.simulated}</span> : null}
                   </td>
-                  <td>{capacityName.get(s.capacityId) ?? s.capacityId}</td>
+                  <td>{capacityName(s.capacityId)}</td>
                   {s.kind === "boolean" ? (
                     <>
-                      <td className="num">{s.whenTrue === "ambar" ? "Si ocurre" : "—"}</td>
-                      <td className="num">{s.whenTrue === "rojo" ? "Si ocurre" : "—"}</td>
+                      <td className="num">{s.whenTrue === "amber" ? t.questionnaire.ifOccurs : "—"}</td>
+                      <td className="num">{s.whenTrue === "red" ? t.questionnaire.ifOccurs : "—"}</td>
                     </>
                   ) : (
                     <>
                       <td className="num">
-                        {threshold(s.ambar)}
-                        {s.ambar !== null && s.ambar !== undefined ? ` ${s.unit}` : ""}
+                        {threshold(s.amber)}
+                        {s.amber !== null && s.amber !== undefined ? ` ${s.unit}` : ""}
                       </td>
                       <td className="num">
-                        {threshold(s.rojo)}
-                        {s.rojo !== null && s.rojo !== undefined ? ` ${s.unit}` : ""}
+                        {threshold(s.red)}
+                        {s.red !== null && s.red !== undefined ? ` ${s.unit}` : ""}
                       </td>
                     </>
                   )}
@@ -236,8 +240,8 @@ export default function QuestionnaireView({ state }: Props) {
       {q.consistencyChecks.length > 0 ? (
         <section className="panel">
           <div className="panel-head">
-            <h2>Coherencia entre autoinforme y sensores</h2>
-            <span className="muted">Si se contradicen, la interfaz lo explica y usa el peor de los dos.</span>
+            <h2>{t.questionnaire.consistencyTitle}</h2>
+            <span className="muted">{t.questionnaire.consistencyHint}</span>
           </div>
           <ul className="q-checks">
             {q.consistencyChecks.map((c) => {
@@ -245,10 +249,11 @@ export default function QuestionnaireView({ state }: Props) {
               return (
                 <li key={c.id}>
                   <strong>
-                    {c.questionId} ≤ {c.answerAtMost} y {s?.name ?? c.signalId} {c.op} {c.value}
+                    {t.questionnaire.consistencyRule(c.questionId, c.answerAtMost, s ? tx(s.name) : c.signalId)}{" "}
+                    {c.op} {c.value}
                     {s?.unit ? ` ${s.unit}` : ""}
                   </strong>
-                  <span>{c.message}</span>
+                  <span>{tx(c.message)}</span>
                 </li>
               );
             })}

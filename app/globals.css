@@ -1,10 +1,9 @@
 /*
- * Estilo AURA Manager.
- * Paleta basada en los colores de NASA: azul #0B3D91, rojo #FC3D21, blanco y
- * negro. Aspecto de documento técnico: fondo claro, filetes finos, esquinas
- * rectas y cifras en monoespaciada. El color se reserva para los datos; el rojo,
- * para lo crítico. Los bloques del cronograma siguen la leyenda del
- * «Overview Timeline» de NASA.
+ * AURA Manager style.
+ * Palette based on NASA colors: blue #0B3D91, red #FC3D21, white and black.
+ * Technical-document look: light background, thin rules, square corners and
+ * monospaced figures. Color is reserved for data; red, for what is critical.
+ * Timeline blocks follow the legend of NASA's "Overview Timeline".
  */
 
 :root {
@@ -24,29 +23,29 @@
   --line: #cfd4dc;
   --line-strong: #0b0d12;
 
-  /* Entornos gravitatorios */
-  --g-tierra: var(--blue);
-  --g-marte: #b5451b;
-  --g-luna: #6c7480;
+  /* Gravity environments */
+  --g-earth: var(--blue);
+  --g-mars: #b5451b;
+  --g-moon: #6c7480;
   --g-micro: #aab1bd;
 
-  /* Carga operativa: rampa de azul, rojo solo para la crítica */
-  --co-baja: #c3cfe4;
-  --co-media: #7391c8;
-  --co-alta: var(--blue);
-  --co-critica: var(--red);
+  /* Operational load: blue ramp, red only for critical */
+  --ol-low: #c3cfe4;
+  --ol-medium: #7391c8;
+  --ol-high: var(--blue);
+  --ol-critical: var(--red);
 
-  --sev-bloqueo: var(--red-ink);
-  --sev-aviso: #a65f00;
+  --sev-blocker: var(--red-ink);
+  --sev-warning: #a65f00;
   --sev-info: var(--blue);
 
-  /* Categorías del catálogo de prevención */
-  --cat-ejercicio: var(--blue);
-  --cat-nutricion: #8a6d00;
-  --cat-evaluacion: #00707f;
-  --cat-preparacion: #a65f00;
-  --cat-recuperacion: #2c7548;
-  --cat-suplemento: #7d3c98;
+  /* Prevention catalog categories */
+  --cat-exercise: var(--blue);
+  --cat-nutrition: #8a6d00;
+  --cat-assessment: #00707f;
+  --cat-preparation: #a65f00;
+  --cat-recovery: #2c7548;
+  --cat-supplement: #7d3c98;
 
   --mono: var(--font-mono), ui-monospace, "SF Mono", Menlo, monospace;
   --sans: var(--font-sans), "Helvetica Neue", Helvetica, Arial, sans-serif;
@@ -154,10 +153,10 @@ input[type="checkbox"] {
 }
 
 .error {
-  color: var(--sev-bloqueo);
+  color: var(--sev-blocker);
 }
 
-/* ---------- Cabecera ---------- */
+/* ---------- Header ---------- */
 
 .topbar {
   display: flex;
@@ -236,6 +235,30 @@ input[type="checkbox"] {
   background: rgb(255 255 255 / 0.12);
 }
 
+.topbar .lang-switch {
+  width: auto;
+  padding: 4px 6px;
+  font-family: var(--mono);
+  font-size: 11px;
+  color: #fff;
+  background: transparent;
+  border-color: rgb(255 255 255 / 0.5);
+}
+
+.topbar .lang-switch option {
+  color: var(--ink, #0b0d12);
+}
+
+/* Localized field with no text in the current language: shows the English
+   text as a placeholder. */
+.missing-translation {
+  border-style: dashed;
+}
+
+.missing-translation::placeholder {
+  font-style: italic;
+}
+
 .sim-banner {
   padding: 7px 24px;
   font-size: 12px;
@@ -285,12 +308,12 @@ input[type="checkbox"] {
   color: #fff;
 }
 
-.pill.sev-bloqueo {
-  background: var(--sev-bloqueo);
+.pill.sev-blocker {
+  background: var(--sev-blocker);
 }
 
-.pill.sev-aviso {
-  background: var(--sev-aviso);
+.pill.sev-warning {
+  background: var(--sev-warning);
 }
 
 .content {
@@ -329,7 +352,7 @@ input[type="checkbox"] {
   font-size: 12px;
 }
 
-/* ---------- Botones ---------- */
+/* ---------- Buttons ---------- */
 
 .btn {
   border: 1px solid var(--line-strong);
@@ -395,7 +418,7 @@ input[type="checkbox"] {
   font-family: var(--mono);
 }
 
-/* ---------- Colores de dominio ---------- */
+/* ---------- Domain colors ---------- */
 
 .swatch {
   display: inline-block;
@@ -404,17 +427,17 @@ input[type="checkbox"] {
   flex: none;
 }
 
-.g-tierra { background: var(--g-tierra); }
-.g-marte { background: var(--g-marte); }
-.g-luna { background: var(--g-luna); }
+.g-earth { background: var(--g-earth); }
+.g-mars { background: var(--g-mars); }
+.g-moon { background: var(--g-moon); }
 .g-micro { background: var(--g-micro); }
 
-.swatch.co-baja, .strip-co.co-baja { background: var(--co-baja); }
-.swatch.co-media, .strip-co.co-media { background: var(--co-media); }
-.swatch.co-alta, .strip-co.co-alta { background: var(--co-alta); }
-.swatch.co-critica, .strip-co.co-critica { background: var(--co-critica); }
+.swatch.ol-low, .strip-ol.ol-low { background: var(--ol-low); }
+.swatch.ol-medium, .strip-ol.ol-medium { background: var(--ol-medium); }
+.swatch.ol-high, .strip-ol.ol-high { background: var(--ol-high); }
+.swatch.ol-critical, .strip-ol.ol-critical { background: var(--ol-critical); }
 
-.co-text {
+.ol-text {
   font-weight: 600;
   padding-left: 14px;
   background-repeat: no-repeat;
@@ -422,10 +445,10 @@ input[type="checkbox"] {
   background-size: 10px 10px;
 }
 
-.co-text.co-baja { background-image: linear-gradient(var(--co-baja), var(--co-baja)); }
-.co-text.co-media { background-image: linear-gradient(var(--co-media), var(--co-media)); }
-.co-text.co-alta { background-image: linear-gradient(var(--co-alta), var(--co-alta)); }
-.co-text.co-critica { background-image: linear-gradient(var(--co-critica), var(--co-critica)); }
+.ol-text.ol-low { background-image: linear-gradient(var(--ol-low), var(--ol-low)); }
+.ol-text.ol-medium { background-image: linear-gradient(var(--ol-medium), var(--ol-medium)); }
+.ol-text.ol-high { background-image: linear-gradient(var(--ol-high), var(--ol-high)); }
+.ol-text.ol-critical { background-image: linear-gradient(var(--ol-critical), var(--ol-critical)); }
 
 .dot {
   display: inline-block;
@@ -434,10 +457,10 @@ input[type="checkbox"] {
   flex: none;
 }
 
-.dot.sev-bloqueo { background: var(--sev-bloqueo); }
-.dot.sev-aviso { background: var(--sev-aviso); }
+.dot.sev-blocker { background: var(--sev-blocker); }
+.dot.sev-warning { background: var(--sev-warning); }
 
-/* ---------- Perfil gravitatorio ---------- */
+/* ---------- Gravity profile ---------- */
 
 .legend {
   display: flex;
@@ -508,7 +531,7 @@ input[type="checkbox"] {
   flex: 1;
 }
 
-.strip-co {
+.strip-ol {
   height: 6px;
 }
 
@@ -536,7 +559,7 @@ input[type="checkbox"] {
   color: var(--muted);
 }
 
-/* ---------- Formularios y tablas ---------- */
+/* ---------- Forms and tables ---------- */
 
 .form-grid {
   display: grid;
@@ -679,7 +702,7 @@ tr:last-child td {
   font-weight: 600;
 }
 
-/* ---------- Plan de prevención ---------- */
+/* ---------- Prevention plan ---------- */
 
 .prevention {
   display: grid;
@@ -795,10 +818,10 @@ tr:last-child td {
   background: var(--panel);
 }
 
-.badge.co-baja { background: var(--co-baja); }
-.badge.co-media { background: var(--co-media); }
-.badge.co-alta { background: var(--co-alta); border-color: var(--co-alta); color: #fff; }
-.badge.co-critica { background: var(--co-critica); border-color: var(--co-critica); color: #fff; }
+.badge.ol-low { background: var(--ol-low); }
+.badge.ol-medium { background: var(--ol-medium); }
+.badge.ol-high { background: var(--ol-high); border-color: var(--ol-high); color: #fff; }
+.badge.ol-critical { background: var(--ol-critical); border-color: var(--ol-critical); color: #fff; }
 
 .badge.transition {
   background: var(--ink);
@@ -822,8 +845,8 @@ tr:last-child td {
   font-size: 13px;
 }
 
-.issue.sev-bloqueo { border-left-color: var(--sev-bloqueo); }
-.issue.sev-aviso { border-left-color: var(--sev-aviso); }
+.issue.sev-blocker { border-left-color: var(--sev-blocker); }
+.issue.sev-warning { border-left-color: var(--sev-warning); }
 .issue.sev-info { border-left-color: var(--sev-info); }
 
 .issue-tag {
@@ -835,8 +858,8 @@ tr:last-child td {
   text-transform: uppercase;
 }
 
-.issue.sev-bloqueo .issue-tag { color: var(--sev-bloqueo); }
-.issue.sev-aviso .issue-tag { color: var(--sev-aviso); }
+.issue.sev-blocker .issue-tag { color: var(--sev-blocker); }
+.issue.sev-warning .issue-tag { color: var(--sev-warning); }
 .issue.sev-info .issue-tag { color: var(--sev-info); }
 
 .crew-columns {
@@ -888,12 +911,12 @@ tr:last-child td {
   margin-left: auto;
 }
 
-.cat-ejercicio { --cat: var(--cat-ejercicio); }
-.cat-nutricion { --cat: var(--cat-nutricion); }
-.cat-evaluacion { --cat: var(--cat-evaluacion); }
-.cat-preparacion { --cat: var(--cat-preparacion); }
-.cat-recuperacion { --cat: var(--cat-recuperacion); }
-.cat-suplemento { --cat: var(--cat-suplemento); }
+.cat-exercise { --cat: var(--cat-exercise); }
+.cat-nutrition { --cat: var(--cat-nutrition); }
+.cat-assessment { --cat: var(--cat-assessment); }
+.cat-preparation { --cat: var(--cat-preparation); }
+.cat-recovery { --cat: var(--cat-recovery); }
+.cat-supplement { --cat: var(--cat-supplement); }
 
 .code {
   flex: none;
@@ -935,12 +958,12 @@ tr:last-child td {
   border-radius: 0;
 }
 
-.status.autorizado {
+.status.authorized {
   background: var(--ink);
   color: #fff;
 }
 
-.status.condicional {
+.status.conditional {
   color: var(--muted);
   border-style: dashed;
   border-color: var(--muted);
@@ -952,7 +975,7 @@ tr:last-child td {
   margin-top: 12px;
 }
 
-/* ---------- Publicar ---------- */
+/* ---------- Publish ---------- */
 
 .counts {
   display: flex;
@@ -971,15 +994,15 @@ tr:last-child td {
   border-left: 0;
 }
 
-.count.sev-bloqueo { color: var(--sev-bloqueo); }
-.count.sev-aviso { color: var(--sev-aviso); }
+.count.sev-blocker { color: var(--sev-blocker); }
+.count.sev-warning { color: var(--sev-warning); }
 .count.sev-info { color: var(--sev-info); }
 
 .packages-table {
   margin-top: 12px;
 }
 
-/* ---------- MET y cronograma ---------- */
+/* ---------- MET and timeline ---------- */
 
 .met-input {
   width: 100px;
@@ -1087,18 +1110,18 @@ tr:last-child td {
   margin-left: -0.5px;
 }
 
-/* Colores de la leyenda del Overview Timeline de NASA */
-.bk-sueno { background: #002060; }
-.tl-block.bk-sueno { color: #fff; font-weight: 600; }
-.bk-presueno { background: #a6a6a6; }
-.bk-maniobra { background: #00a2e8; }
-.bk-prueba { background: #92d050; }
-.bk-comunicacion { background: #f8bf8f; }
-.bk-salud { background: #f49ac1; }
-.bk-ejercicio { background: #ffe14d; }
-.bk-operacion { background: #e3e7ee; }
-.bk-comida { background: #ffffff; }
-.bk-libre { background: #cfe8d6; }
+/* Colors from the legend of NASA's Overview Timeline */
+.bk-sleep { background: #002060; }
+.tl-block.bk-sleep { color: #fff; font-weight: 600; }
+.bk-presleep { background: #a6a6a6; }
+.bk-maneuver { background: #00a2e8; }
+.bk-test { background: #92d050; }
+.bk-communication { background: #f8bf8f; }
+.bk-health { background: #f49ac1; }
+.bk-exercise { background: #ffe14d; }
+.bk-operation { background: #e3e7ee; }
+.bk-meal { background: #ffffff; }
+.bk-off-duty { background: #cfe8d6; }
 
 .tl-events .tl-track {
   height: 18px;
@@ -1114,10 +1137,10 @@ tr:last-child td {
   cursor: default;
 }
 
-.ev-maniobra { color: #0077b6; }
-.ev-hito { color: var(--ink); }
-.ev-prueba { color: #3f7d20; }
-.ev-operacion { color: var(--muted); }
+.ev-maneuver { color: #0077b6; }
+.ev-milestone { color: var(--ink); }
+.ev-test { color: #3f7d20; }
+.ev-operation { color: var(--muted); }
 
 .tl-crew .tl-track {
   min-height: 24px;
@@ -1126,8 +1149,8 @@ tr:last-child td {
 
 .tl-chip {
   position: absolute;
-  /* El borde izquierdo de la ficha marca su MET; el alto de la fila y la
-     posición los calcula DayTimeline para que no se pisen. */
+  /* The chip's left edge marks its MET; DayTimeline computes the row height
+     and position so chips do not overlap. */
   padding: 0 4px;
   white-space: nowrap;
   font-family: var(--mono);
@@ -1140,7 +1163,7 @@ tr:last-child td {
   cursor: default;
 }
 
-.tl-chip.condicional {
+.tl-chip.conditional {
   color: var(--cat);
   background: var(--panel);
   border-style: dashed;
@@ -1168,7 +1191,7 @@ tr:last-child td {
   font-weight: 500;
 }
 
-/* ---------- Fijo y adaptable ---------- */
+/* ---------- Fixed and adaptable ---------- */
 
 .adapt {
   flex: none;
@@ -1217,7 +1240,7 @@ tr:last-child td {
   padding: 0 6px;
 }
 
-/* ---------- Adaptaciones ---------- */
+/* ---------- Adaptations ---------- */
 
 .adaptations {
   list-style: none;
@@ -1229,11 +1252,11 @@ tr:last-child td {
 .adaptation {
   padding: 12px 0 12px 12px;
   border-bottom: 1px solid var(--line);
-  border-left: 3px solid var(--sev-aviso);
+  border-left: 3px solid var(--sev-warning);
 }
 
-.adaptation.review-validada { border-left-color: var(--ink); }
-.adaptation.review-objetada { border-left-color: var(--sev-bloqueo); }
+.adaptation.review-validated { border-left-color: var(--ink); }
+.adaptation.review-objected { border-left-color: var(--sev-blocker); }
 
 .adaptation p {
   margin: 6px 0;
@@ -1308,9 +1331,9 @@ tr:last-child td {
   text-transform: uppercase;
 }
 
-.review-status.review-pendiente { color: var(--sev-aviso); }
+.review-status.review-pending { color: var(--sev-warning); }
 
-/* ---------- Alertas ---------- */
+/* ---------- Alerts ---------- */
 
 .alerts {
   list-style: none;
@@ -1322,27 +1345,27 @@ tr:last-child td {
 .alert-item {
   padding: 12px 0 12px 12px;
   border-bottom: 1px solid var(--line);
-  border-left: 3px solid var(--sev-aviso);
+  border-left: 3px solid var(--sev-warning);
 }
 
-.alert-item.level-rojo { border-left-color: var(--sev-bloqueo); }
-.alert-item.ack-atendida { border-left-color: var(--line-strong); opacity: 0.75; }
+.alert-item.level-red { border-left-color: var(--sev-blocker); }
+.alert-item.ack-handled { border-left-color: var(--line-strong); opacity: 0.75; }
 .alert-item p { margin: 6px 0; }
 
-.badge.alert-level-rojo {
+.badge.alert-level-red {
   background: var(--red);
   border-color: var(--red);
   color: #fff;
 }
 
-.badge.alert-level-aviso {
-  border-color: var(--sev-aviso);
-  color: var(--sev-aviso);
+.badge.alert-level-warning {
+  border-color: var(--sev-warning);
+  color: var(--sev-warning);
 }
 
-.review-status.ack-nueva { color: var(--sev-bloqueo); }
-.review-status.ack-vista { color: var(--sev-aviso); }
-.review-status.review-objetada { color: var(--sev-bloqueo); }
+.review-status.ack-new { color: var(--sev-blocker); }
+.review-status.ack-seen { color: var(--sev-warning); }
+.review-status.review-objected { color: var(--sev-blocker); }
 
 @media (max-width: 900px) {
   .prevention {
@@ -1372,7 +1395,7 @@ tr:last-child td {
   }
 }
 
-/* ---------- Cuestionario ---------- */
+/* ---------- Questionnaire ---------- */
 
 .q-summary,
 .q-demo {
@@ -1383,7 +1406,7 @@ tr:last-child td {
 
 .q-demo {
   padding: 8px 10px;
-  border-left: 3px solid var(--sev-aviso);
+  border-left: 3px solid var(--sev-warning);
   background: var(--panel-2);
   font-size: 13px;
 }
@@ -1436,6 +1459,6 @@ tr:last-child td {
 
 .badge.q-sim {
   margin-left: 6px;
-  border-color: var(--sev-aviso);
-  color: var(--sev-aviso);
+  border-color: var(--sev-warning);
+  color: var(--sev-warning);
 }

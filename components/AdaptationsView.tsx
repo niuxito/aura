@@ -3,7 +3,8 @@
 import { useEffect, useState } from "react";
 import { formatFlightDay, formatMet } from "@/lib/met";
 import type { Adaptation, AppState, CatalogItem, ReviewStatus } from "@/lib/types";
-import { ADAPTATION_TYPE_LABEL, flightDayOf } from "@/lib/types";
+import { flightDayOf } from "@/lib/types";
+import { useI18n } from "./I18n";
 
 interface Props {
   state: AppState;
@@ -12,15 +13,8 @@ interface Props {
   refresh: () => Promise<void>;
 }
 
-const dateFormat = new Intl.DateTimeFormat("es-ES", { dateStyle: "short", timeStyle: "medium" });
-
-const STATUS_LABEL: Record<ReviewStatus, string> = {
-  pendiente: "Pendiente de validar",
-  validada: "Validada",
-  objetada: "Objetada",
-};
-
 export default function AdaptationsView({ state, adaptations, latestPackageVersion, refresh }: Props) {
+  const { t, tx, formatDate } = useI18n();
   const [notes, setNotes] = useState<Record<string, string>>({});
   const [error, setError] = useState<string | null>(null);
   const items = new Map<string, CatalogItem>(state.catalog.map((c) => [c.id, c]));
@@ -37,7 +31,7 @@ export default function AdaptationsView({ state, adaptations, latestPackageVersi
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ id: a.id, status, note: notes[a.id] ?? a.review.note }),
     });
-    if (!res.ok) setError("No se pudo guardar la revisión.");
+    if (!res.ok) setError(t.adaptations.saveError);
     await refresh();
   };
 
@@ -49,10 +43,10 @@ export default function AdaptationsView({ state, adaptations, latestPackageVersi
     const item = itemId ? items.get(itemId) : undefined;
     return item ? (
       <>
-        <span className={`code cat-${item.category}`}>{item.code}</span> {item.name}
+        <span className={`code cat-${item.category}`}>{item.code}</span> {tx(item.name)}
       </>
     ) : (
-      <em>{itemId ?? "desconocida"}</em>
+      <em>{itemId ?? t.common.unknown}</em>
     );
   };
 
@@ -60,24 +54,19 @@ export default function AdaptationsView({ state, adaptations, latestPackageVersi
     <div className="stack">
       <section className="panel">
         <div className="panel-head">
-          <h2>Adaptaciones recibidas de la interfaz del astronauta</h2>
+          <h2>{t.adaptations.title}</h2>
           <div className="counts">
-            <span className="count sev-aviso">{count("pendiente")} pendientes</span>
-            <span className="count">{count("validada")} validadas</span>
-            <span className="count sev-bloqueo">{count("objetada")} objetadas</span>
-            <span className="count sev-bloqueo">{outOfPolicy} fuera de política</span>
+            <span className="count sev-warning">{t.adaptations.pending(count("pending"))}</span>
+            <span className="count">{t.adaptations.validated(count("validated"))}</span>
+            <span className="count sev-blocker">{t.adaptations.objected(count("objected"))}</span>
+            <span className="count sev-blocker">{t.adaptations.outOfPolicy(outOfPolicy)}</span>
           </div>
         </div>
-        <p className="muted">
-          La interfaz adapta por su cuenta las actividades marcadas como adaptables (ejercicios
-          dentro de los periodos de ejercicio y menús en las comidas) y las aplica a bordo sin
-          esperar respuesta. Aquí quedan registradas para su validación. Validar u objetar no
-          cambia lo ya hecho: deja constancia y la interfaz puede consultar el resultado.
-        </p>
+        <p className="muted">{t.adaptations.intro}</p>
         {error ? <p className="error">{error}</p> : null}
 
         {ordered.length === 0 ? (
-          <p className="muted">Todavía no se ha recibido ninguna adaptación.</p>
+          <p className="muted">{t.adaptations.none}</p>
         ) : (
           <ul className="adaptations">
             {ordered.map((a) => {
@@ -89,19 +78,22 @@ export default function AdaptationsView({ state, adaptations, latestPackageVersi
                       {fd === null ? "—" : formatFlightDay(fd)} · MET {formatMet(a.decidedAtMet)}
                     </span>
                     <strong>{crewName(a.crewId)}</strong>
-                    <span className="badge">{ADAPTATION_TYPE_LABEL[a.type]}</span>
+                    <span className="badge">{t.labels.adaptationType[a.type]}</span>
                     <span className={`badge ${a.policy.withinPolicy ? "policy-ok" : "policy-out"}`}>
-                      {a.policy.withinPolicy ? "Dentro de política" : "Fuera de política"}
+                      {a.policy.withinPolicy ? t.adaptations.withinPolicy : t.adaptations.outOfPolicyBadge}
                     </span>
-                    {a.source === "simulada" ? <span className="badge">Simulada</span> : null}
+                    {a.source === "simulated" ? <span className="badge">{t.common.simulated}</span> : null}
                     <span className="muted adaptation-meta">
-                      Paquete v{a.packageVersion} · recibida {dateFormat.format(new Date(a.receivedAt))}
+                      {t.common.received(
+                        a.packageVersion,
+                        formatDate(a.receivedAt, { dateStyle: "short", timeStyle: "medium" }),
+                      )}
                     </span>
                   </div>
 
                   <div className="adaptation-change">
                     <div>
-                      <span className="eyebrow">Plan original</span>
+                      <span className="eyebrow">{t.adaptations.originalPlan}</span>
                       <p>
                         {a.original ? (
                           <>
@@ -109,27 +101,27 @@ export default function AdaptationsView({ state, adaptations, latestPackageVersi
                             <span className="num muted">MET {formatMet(a.original.met)}</span>
                           </>
                         ) : (
-                          <em>No localizada en el paquete</em>
+                          <em>{t.adaptations.notFound}</em>
                         )}
                       </p>
                     </div>
                     <span className="arrow">→</span>
                     <div>
-                      <span className="eyebrow">Decisión de la interfaz</span>
+                      <span className="eyebrow">{t.adaptations.decision}</span>
                       <p>
-                        {a.type === "sustitucion" ? describe(a.replacementItemId) : null}
-                        {a.type === "reprogramacion" && a.newMet !== undefined ? (
+                        {a.type === "substitution" ? describe(a.replacementItemId) : null}
+                        {a.type === "reschedule" && a.newMet !== undefined ? (
                           <>
-                            Reprogramada a <span className="num">MET {formatMet(a.newMet)}</span>
+                            {t.adaptations.rescheduledTo} <span className="num">MET {formatMet(a.newMet)}</span>
                           </>
                         ) : null}
-                        {a.type === "omision" ? "Actividad omitida" : null}
+                        {a.type === "omission" ? t.adaptations.omitted : null}
                       </p>
                     </div>
                   </div>
 
                   <p>
-                    <span className="eyebrow">Motivo</span> {a.reason}
+                    <span className="eyebrow">{t.adaptations.reason}</span> {a.reason}
                   </p>
                   {a.evidence.length > 0 ? (
                     <ul className="evidence">
@@ -141,44 +133,44 @@ export default function AdaptationsView({ state, adaptations, latestPackageVersi
                             {e.unit ? ` ${e.unit}` : ""}
                           </span>{" "}
                           <span className="muted">
-                            ({e.source}
+                            ({t.labels.evidenceSource[e.source]}
                             {e.met !== undefined ? `, MET ${formatMet(e.met)}` : ""})
                           </span>
                         </li>
                       ))}
                     </ul>
                   ) : null}
-                  {a.policy.violations.map((v) => (
-                    <p key={v} className="error">
-                      {v}
+                  {a.policy.violations.map((v, i) => (
+                    <p key={i} className="error">
+                      {tx(v)}
                     </p>
                   ))}
 
                   <div className="adaptation-review">
                     <span className={`review-status review-${a.review.status}`}>
-                      {STATUS_LABEL[a.review.status]}
+                      {t.labels.reviewStatus[a.review.status]}
                     </span>
                     <input
-                      placeholder="Nota de control de misión (opcional)"
-                      aria-label="Nota de control de misión"
+                      placeholder={t.adaptations.notePlaceholder}
+                      aria-label={t.adaptations.noteLabel}
                       value={notes[a.id] ?? a.review.note}
                       onChange={(e) => setNotes({ ...notes, [a.id]: e.target.value })}
                     />
                     <button
                       type="button"
                       className="btn primary"
-                      disabled={a.review.status === "validada"}
-                      onClick={() => review(a, "validada")}
+                      disabled={a.review.status === "validated"}
+                      onClick={() => review(a, "validated")}
                     >
-                      Validar
+                      {t.adaptations.validate}
                     </button>
                     <button
                       type="button"
                       className="btn"
-                      disabled={a.review.status === "objetada"}
-                      onClick={() => review(a, "objetada")}
+                      disabled={a.review.status === "objected"}
+                      onClick={() => review(a, "objected")}
                     >
-                      Objetar
+                      {t.adaptations.object}
                     </button>
                   </div>
                 </li>
@@ -197,17 +189,18 @@ export default function AdaptationsView({ state, adaptations, latestPackageVersi
   );
 }
 
-/** Envía una adaptación de prueba por el mismo punto de entrada que la interfaz. */
+/** Sends a test adaptation through the same endpoint the interface uses. */
 function SimulationForm({
   state,
   latestPackageVersion,
   refresh,
 }: Pick<Props, "state" | "latestPackageVersion" | "refresh">) {
+  const { t, tx } = useI18n();
   const [crewId, setCrewId] = useState(state.crew[0]?.id ?? "");
   const [entryId, setEntryId] = useState("");
-  const [type, setType] = useState<"sustitucion" | "omision">("sustitucion");
+  const [type, setType] = useState<"substitution" | "omission">("substitution");
   const [replacementId, setReplacementId] = useState("");
-  const [reason, setReason] = useState("Fatiga alta declarada tras una mala noche de sueño.");
+  const [reason, setReason] = useState(t.adaptations.sim.defaultReason);
   const [message, setMessage] = useState<string | null>(null);
 
   const items = new Map<string, CatalogItem>(state.catalog.map((c) => [c.id, c]));
@@ -223,7 +216,7 @@ function SimulationForm({
     latestPackageVersion !== null &&
     entry !== undefined &&
     reason.trim() !== "" &&
-    (type === "omision" || replacementId !== "");
+    (type === "omission" || replacementId !== "");
 
   const send = async () => {
     if (!entry || latestPackageVersion === null) return;
@@ -237,34 +230,32 @@ function SimulationForm({
         crewId,
         entryId: entry.id,
         type,
-        ...(type === "sustitucion" ? { replacementItemId: replacementId } : {}),
+        ...(type === "substitution" ? { replacementItemId: replacementId } : {}),
         decidedAtMet: entry.met,
         reason,
         evidence: [
-          { indicator: "Fatiga autodeclarada", value: "8", unit: "0–10", source: "simulado" },
+          { indicator: t.adaptations.sim.evidenceIndicator, value: "8", unit: "0–10", source: "simulated" },
         ],
-        source: "simulada",
+        source: "simulated",
       }),
     });
-    setMessage(res.ok ? "Adaptación de prueba registrada." : "No se pudo registrar.");
+    setMessage(res.ok ? t.adaptations.sim.sent : t.adaptations.sim.sendError);
     await refresh();
   };
 
   return (
     <section className="panel">
       <div className="panel-head">
-        <h2>Simular una adaptación</h2>
-        <span className="muted">
-          Para probar el circuito mientras la interfaz del astronauta no esté conectada
-        </span>
+        <h2>{t.adaptations.sim.title}</h2>
+        <span className="muted">{t.adaptations.sim.hint}</span>
       </div>
       {latestPackageVersion === null ? (
-        <p className="muted">Publica antes un paquete: las adaptaciones se refieren a una versión publicada.</p>
+        <p className="muted">{t.adaptations.sim.publishFirst}</p>
       ) : (
         <>
           <div className="form-grid">
             <label>
-              Tripulante
+              {t.adaptations.sim.crewMember}
               <select
                 value={crewId}
                 onChange={(e) => {
@@ -281,7 +272,7 @@ function SimulationForm({
               </select>
             </label>
             <label>
-              Actividad del plan
+              {t.adaptations.sim.activity}
               <select
                 value={entryId}
                 onChange={(e) => {
@@ -289,50 +280,47 @@ function SimulationForm({
                   setReplacementId("");
                 }}
               >
-                <option value="">Elegir…</option>
+                <option value="">{t.common.choose}</option>
                 {entries.map((e) => {
                   const item = items.get(e.itemId);
                   return (
                     <option key={e.id} value={e.id}>
-                      {formatMet(e.met)} · {item?.code} {item?.name} · {e.adaptable ? "adaptable" : "fija"}
+                      {formatMet(e.met)} · {item?.code} {tx(item?.name)} · {e.adaptable ? t.common.adaptable : t.common.fixed}
                     </option>
                   );
                 })}
               </select>
             </label>
             <label>
-              Decisión
+              {t.adaptations.sim.decision}
               <select value={type} onChange={(e) => setType(e.target.value as typeof type)}>
-                <option value="sustitucion">Sustitución</option>
-                <option value="omision">Omisión</option>
+                <option value="substitution">{t.labels.adaptationType.substitution}</option>
+                <option value="omission">{t.labels.adaptationType.omission}</option>
               </select>
             </label>
-            {type === "sustitucion" ? (
+            {type === "substitution" ? (
               <label>
-                Sustituir por
+                {t.adaptations.sim.replaceWith}
                 <select value={replacementId} onChange={(e) => setReplacementId(e.target.value)}>
-                  <option value="">Elegir…</option>
+                  <option value="">{t.common.choose}</option>
                   {replacements.map((c) => (
                     <option key={c.id} value={c.id}>
-                      {c.code} · {c.name}
+                      {c.code} · {tx(c.name)}
                     </option>
                   ))}
                 </select>
               </label>
             ) : null}
             <label className="wide">
-              Motivo
+              {t.adaptations.sim.reason}
               <input value={reason} onChange={(e) => setReason(e.target.value)} />
             </label>
           </div>
           <div className="form-actions">
             <button type="button" className="btn primary" disabled={!ready} onClick={send}>
-              Enviar adaptación de prueba
+              {t.adaptations.sim.send}
             </button>
-            <span className="muted">
-              Se envía contra el paquete v{latestPackageVersion}. Elegir una actividad fija sirve
-              para comprobar que queda señalada como fuera de política.
-            </span>
+            <span className="muted">{t.adaptations.sim.sendHint(latestPackageVersion)}</span>
           </div>
           {message ? <p className="muted">{message}</p> : null}
         </>

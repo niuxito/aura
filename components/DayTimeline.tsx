@@ -3,14 +3,15 @@
 import { useEffect, useRef, useState } from "react";
 import { DAY, HOUR, formatMet } from "@/lib/met";
 import type { AppState, CatalogItem, FlightDay } from "@/lib/types";
-import { BLOCK_KIND_LABEL, adaptableCategoriesOf, flightDayOf } from "@/lib/types";
+import { adaptableCategoriesOf, flightDayOf } from "@/lib/types";
+import { useI18n } from "./I18n";
 
 interface Props {
   state: AppState;
   day: FlightDay;
 }
 
-// Medidas de las fichas de actividad, para colocarlas sin que se pisen.
+// Activity chip sizes, used to place them without overlapping.
 const CHIP_CHAR_PX = 6.2;
 const CHIP_PADDING_PX = 16;
 const CHIP_GAP_PX = 3;
@@ -24,8 +25,8 @@ interface PlacedChip<T> {
 }
 
 /**
- * Reparte las fichas de una fila en carriles: cada ficha empieza en su MET y,
- * si ahí chocaría con la anterior, baja al primer carril libre.
+ * Spreads the chips of a row over lanes: each chip starts at its MET and, if
+ * it would collide with the previous one there, drops to the first free lane.
  */
 function placeChips<T>(
   entries: { entry: T; x: number; label: string }[],
@@ -45,8 +46,9 @@ function placeChips<T>(
   return { chips, lanes: Math.max(1, laneEnds.length) };
 }
 
-/** Cronograma de un día de vuelo sobre un eje MET, al estilo del Overview Timeline. */
+/** Timeline of a flight day on a MET axis, in the style of the Overview Timeline. */
 export default function DayTimeline({ state, day }: Props) {
+  const { t, tx } = useI18n();
   const trackRef = useRef<HTMLDivElement>(null);
   const [trackWidth, setTrackWidth] = useState(800);
 
@@ -78,17 +80,17 @@ export default function DayTimeline({ state, day }: Props) {
   return (
     <section className="panel">
       <div className="panel-head">
-        <h2>Cronograma del día de vuelo</h2>
+        <h2>{t.timeline.title}</h2>
         <div className="legend">
           {kinds.map((k) => (
             <span key={k} className="legend-item">
               <i className={`swatch bk-${k}`} />
-              {BLOCK_KIND_LABEL[k]}
+              {t.labels.blockKind[k]}
             </span>
           ))}
           <span className="legend-item">
             <i className="swatch adaptable" />
-            Periodo adaptable por la interfaz
+            {t.timeline.adaptableLegend}
           </span>
         </div>
       </div>
@@ -96,21 +98,21 @@ export default function DayTimeline({ state, day }: Props) {
       <div className="tl-scroll">
         <div className="tl">
           <div className="tl-row tl-axis">
-            <span className="tl-label">MET</span>
+            <span className="tl-label">{t.timeline.axis}</span>
             <div className="tl-track" ref={trackRef}>
-              {ticks.map((t) => (
-                <span key={t} className="tl-tick" style={{ left: `${pct(t)}%` }}>
-                  {tickLabel(t)}
+              {ticks.map((tick) => (
+                <span key={tick} className="tl-tick" style={{ left: `${pct(tick)}%` }}>
+                  {tickLabel(tick)}
                 </span>
               ))}
             </div>
           </div>
 
           <div className="tl-row tl-blocks">
-            <span className="tl-label">Tripulación</span>
+            <span className="tl-label">{t.timeline.crewRow}</span>
             <div className="tl-track">
-              {ticks.map((t) => (
-                <i key={t} className="tl-grid" style={{ left: `${pct(t)}%` }} />
+              {ticks.map((tick) => (
+                <i key={tick} className="tl-grid" style={{ left: `${pct(tick)}%` }} />
               ))}
               {blocks.map((b) => {
                 const start = Math.max(b.startMet, day.startMet);
@@ -121,9 +123,9 @@ export default function DayTimeline({ state, day }: Props) {
                     key={b.id}
                     className={`tl-block bk-${b.kind}${adaptable ? " adaptable" : ""}`}
                     style={{ left: `${pct(start)}%`, width: `${pct(end) - pct(start)}%` }}
-                    title={`${b.name} · MET ${formatMet(b.startMet)} – ${formatMet(b.endMet)} (aprox.) · ${adaptable ? "periodo adaptable por la interfaz" : "fijo"}`}
+                    title={t.timeline.blockTitle(tx(b.name), formatMet(b.startMet), formatMet(b.endMet), adaptable)}
                   >
-                    {b.name}
+                    {tx(b.name)}
                   </span>
                 );
               })}
@@ -131,14 +133,14 @@ export default function DayTimeline({ state, day }: Props) {
           </div>
 
           <div className="tl-row tl-events">
-            <span className="tl-label">Eventos</span>
+            <span className="tl-label">{t.timeline.eventsRow}</span>
             <div className="tl-track">
               {events.map((e) => (
                 <span
                   key={e.id}
                   className={`tl-event ev-${e.kind}`}
                   style={{ left: `${pct(e.met)}%` }}
-                  title={`${e.name} · MET ${e.approx ? "~" : ""}${formatMet(e.met)}`}
+                  title={`${tx(e.name)} · MET ${e.approx ? "~" : ""}${formatMet(e.met)}`}
                 >
                   ▲
                 </span>
@@ -172,7 +174,12 @@ export default function DayTimeline({ state, day }: Props) {
                       key={entry.id}
                       className={`tl-chip cat-${entry.item.category} ${entry.status}${entry.adaptable ? " adaptable" : ""}`}
                       style={{ left: x, top: lane * LANE_HEIGHT_PX + ROW_PADDING_PX / 2 }}
-                      title={`${entry.item.name} · MET ${formatMet(entry.met)} · ${entry.status} · ${entry.adaptable ? "adaptable" : "fija"}`}
+                      title={t.timeline.chipTitle(
+                        tx(entry.item.name),
+                        formatMet(entry.met),
+                        t.labels.entryStatus[entry.status],
+                        entry.adaptable,
+                      )}
                     >
                       {entry.item.code}
                     </span>
@@ -192,17 +199,12 @@ export default function DayTimeline({ state, day }: Props) {
                 {e.approx ? "~" : ""}
                 {formatMet(e.met)}
               </span>
-              {e.name}
+              {tx(e.name)}
             </li>
           ))}
         </ul>
       ) : null}
-      <p className="hint">
-        Eventos: MET rotulados en el cronograma de misión. Bloques de la tripulación: leídos de la
-        gráfica, aproximados. Filas inferiores: plan de prevención de cada tripulante; cada ficha empieza en su MET y,
-        si coincide con otra, pasa a la línea de debajo; las adaptables por la interfaz van
-        redondeadas y las fijas, rectas.
-      </p>
+      <p className="hint">{t.timeline.hint}</p>
     </section>
   );
 }

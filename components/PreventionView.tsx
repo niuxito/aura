@@ -2,16 +2,9 @@
 
 import { MINUTE, formatFlightDay, formatMet } from "@/lib/met";
 import type { AppState, CatalogItem, FlightDay, Issue, PlanEntry } from "@/lib/types";
-import {
-  CATEGORIES,
-  CATEGORY_LABEL,
-  GRAVITY_LABEL,
-  GRAVITY_SHORT,
-  LOAD_LABEL,
-  flightDayOf,
-  isAdaptableCategory,
-} from "@/lib/types";
+import { CATEGORIES, flightDayOf, isAdaptableCategory } from "@/lib/types";
 import DayTimeline from "./DayTimeline";
+import { useI18n } from "./I18n";
 import MetInput from "./MetInput";
 
 interface Props {
@@ -22,16 +15,17 @@ interface Props {
   update: (fn: (s: AppState) => AppState) => void;
 }
 
-/** MET propuesto para una actividad nueva: media hora después de despertar. */
+/** Proposed MET for a new activity: half an hour after waking up. */
 function defaultMet(day: FlightDay, state: AppState): number {
   const wake = state.blocks
-    .filter((b) => b.kind === "sueno" && b.startMet <= day.startMet && b.endMet > day.startMet)
+    .filter((b) => b.kind === "sleep" && b.startMet <= day.startMet && b.endMet > day.startMet)
     .map((b) => b.endMet)[0];
   const proposed = (wake ?? day.startMet) + 30 * MINUTE;
   return Math.min(proposed, day.endMet - MINUTE);
 }
 
 export default function PreventionView({ state, issues, selectedDay, onSelect, update }: Props) {
+  const { t, tx } = useI18n();
   const day = state.days.find((d) => d.day === selectedDay) ?? state.days[0];
   const items = new Map<string, CatalogItem>(state.catalog.map((c) => [c.id, c]));
   const dayIssues = issues.filter((i) => i.day === day.day);
@@ -44,9 +38,9 @@ export default function PreventionView({ state, issues, selectedDay, onSelect, u
         crewId,
         itemId,
         met: defaultMet(day, s),
-        status: "autorizado",
+        status: "authorized",
         adaptable: isAdaptableCategory(
-          s.catalog.find((c) => c.id === itemId)?.category ?? "evaluacion",
+          s.catalog.find((c) => c.id === itemId)?.category ?? "assessment",
         ),
       };
       return { ...s, plan: [...s.plan, entry] };
@@ -81,14 +75,14 @@ export default function PreventionView({ state, issues, selectedDay, onSelect, u
             >
               <span className="num">{formatFlightDay(d.day)}</span>
               <span className="day-row-text">
-                <strong>{d.milestone}</strong>
+                <strong>{tx(d.milestone)}</strong>
                 <small>
-                  MET {formatMet(d.startMet)} · {GRAVITY_SHORT[d.gravity]}
+                  MET {formatMet(d.startMet)} · {t.labels.gravityShort[d.gravity]}
                   {d.transitionFrom ? " ▲" : ""}
                 </small>
               </span>
-              {flagged ? <i className="dot sev-aviso" /> : null}
-              <i className={`swatch co-${d.co}`} title={`CO ${LOAD_LABEL[d.co]}`} />
+              {flagged ? <i className="dot sev-warning" /> : null}
+              <i className={`swatch ol-${d.opLoad}`} title={t.prevention.loadBadge(t.labels.load[d.opLoad])} />
             </button>
           );
         })}
@@ -100,19 +94,19 @@ export default function PreventionView({ state, issues, selectedDay, onSelect, u
             <div>
               <span className="eyebrow">
                 {formatFlightDay(day.day)} · MET {formatMet(day.startMet)} – {formatMet(day.endMet)}{" "}
-                · {day.phase}
+                · {tx(day.phase)}
               </span>
-              <h2>{day.milestone}</h2>
+              <h2>{tx(day.milestone)}</h2>
             </div>
             <div className="badges">
-              <span className={`badge co-${day.co}`}>CO {LOAD_LABEL[day.co]}</span>
+              <span className={`badge ol-${day.opLoad}`}>{t.prevention.loadBadge(t.labels.load[day.opLoad])}</span>
               <span className="badge outline">
                 <i className={`swatch g-${day.gravity}`} />
-                {GRAVITY_LABEL[day.gravity]}
+                {t.labels.gravity[day.gravity]}
               </span>
               {day.transitionFrom ? (
                 <span className="badge transition">
-                  ▲ {GRAVITY_SHORT[day.transitionFrom]} → {GRAVITY_SHORT[day.gravity]}
+                  ▲ {t.labels.gravityShort[day.transitionFrom]} → {t.labels.gravityShort[day.gravity]}
                 </span>
               ) : null}
             </div>
@@ -121,15 +115,15 @@ export default function PreventionView({ state, issues, selectedDay, onSelect, u
             <ul className="issues">
               {dayIssues.map((issue) => (
                 <li key={issue.id} className={`issue sev-${issue.severity}`}>
-                  <span className="issue-tag">{issue.severity}</span>
+                  <span className="issue-tag">{t.labels.severity[issue.severity]}</span>
                   <span>
-                    {state.crew.find((c) => c.id === issue.crewId)?.name}: {issue.message}
+                    {state.crew.find((c) => c.id === issue.crewId)?.name}: {tx(issue.message)}
                   </span>
                 </li>
               ))}
             </ul>
           ) : (
-            <p className="muted">Sin avisos para este día de vuelo.</p>
+            <p className="muted">{t.prevention.noIssues}</p>
           )}
         </section>
 
@@ -140,7 +134,7 @@ export default function PreventionView({ state, issues, selectedDay, onSelect, u
             const entries = state.plan
               .filter((e) => e.crewId === member.id && inDay(e))
               .sort((a, b) => a.met - b.met);
-            const count = (type: "CA" | "RE") =>
+            const count = (type: "CL" | "RE") =>
               entries.filter((e) => items.get(e.itemId)?.loadType === type).length;
             const others = state.crew.filter((c) => c.id !== member.id);
             return (
@@ -148,16 +142,16 @@ export default function PreventionView({ state, issues, selectedDay, onSelect, u
                 <div className="panel-head">
                   <div>
                     <h2>{member.name}</h2>
-                    <span className="muted">{member.role}</span>
+                    <span className="muted">{tx(member.role)}</span>
                   </div>
                   <div className="loads">
-                    <span title="Actividades de carga de acondicionamiento">CA {count("CA")}</span>
-                    <span title="Ventanas de recuperación">RE {count("RE")}</span>
+                    <span title={t.prevention.clTitle}>CL {count("CL")}</span>
+                    <span title={t.prevention.reTitle}>RE {count("RE")}</span>
                   </div>
                 </div>
 
                 {entries.length === 0 ? (
-                  <p className="muted">Sin actividades asignadas.</p>
+                  <p className="muted">{t.prevention.noActivities}</p>
                 ) : (
                   <ul className="entries">
                     {entries.map((entry) => {
@@ -168,7 +162,7 @@ export default function PreventionView({ state, issues, selectedDay, onSelect, u
                           <MetInput
                             key={entry.met}
                             value={entry.met}
-                            ariaLabel={`MET de ${item.name}`}
+                            ariaLabel={t.common.metOf(tx(item.name))}
                             onCommit={(met) => patchEntry(entry.id, { met })}
                           />
                           <span className="code">{item.code}</span>
@@ -179,30 +173,30 @@ export default function PreventionView({ state, issues, selectedDay, onSelect, u
                               onClick={() => patchEntry(entry.id, { adaptable: !entry.adaptable })}
                               title={
                                 entry.adaptable
-                                  ? "La interfaz del astronauta puede sustituirla, moverla dentro de su periodo u omitirla. Pulsa para fijarla."
-                                  : "Fijada por control de misión. Pulsa para permitir que la interfaz la adapte."
+                                  ? t.prevention.adaptableOnTitle
+                                  : t.prevention.adaptableOffTitle
                               }
                             >
-                              {entry.adaptable ? "Adaptable" : "Fija"}
+                              {entry.adaptable ? t.common.adaptable : t.common.fixed}
                             </button>
                           ) : (
                             <span
                               className="adapt off static"
-                              title="Esta categoría no la adapta la interfaz del astronauta"
+                              title={t.prevention.staticFixedTitle}
                             >
-                              Fija
+                              {t.common.fixed}
                             </span>
                           )}
                           <span className="entry-body">
-                            <strong>{item.name}</strong>
+                            <strong>{tx(item.name)}</strong>
                             <small>
-                              {CATEGORY_LABEL[item.category]}
-                              {item.experimental ? " · experimental" : ""}
-                              {item.category === "suplemento"
-                                ? ` · dosis: ${item.dose ?? "pendiente de protocolo"}`
+                              {t.labels.category[item.category]}
+                              {item.experimental ? ` · ${t.common.experimental}` : ""}
+                              {item.category === "supplement"
+                                ? t.prevention.dose(item.dose ? tx(item.dose) : t.prevention.dosePending)
                                 : ""}
                             </small>
-                            <small className="limit">{item.limit}</small>
+                            <small className="limit">{tx(item.limit)}</small>
                           </span>
                           <button
                             type="button"
@@ -210,18 +204,18 @@ export default function PreventionView({ state, issues, selectedDay, onSelect, u
                             onClick={() =>
                               patchEntry(entry.id, {
                                 status:
-                                  entry.status === "autorizado" ? "condicional" : "autorizado",
+                                  entry.status === "authorized" ? "conditional" : "authorized",
                               })
                             }
-                            title="Cambiar entre autorizado y condicional"
+                            title={t.prevention.toggleStatus}
                           >
-                            {entry.status}
+                            {t.labels.entryStatus[entry.status]}
                           </button>
                           <button
                             type="button"
                             className="icon-btn"
                             onClick={() => removeEntry(entry.id)}
-                            aria-label={`Quitar ${item.name}`}
+                            aria-label={t.common.remove(tx(item.name))}
                           >
                             ×
                           </button>
@@ -235,16 +229,16 @@ export default function PreventionView({ state, issues, selectedDay, onSelect, u
                   <select
                     value=""
                     onChange={(e) => e.target.value && addEntry(member.id, e.target.value)}
-                    aria-label={`Añadir actividad a ${member.name}`}
+                    aria-label={t.prevention.addTo(member.name)}
                   >
-                    <option value="">+ Añadir del catálogo…</option>
+                    <option value="">{t.prevention.addFromCatalog}</option>
                     {CATEGORIES.map((category) => (
-                      <optgroup key={category} label={CATEGORY_LABEL[category]}>
+                      <optgroup key={category} label={t.labels.category[category]}>
                         {state.catalog
                           .filter((c) => c.category === category)
                           .map((c) => (
                             <option key={c.id} value={c.id}>
-                              {c.code} · {c.name}
+                              {c.code} · {tx(c.name)}
                             </option>
                           ))}
                       </optgroup>
@@ -253,9 +247,9 @@ export default function PreventionView({ state, issues, selectedDay, onSelect, u
                   <select
                     value=""
                     onChange={(e) => e.target.value && copyFrom(e.target.value, member.id)}
-                    aria-label={`Copiar a ${member.name} el plan de otro tripulante`}
+                    aria-label={t.prevention.copyTo(member.name)}
                   >
-                    <option value="">Copiar de…</option>
+                    <option value="">{t.prevention.copyFrom}</option>
                     {others.map((c) => (
                       <option key={c.id} value={c.id}>
                         {c.name}

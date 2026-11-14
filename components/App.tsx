@@ -1,42 +1,43 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { LOCALES, LOCALE_NAMES, isLocale, type Locale } from "@/lib/i18n";
 import { countBySeverity, validate } from "@/lib/rules";
 import type { Adaptation, Alert, AppState } from "@/lib/types";
 import AdaptationsView from "./AdaptationsView";
 import AlertsView from "./AlertsView";
 import CatalogView from "./CatalogView";
 import GravityStrip from "./GravityStrip";
+import { I18nProvider, useI18n } from "./I18n";
 import MissionView from "./MissionView";
 import PreventionView from "./PreventionView";
 import PublishView from "./PublishView";
 import QuestionnaireView from "./QuestionnaireView";
 
-type Tab = "mision" | "prevencion" | "catalogo" | "cuestionario" | "publicar" | "adaptaciones" | "alertas";
-type SaveStatus = "guardado" | "guardando" | "error";
-
-const TABS: { id: Tab; label: string }[] = [
-  { id: "mision", label: "Plan de misión" },
-  { id: "prevencion", label: "Plan de prevención" },
-  { id: "catalogo", label: "Catálogo" },
-  { id: "cuestionario", label: "Cuestionario" },
-  { id: "publicar", label: "Publicar" },
-  { id: "adaptaciones", label: "Adaptaciones" },
-  { id: "alertas", label: "Alertas" },
-];
+const TABS = [
+  "mission",
+  "prevention",
+  "catalog",
+  "questionnaire",
+  "publish",
+  "adaptations",
+  "alerts",
+] as const;
+type Tab = (typeof TABS)[number];
+type SaveStatus = "saved" | "saving" | "error";
 
 const SAVE_DELAY_MS = 500;
-/** Cada cuánto se consulta si la interfaz ha enviado adaptaciones o alertas nuevas. */
+/** How often to check whether the interface has sent new adaptations or alerts. */
 const ADAPTATIONS_POLL_MS = 15000;
 
-/** Permite enlazar a una pestaña concreta con ?tab=adaptaciones. */
+/** Allows linking to a specific tab with ?tab=adaptations. */
 function initialTab(): Tab {
-  if (typeof window === "undefined") return "prevencion";
+  if (typeof window === "undefined") return "prevention";
   const requested = new URLSearchParams(window.location.search).get("tab");
-  return TABS.some((t) => t.id === requested) ? (requested as Tab) : "prevencion";
+  return (TABS as readonly string[]).includes(requested ?? "") ? (requested as Tab) : "prevention";
 }
 
-/** Permite enlazar a un día de vuelo concreto con ?fd=2. */
+/** Allows linking to a specific flight day with ?fd=2. */
 function initialDay(): number {
   if (typeof window === "undefined") return 1;
   const requested = Number(new URLSearchParams(window.location.search).get("fd"));
@@ -48,7 +49,7 @@ interface AdaptationsResponse {
   latestPackageVersion: number | null;
 }
 
-/** null si el servidor no responde: se reintenta en la siguiente consulta. */
+/** null if the server does not answer: retried on the next poll. */
 async function fetchAdaptations(): Promise<AdaptationsResponse | null> {
   try {
     const res = await fetch("/api/adaptations");
@@ -58,7 +59,7 @@ async function fetchAdaptations(): Promise<AdaptationsResponse | null> {
   }
 }
 
-/** null si el servidor no responde: se reintenta en la siguiente consulta. */
+/** null if the server does not answer: retried on the next poll. */
 async function fetchAlerts(): Promise<Alert[] | null> {
   try {
     const res = await fetch("/api/alerts");
@@ -68,12 +69,42 @@ async function fetchAlerts(): Promise<Alert[] | null> {
   }
 }
 
-export default function App() {
+export default function App({ locale }: { locale: Locale }) {
+  return (
+    <I18nProvider initialLocale={locale}>
+      <Console />
+    </I18nProvider>
+  );
+}
+
+function LanguageSwitch() {
+  const { locale, setLocale, t } = useI18n();
+  return (
+    <select
+      className="lang-switch"
+      value={locale}
+      aria-label={t.app.language}
+      title={t.app.language}
+      onChange={(e) => {
+        if (isLocale(e.target.value)) setLocale(e.target.value);
+      }}
+    >
+      {LOCALES.map((l) => (
+        <option key={l} value={l}>
+          {l.toUpperCase()} · {LOCALE_NAMES[l]}
+        </option>
+      ))}
+    </select>
+  );
+}
+
+function Console() {
+  const { t, tx } = useI18n();
   const [state, setState] = useState<AppState | null>(null);
   const [loadError, setLoadError] = useState(false);
   const [tab, setTab] = useState<Tab>(initialTab);
   const [selectedDay, setSelectedDay] = useState(initialDay);
-  const [saveStatus, setSaveStatus] = useState<SaveStatus>("guardado");
+  const [saveStatus, setSaveStatus] = useState<SaveStatus>("saved");
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [adaptations, setAdaptations] = useState<Adaptation[]>([]);
   const [latestPackageVersion, setLatestPackageVersion] = useState<number | null>(null);
@@ -120,14 +151,14 @@ export default function App() {
 
   const save = useCallback((next: AppState) => {
     if (timer.current) clearTimeout(timer.current);
-    setSaveStatus("guardando");
+    setSaveStatus("saving");
     timer.current = setTimeout(() => {
       fetch("/api/state", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(next),
       })
-        .then((r) => setSaveStatus(r.ok ? "guardado" : "error"))
+        .then((r) => setSaveStatus(r.ok ? "saved" : "error"))
         .catch(() => setSaveStatus("error"));
     }, SAVE_DELAY_MS);
   }, []);
@@ -144,12 +175,12 @@ export default function App() {
   );
 
   const reset = async () => {
-    if (!window.confirm("¿Restaurar la misión demo? Se perderán los cambios del borrador.")) return;
+    if (!window.confirm(t.app.resetConfirm)) return;
     if (timer.current) clearTimeout(timer.current);
     const res = await fetch("/api/state", { method: "DELETE" });
     if (res.ok) {
       setState(await res.json());
-      setSaveStatus("guardado");
+      setSaveStatus("saved");
     } else {
       setSaveStatus("error");
     }
@@ -157,16 +188,16 @@ export default function App() {
 
   const issues = useMemo(() => (state ? validate(state) : []), [state]);
 
-  if (loadError) return <main className="loading">No se pudo cargar el plan de misión.</main>;
-  if (!state) return <main className="loading">Cargando plan de misión…</main>;
+  if (loadError) return <main className="loading">{t.app.loadError}</main>;
+  if (!state) return <main className="loading">{t.app.loading}</main>;
 
   const counts = countBySeverity(issues);
-  const pendingAdaptations = adaptations.filter((a) => a.review.status === "pendiente").length;
-  const newAlerts = alerts.filter((a) => a.ack.status === "nueva");
-  const newRedAlerts = newAlerts.filter((a) => a.level === "rojo").length;
+  const pendingAdaptations = adaptations.filter((a) => a.review.status === "pending").length;
+  const newAlerts = alerts.filter((a) => a.ack.status === "new");
+  const newRedAlerts = newAlerts.filter((a) => a.level === "red").length;
   const goToDay = (day: number) => {
     setSelectedDay(day);
-    setTab("prevencion");
+    setTab("prevention");
   };
 
   return (
@@ -174,62 +205,58 @@ export default function App() {
       <header className="topbar">
         <div className="brand">
           <span className="wordmark">AURA</span>
-          <span className="brand-sub">Control de misión · plan de prevención</span>
+          <span className="brand-sub">{t.app.brandSub}</span>
         </div>
         <div className="mission-meta">
-          <strong>{state.mission.name}</strong>
+          <strong>{tx(state.mission.name)}</strong>
           <span className="muted">
-            {state.mission.destination} · {state.days.length} días de vuelo · {state.crew.length} tripulantes
+            {t.app.missionMeta(tx(state.mission.destination), state.days.length, state.crew.length)}
           </span>
         </div>
         <div className="topbar-right">
           <span className={`save save-${saveStatus}`}>
-            {saveStatus === "guardado"
-              ? "Guardado"
-              : saveStatus === "guardando"
-                ? "Guardando…"
-                : "Error al guardar"}
+            {saveStatus === "saved" ? t.app.saved : saveStatus === "saving" ? t.app.saving : t.app.saveError}
           </span>
+          <LanguageSwitch />
           <button type="button" className="btn ghost" onClick={reset}>
-            Restaurar demo
+            {t.app.resetDemo}
           </button>
         </div>
       </header>
 
       <div className="sim-banner">
-        Cronograma: {state.mission.timelineSource}. Tiempos en MET (tiempo transcurrido desde el
-        despegue, DD/HH:MM).
-        {state.mission.simulated
-          ? " La carga operativa, la tripulación y el plan de prevención son un ejemplo del equipo: no son datos de NASA ni una prescripción médica."
-          : ""}
+        {t.app.banner(state.mission.timelineSource)}
+        {state.mission.simulated ? t.app.bannerSimulated : ""}
       </div>
 
       <nav className="tabs">
-        {TABS.map((t) => (
+        {TABS.map((id) => (
           <button
-            key={t.id}
+            key={id}
             type="button"
-            className={`tab${tab === t.id ? " active" : ""}`}
-            onClick={() => setTab(t.id)}
+            className={`tab${tab === id ? " active" : ""}`}
+            onClick={() => setTab(id)}
           >
-            {t.label}
-            {t.id === "publicar" && counts.bloqueo + counts.aviso > 0 ? (
-              <span className={`pill ${counts.bloqueo > 0 ? "sev-bloqueo" : "sev-aviso"}`}>
-                {counts.bloqueo + counts.aviso}
+            {t.tabs[id]}
+            {id === "publish" && counts.blocker + counts.warning > 0 ? (
+              <span className={`pill ${counts.blocker > 0 ? "sev-blocker" : "sev-warning"}`}>
+                {counts.blocker + counts.warning}
               </span>
             ) : null}
-            {t.id === "adaptaciones" && pendingAdaptations > 0 ? (
-              <span className="pill sev-aviso">{pendingAdaptations}</span>
+            {id === "adaptations" && pendingAdaptations > 0 ? (
+              <span className="pill sev-warning">{pendingAdaptations}</span>
             ) : null}
-            {t.id === "alertas" && newAlerts.length > 0 ? (
-              <span className={`pill ${newRedAlerts > 0 ? "sev-bloqueo" : "sev-aviso"}`}>{newAlerts.length}</span>
+            {id === "alerts" && newAlerts.length > 0 ? (
+              <span className={`pill ${newRedAlerts > 0 ? "sev-blocker" : "sev-warning"}`}>
+                {newAlerts.length}
+              </span>
             ) : null}
           </button>
         ))}
       </nav>
 
       <main className="content">
-        {tab === "mision" || tab === "prevencion" ? (
+        {tab === "mission" || tab === "prevention" ? (
           <GravityStrip
             days={state.days}
             issues={issues}
@@ -237,7 +264,7 @@ export default function App() {
             onSelect={setSelectedDay}
           />
         ) : null}
-        {tab === "mision" ? (
+        {tab === "mission" ? (
           <MissionView
             state={state}
             issues={issues}
@@ -246,7 +273,7 @@ export default function App() {
             update={update}
           />
         ) : null}
-        {tab === "prevencion" ? (
+        {tab === "prevention" ? (
           <PreventionView
             state={state}
             issues={issues}
@@ -255,9 +282,9 @@ export default function App() {
             update={update}
           />
         ) : null}
-        {tab === "catalogo" ? <CatalogView state={state} update={update} /> : null}
-        {tab === "cuestionario" ? <QuestionnaireView state={state} /> : null}
-        {tab === "adaptaciones" ? (
+        {tab === "catalog" ? <CatalogView state={state} update={update} /> : null}
+        {tab === "questionnaire" ? <QuestionnaireView state={state} /> : null}
+        {tab === "adaptations" ? (
           <AdaptationsView
             state={state}
             adaptations={adaptations}
@@ -265,8 +292,8 @@ export default function App() {
             refresh={refreshAdaptations}
           />
         ) : null}
-        {tab === "alertas" ? <AlertsView state={state} alerts={alerts} refresh={refreshAlerts} /> : null}
-        {tab === "publicar" ? (
+        {tab === "alerts" ? <AlertsView state={state} alerts={alerts} refresh={refreshAlerts} /> : null}
+        {tab === "publish" ? (
           <PublishView state={state} issues={issues} onSelectDay={goToDay} />
         ) : null}
       </main>

@@ -1,89 +1,99 @@
 # AURA Manager
 
-Consola de control de misión de **AURA (Astronaut Unified Readiness & Autonomous-health)**, proyecto para NASA Space Apps Challenge 2026.
+Mission control console for **AURA (Astronaut Unified Readiness & Autonomous-health)**, a project for the NASA Space Apps Challenge 2026.
 
-A partir del plan de misión, permite preparar el plan de prevención de cada astronauta (ejercicios, evaluaciones, suplementos y recuperación) para cada día, con especial atención a los cambios de gravedad, y publicar un paquete de misión versionado que consume la interfaz del astronauta (`../aura-astronaut`).
+Starting from the mission plan, it prepares each astronaut's prevention plan (exercise, assessments, supplements and recovery) for every day, with special attention to gravity changes, and publishes a versioned mission package consumed by the astronaut interface (`../aura-astronaut`).
 
-## Arrancar
+## Getting started
 
 ```bash
 npm install
 npm run dev
 ```
 
-Abre http://localhost:3000. La primera vez se crea `data/state.json` con la misión demo.
+Open http://localhost:3000. The first time, `data/state/current.json` is created with the demo mission.
 
-## Tiempo de misión: MET
+## Languages
 
-Todos los tiempos son **MET (Mission Elapsed Time)**: tiempo transcurrido desde el despegue, escrito `DD/HH:MM` o `DD/HH:MM:SS` como en los cronogramas de NASA. Internamente se guardan en segundos (`lib/met.ts`). La misión se divide en **días de vuelo** (`FD01`, `FD02`…) con sus límites en MET, y cada actividad de prevención se programa en un MET; su día de vuelo se deduce de él.
+The console and the data are multilingual. **English** is the reference language (NASA's) and **Spanish** the second one.
 
-## Misión demo: Artemis II
+- **Console:** served at `/en` and `/es`. `/` redirects to the language chosen earlier (cookie `aura-locale`) or to the browser's preferred one, English otherwise (`proxy.ts`). The selector in the header switches language in place. UI strings live in `lib/i18n/en.ts` (reference) and `lib/i18n/es.ts`, which must have the same shape: a missing key fails type-checking.
+- **Data:** every human-readable text in the state and in the package is a `LocalizedText`, e.g. `{ "en": "Sleep", "es": "Sueño" }` (`lib/i18n/text.ts`). A missing language falls back to English. Fields are edited in the console's current language; a field with no text in that language shows the English one as a dashed placeholder. Codes and identifiers are English and never translated.
+- **Validation:** texts with no Spanish version are reported as information; texts with no English version, as a warning.
+- **Adding a language:** add it to `LOCALES` in `lib/i18n/text.ts`, write its dictionary and register it in `lib/i18n/index.ts`.
 
-Cronograma **planificado** de Artemis II, del «Artemis II Overview Timeline» de NASA (18/03/2026, STRIVES 20260002249). En `lib/seed.ts`:
+## Mission time: MET
 
-- **Del documento:** los 10 días de vuelo, las fases y los eventos con su MET.
-- **Leído de la gráfica, aproximado (±15 min):** los bloques de actividad de la tripulación (sueño, comidas, ejercicio, maniobras, pruebas).
-- **Ejemplo del equipo:** la carga operativa de cada día, la tripulación de demostración y todo el plan de prevención. No son datos ni prescripciones de NASA.
+All times are **MET (Mission Elapsed Time)**: time elapsed since launch, written `DD/HH:MM` or `DD/HH:MM:SS` as in NASA timelines. They are stored in seconds (`lib/met.ts`). The mission is split into **flight days** (`FD01`, `FD02`…) with their MET boundaries, and each prevention activity is scheduled at a MET; its flight day is derived from it.
 
-## Vistas
+## Demo mission: Artemis II
 
-- **Plan de misión:** días de vuelo con su MET, fases, entorno gravitatorio, transiciones, carga operativa (CO) y eventos.
-- **Plan de prevención:** cronograma del día de vuelo sobre un eje MET y actividades de cada tripulante con su MET.
-- **Catálogo:** acciones asignables. La herramienta no inventa dosis; se publican como se registren.
-- **Cuestionario:** cuestionario diario del astronauta (bloque fijo y banco con disparadores), capacidades con semáforo y señales objetivas. Solo lectura por ahora; se edita en `lib/questionnaire.ts`.
-- **Publicar:** validación del plan y publicación del paquete.
-- **Adaptaciones:** registro de los cambios que la interfaz del astronauta ha hecho por su cuenta, para validarlos u objetarlos.
-- **Alertas:** lo que la interfaz no resuelve adaptando (capacidad en rojo, medida de preparación de la transición perdida, incoherencia entre autoinforme y sensor), para marcarlo como visto o atendido.
+**Planned** timeline of Artemis II, from NASA's "Artemis II Overview Timeline" (2026-03-18, STRIVES 20260002249). In `lib/seed.ts`:
 
-## Fijo y adaptable
+- **From the document:** the 10 flight days, the phases and the events with their MET.
+- **Read from the chart, approximate (±15 min):** crew activity blocks (sleep, meals, exercise, maneuvers, tests).
+- **Team example:** each day's operational load (OL), the demonstration crew and the whole prevention plan. They are not NASA data or prescriptions.
 
-La interfaz del astronauta puede adaptar por sí misma una parte acotada del plan. Control de misión decide cuál:
+## Views
 
-- **Adaptable:** los ejercicios, dentro de los bloques de ejercicio del cronograma, y los menús, en los bloques de comida (`ADAPTABLE_WINDOW` en `lib/types.ts`). Cada actividad de esas categorías lleva un interruptor Adaptable/Fija.
-- **Fijo:** todo lo demás: maniobras, pruebas, sueño, operaciones, evaluaciones, preparación del retorno y suplementos.
+- **Mission plan:** flight days with their MET, phases, gravity environment, transitions, operational load (OL) and events.
+- **Prevention plan:** timeline of the flight day on a MET axis and each crew member's activities with their MET.
+- **Catalog:** assignable actions. The tool does not invent doses; they are published as recorded.
+- **Questionnaire:** the astronaut's daily questionnaire (fixed block and triggered bank), traffic-light capacities and objective signals. Read-only for now; edited in `lib/questionnaire.ts`.
+- **Publish:** plan validation and package publishing.
+- **Adaptations:** record of the changes the astronaut interface made on its own, to validate or object to them.
+- **Alerts:** what the interface does not resolve by adapting (capacity in red, lost transition preparation measure, self-report vs. sensor inconsistency), to mark as seen or handled.
 
-El paquete publica la política (`adaptationPolicy`) y marca cada bloque y cada actividad con `adaptable`. La interfaz puede sustituir una actividad adaptable por otra de la misma categoría sin aumentar la carga, moverla dentro de su periodo u omitirla.
+## Fixed and adaptable
 
-Cada adaptación se aplica a bordo sin esperar respuesta y se envía a `POST /api/adaptations`. El servidor la registra siempre, la comprueba contra la política y señala las que se salen de ella; control de misión la valida o la objeta en la pestaña Adaptaciones. `GET /api/adaptations?crewId=` devuelve el registro con el resultado de la revisión. Se guardan en `data/adaptations.json`.
+The astronaut interface may adapt a bounded part of the plan on its own. Mission control decides which:
 
-## Alertas de la interfaz (`lib/alerts.ts`)
+- **Adaptable:** exercise, within the timeline's exercise blocks, and menus, at meal blocks (`ADAPTABLE_WINDOW` in `lib/types.ts`). Each activity in those categories has an Adaptable/Fixed toggle.
+- **Fixed:** everything else: maneuvers, tests, sleep, operations, assessments, return preparation and supplements.
 
-`POST /api/alerts` recibe una alerta o una lista: `{ id, packageVersion, crewId, kind, level, capacityId?, entryId?, met, message, evidence[], source }`, con `kind` `capacidad-roja`, `preparacion-perdida` o `incoherencia` y `level` `rojo` o `aviso`. Como las adaptaciones, se registra siempre (`202`), reenviar el mismo `id` no duplica y solo responde `400` si el mensaje está mal formado. `GET /api/alerts?crewId=` devuelve el registro con el acuse (`ack.status`: `nueva`, `vista` o `atendida`, y `ack.note`), que la interfaz muestra al astronauta. Control de misión lo marca en la pestaña Alertas (`PATCH /api/alerts`). Se guardan en la colección `alerts` (ficheros en local, Postgres en Vercel).
+The package publishes the policy (`adaptationPolicy`) and flags every block and activity with `adaptable`. The interface may replace an adaptable activity with another of the same category without increasing the load, move it within its window, or omit it.
 
-## Cuestionario y semáforo (`lib/questionnaire.ts`)
+Each adaptation is applied on board without waiting for a reply and is sent to `POST /api/adaptations`. The server always records it, checks it against the policy and flags those outside it; mission control validates or objects to it in the Adaptations tab. `GET /api/adaptations?crewId=` returns the record with the review outcome. They are stored in the `adaptations` collection.
 
-Control de misión define y publica en el paquete lo que la interfaz usa para evaluar al astronauta:
+## Alerts from the interface (`lib/alerts.ts`)
 
-- **Capacidades** con semáforo (verde, ámbar, rojo y gris por falta de datos) y qué hace la interfaz en ámbar (una adaptación permitida) y en rojo (remitir y avisar).
-- **Señales** objetivas: reloj (real), prueba de coordinación (real) y ropa inteligente (**simulada** en la demo).
-- **Cuestionario diario:** 3 preguntas fijas con redacción rotativa y 2 del banco, elegidas por disparadores (cambio de gravedad, entorno, días en microgravedad, EVA, señales). Procede del documento del equipo «ARTEMIS-MED», adaptado a los principios de AURA: no diagnostica, no certifica aptitud y no usa cámara, analítica ni miometría.
+`POST /api/alerts` receives one alert or a list: `{ id, packageVersion, crewId, kind, level, capacityId?, entryId?, met, message, evidence[], source }`, with `kind` `capacity-red`, `preparation-lost` or `inconsistency` and `level` `red` or `warning`. Like adaptations, it is always recorded (`202`), resending the same `id` does not duplicate, and it only answers `400` if the message is malformed. `GET /api/alerts?crewId=` returns the record with the acknowledgement (`ack.status`: `new`, `seen` or `handled`, and `ack.note`), which the interface shows the astronaut. Mission control marks it in the Alerts tab (`PATCH /api/alerts`). They are stored in the `alerts` collection (files locally, Postgres on Vercel).
 
-No depende de la misión: los disparadores usan entornos gravitatorios y días de vuelo, así que sirve igual para la Luna, Marte o una estación. Todos los umbrales son de demostración (`thresholdsAreDemo: true`).
+## Questionnaire and traffic light (`lib/questionnaire.ts`)
 
-## Reglas de validación (`lib/rules.ts`)
+Mission control defines and publishes in the package what the interface uses to assess the astronaut:
 
-| Regla | Gravedad |
+- **Capacities** with a traffic light (green, amber, red, and gray for missing data) and what the interface does in amber (a permitted adaptation) and in red (refer and alert).
+- **Objective signals:** watch (real), coordination test (real) and smart clothing (**simulated** in the demo).
+- **Daily questionnaire:** 3 fixed questions with rotating wording and 2 from the bank, chosen by triggers (gravity change, environment, days in microgravity, EVA, signals). It comes from the team document "ARTEMIS-MED", adapted to AURA's principles: it does not diagnose, does not certify fitness and uses no camera, blood tests or myometry.
+
+It is mission-agnostic: triggers use gravity environments and flight days, so it works the same for the Moon, Mars or a station. All thresholds are for demonstration (`thresholdsAreDemo: true`).
+
+## Validation rules (`lib/rules.ts`)
+
+| Rule | Severity |
 | --- | --- |
-| Carga exigente autorizada en un día de CO crítica | Bloqueo (impide publicar) |
-| Carga exigente en la víspera de un día crítico | Aviso |
-| Día posterior a uno crítico sin ventana de recuperación | Aviso |
-| Transición a un entorno con gravedad sin preparación en los 2 días de vuelo previos | Aviso |
-| Actividad programada dentro de un periodo de sueño o fuera de la misión | Aviso |
-| Astronauta sin plan en un día de vuelo | Aviso |
-| Día sin cuestionario de fatiga, suplementos sin dosis, actividades condicionales | Informativo |
-| Cuestionario incoherente (capacidad, señal o acción inexistente, umbrales fuera de escala) | Bloqueo |
-| Pregunta del banco sin disparadores disponibles | Informativo |
+| Authorized demanding load on a day of critical OL | Blocker (prevents publishing) |
+| Demanding load on the day before a critical day | Warning |
+| Day after a critical one with no recovery window | Warning |
+| Transition to an environment with gravity with no preparation in the previous 2 flight days | Warning |
+| Activity scheduled within a sleep period or outside the mission | Warning |
+| Crew member with no plan on a flight day | Warning |
+| Text with no English version | Warning |
+| Day with no fatigue questionnaire, supplements with no dose, conditional activities, texts with no Spanish version | Information |
+| Inconsistent questionnaire (non-existent capacity, signal or action, thresholds off the scale) | Blocker |
+| Bank question with no available triggers | Information |
 
-Son reglas de diseño del demostrador, no criterios clínicos.
+They are design rules for the demonstrator, not clinical criteria. Their messages are generated in every language and travel in the package (`validation[]`).
 
-## Paquete de misión
+## Mission package
 
-- `GET /api/package`: último paquete publicado.
-- `GET /api/package?version=N`: una versión concreta.
-- `GET /api/package?list=1`: resumen de versiones.
+- `GET /api/package`: latest published package.
+- `GET /api/package?version=N`: a specific version.
+- `GET /api/package?list=1`: summary of versions.
 
-El formato (`aura.mission-package/v4`) está definido en `lib/package.ts`. Los paquetes se guardan en `data/packages/`.
+The format (`aura.mission-package/v5`) is defined in `lib/package.ts`. v5 changed every code to English and every text to a `LocalizedText`, and adds `languages` and `defaultLanguage`; the v4 → v5 mapping is in `../aura-astronaut/contract/v4-to-v5.md`. During the migration, the adaptation and alert endpoints still accept v4 (Spanish) codes and convert them (`lib/legacy.ts`), and records stored with v4 codes are converted when read. A saved state from an older schema is replaced by the demo mission.
 
-## Datos
+## Data
 
-Persistencia local en ficheros JSON dentro de `data/` (fuera de git). Sin autenticación ni nube: está pensada para un único usuario en el demostrador.
+Stored as JSON documents (`lib/storage.ts`): files in `data/` locally (outside git), the `aura_documents` table in Postgres when `DATABASE_URL` is set (Vercel). No authentication: it is meant for a single user in the demonstrator.

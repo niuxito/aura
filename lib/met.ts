@@ -1,6 +1,6 @@
-// MET (Mission Elapsed Time): tiempo transcurrido desde el despegue.
-// Se guarda en segundos y se escribe como DD/HH:MM o DD/HH:MM:SS, igual que
-// en los cronogramas de NASA (por ejemplo, TLI en 01/01:08:42).
+// MET (Mission Elapsed Time): time elapsed since launch.
+// Stored in seconds and written as DD/HH:MM or DD/HH:MM:SS, as in NASA
+// timelines (for example, TLI at 01/01:08:42).
 
 export const MINUTE = 60;
 export const HOUR = 3600;
@@ -18,7 +18,7 @@ export function formatMet(seconds: number): string {
   return `${sign}${pad(d)}/${pad(h)}:${pad(m)}${s ? `:${pad(s)}` : ""}`;
 }
 
-/** Acepta D/HH:MM y D/HH:MM:SS, con signo opcional. Devuelve null si no es válido. */
+/** Accepts D/HH:MM and D/HH:MM:SS, with an optional sign. Returns null if invalid. */
 export function parseMet(text: string): number | null {
   const match = /^(-)?(\d{1,3})\/(\d{1,2}):(\d{2})(?::(\d{2}))?$/.exec(text.trim());
   if (!match) return null;
@@ -31,10 +31,10 @@ export function parseMet(text: string): number | null {
   return sign ? -total : total;
 }
 
-/** Para datos escritos a mano en el código; falla si el texto no es un MET. */
+/** For data written by hand in code; throws if the text is not a MET. */
 export function met(text: string): number {
   const value = parseMet(text);
-  if (value === null) throw new Error(`MET no válido: ${text}`);
+  if (value === null) throw new Error(`Invalid MET: ${text}`);
   return value;
 }
 

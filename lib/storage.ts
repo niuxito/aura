@@ -2,9 +2,9 @@ import { promises as fs } from "fs";
 import path from "path";
 import { neon } from "@neondatabase/serverless";
 
-// Almacén de documentos JSON, organizados en colecciones.
-// - Con DATABASE_URL (despliegue en Vercel): tabla aura_documents en Postgres.
-// - Sin ella (desarrollo local): ficheros en data/<colección>/<nombre>.json.
+// JSON document store, organized in collections.
+// - With DATABASE_URL (Vercel deployment): aura_documents table in Postgres.
+// - Without it (local development): files in data/<collection>/<name>.json.
 
 const DATA_DIR = path.join(process.cwd(), "data");
 const databaseUrl = process.env.DATABASE_URL;
@@ -41,7 +41,7 @@ export async function setDoc(collection: string, name: string, value: unknown): 
   await fs.writeFile(file, JSON.stringify(value, null, 2), "utf8");
 }
 
-/** Nombres de los documentos de una colección. */
+/** Names of the documents in a collection. */
 export async function listDocs(collection: string): Promise<string[]> {
   if (sql) {
     const prefix = `${collection}:`;
