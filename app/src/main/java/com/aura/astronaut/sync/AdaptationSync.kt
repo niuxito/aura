@@ -55,7 +55,7 @@ class AdaptationSync(private val dao: AuraDao, initialUrl: String) {
             val now = System.currentTimeMillis()
             pending.forEach { a ->
                 val server = registered[a.id]
-                dao.markSent(a.id, now, server?.policy?.withinPolicy, server?.policy?.violations?.joinToString("\n")?.ifBlank { null })
+                dao.markSent(a.id, now, server?.policy?.withinPolicy, server?.policy?.violationTexts?.joinToString("\n")?.ifBlank { null })
             }
             Log.i(TAG, "Enviadas ${pending.size} adaptaciones a $url")
         }
@@ -66,7 +66,7 @@ class AdaptationSync(private val dao: AuraDao, initialUrl: String) {
                     ServerCodes.review(s.review?.status),
                     s.review?.note?.ifBlank { null },
                     s.policy?.withinPolicy,
-                    s.policy?.violations?.joinToString("\n")?.ifBlank { null },
+                    s.policy?.violationTexts?.joinToString("\n")?.ifBlank { null },
                 )
             }
         }

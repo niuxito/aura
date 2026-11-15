@@ -146,11 +146,20 @@ class AuraViewModel(app: Application) : AndroidViewModel(app) {
         .map { list -> list.associateBy { it.entryId } }
         .stateIn(viewModelScope, SharingStarted.Eagerly, emptyMap())
 
-    /** Adaptaciones del tripulante elegido (aplicadas a bordo), con su estado de envío y revisión. */
+    /**
+     * Adaptaciones del tripulante elegido sobre el paquete en vigor (aplicadas a bordo), con su envío y revisión.
+     * Control de misión cambia el plan publicando un paquete nuevo: las decididas sobre otra versión ya no se
+     * aplican (siguen en la base y en el registro del Manager).
+     */
     @OptIn(ExperimentalCoroutinesApi::class)
-    val adaptations: StateFlow<List<LocalAdaptation>> = crewId
-        .flatMapLatest { id -> if (id == null) flowOf(emptyList()) else dao.adaptations(id) }
+    val adaptations: StateFlow<List<LocalAdaptation>> = combine(
+        crewId.flatMapLatest { id -> if (id == null) flowOf(emptyList()) else dao.adaptations(id) },
+        _pkg,
+    ) { list, p -> inForce(list, (p as? PackageState.Ready)?.loaded?.pkg) }
         .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
+
+    private fun inForce(list: List<LocalAdaptation>, pkg: MissionPackage?): List<LocalAdaptation> =
+        if (pkg == null) emptyList() else list.filter { it.packageVersion == pkg.packageVersion }
 
     /** Alertas del tripulante elegido para control de misión, con su envío y acuse. */
     @OptIn(ExperimentalCoroutinesApi::class)
@@ -249,7 +258,7 @@ class AuraViewModel(app: Application) : AndroidViewModel(app) {
         val crew = crewId.value ?: return
         val day = s?.day ?: return
         engineLock.withLock {
-            val handled = confirmations.value.keys + dao.adaptationsNow(crew).map { it.entryId }
+            val handled = confirmations.value.keys + inForce(dao.adaptationsNow(crew), pkg).map { it.entryId }
             val decisions = AdaptationEngine.decide(pkg, crew, s.met, day, a, handled)
             decisions.forEach { d ->
                 val evidence = d.evidence.map { e -> EvidenceDto(e.indicator, e.value, e.unit, e.source.wire, e.met) }
@@ -273,7 +282,7 @@ class AuraViewModel(app: Application) : AndroidViewModel(app) {
             }
             // Alertas: lo que no se resuelve adaptando. Una por situación (id derivado de la clave).
             val catalog = pkg.catalog.associateBy { it.id }
-            val newAlerts = AlertRules.candidates(a?.takeIf { it.flightDay == day.day }, dao.adaptationsNow(crew), catalog)
+            val newAlerts = AlertRules.candidates(a?.takeIf { it.flightDay == day.day }, inForce(dao.adaptationsNow(crew), pkg), catalog)
             // Una alerta por situación: se compara por clave (los ids de alertas antiguas siguen siendo válidos).
             val known = dao.alertKeys(crew).toSet()
             newAlerts.filter { it.dedupeKey !in known }.forEach { c ->

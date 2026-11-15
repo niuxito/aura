@@ -6,6 +6,11 @@ import com.aura.astronaut.data.LocalAlert
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonElement
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.contentOrNull
+import com.aura.astronaut.mission.LocalizedText
 import java.io.IOException
 import java.net.HttpURLConnection
 import java.net.URL
@@ -38,7 +43,21 @@ data class AdaptationDto(
 )
 
 @Serializable
-data class PolicyDto(val withinPolicy: Boolean, val violations: List<String> = emptyList())
+data class PolicyDto(
+    val withinPolicy: Boolean,
+    /** v5: cada infracción es un LocalizedText; registros antiguos pueden traer texto plano. */
+    val violations: List<JsonElement> = emptyList(),
+) {
+    /** Infracciones en el idioma activo. */
+    val violationTexts: List<String>
+        get() = violations.mapNotNull { v ->
+            when (v) {
+                is JsonPrimitive -> v.contentOrNull
+                is JsonObject -> LocalizedText(v.mapNotNull { (k, t) -> (t as? JsonPrimitive)?.contentOrNull?.let { k to it } }.toMap()).text
+                else -> null
+            }?.takeIf { it.isNotBlank() }
+        }
+}
 
 @Serializable
 data class ReviewDto(val status: String, val note: String = "")
