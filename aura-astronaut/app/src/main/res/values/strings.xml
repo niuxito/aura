@@ -1,0 +1,404 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name" translatable="false">AURA Astronaut</string>
+
+    <!-- Textos del HUD que también dice la voz (HudTexts) -->
+    <string name="transition_title_exact">%1$s in %2$s</string>
+    <string name="transition_title_day">Transition before the end of %1$s, in %2$s</string>
+    <string name="transition_change">From %1$s to %2$s</string>
+    <string name="transition_end_of_day">End of %1$s: MET %2$s</string>
+    <string name="transition_announcement">Gravity transition. %1$s. %2$s.</string>
+    <string name="next_now">Now</string>
+    <string name="next_in">Next action, in %1$s</string>
+    <string name="next_none_left_today">No activities left today.</string>
+    <string name="next_in_plan">It is in your %1$s plan at %2$s.</string>
+    <string name="conditional_text">Conditional, not mandatory: %1$s</string>
+    <string name="conditional_unknown">the package does not say what it depends on.</string>
+    <string name="conditional_short">Conditional, not mandatory.</string>
+    <string name="level_green">GREEN</string>
+    <string name="level_amber">AMBER</string>
+    <string name="level_red">RED</string>
+    <string name="level_gray">GRAY</string>
+    <string name="capacity_no_data">no data today</string>
+    <string name="capacity_no_deviation">no deviation in today’s data</string>
+    <string name="value_yes">yes</string>
+    <string name="value_no">no</string>
+    <string name="red_announcement">%1$s in red. %2$s</string>
+    <string name="adaptation_omitted">Omitted: %1$s</string>
+    <string name="adaptation_moved">%1$s moved to %2$s</string>
+    <string name="adaptation_announcement">AURA has adapted your plan: %1$s. Reason: %2$s.</string>
+    <string name="adaptation_validated">Validated by mission control</string>
+    <string name="adaptation_objected">Objected by mission control</string>
+    <string name="adaptation_objected_note">Objected by mission control: %1$s</string>
+    <string name="adaptation_sent">Sent · pending mission control review</string>
+    <string name="adaptation_queued">Queued: it will be sent to mission control when there is a connection</string>
+    <string name="review_validated">Mission control has validated: %1$s.</string>
+    <string name="review_objected">Mission control has objected: %1$s.</string>
+    <string name="note_suffix">Note: %1$s.</string>
+    <string name="alert_replied_note">Mission control has replied: %1$s</string>
+    <string name="alert_replied">Mission control has replied to your alert</string>
+    <string name="alert_read">Mission control has read your alert</string>
+    <string name="alert_read_note">Mission control has read your alert: %1$s</string>
+    <string name="alert_received">Mission control has received your alert</string>
+    <string name="alert_pending">Alert to mission control pending sending</string>
+    <string name="alert_subject_red">about %1$s in red</string>
+    <string name="alert_subject_capacity">a capacity</string>
+    <string name="alert_subject_prep">about a lost preparation measure</string>
+    <string name="alert_subject_inconsistency">about an inconsistency between what you report and the sensor</string>
+    <string name="alert_ack_read">Mission control has read your alert %1$s.</string>
+    <string name="alert_ack_replied">Mission control has replied to your alert %1$s.</string>
+    <string name="duration_under_minute">less than 1 min</string>
+
+    <!-- Valores del contrato (Labels) -->
+    <string name="gravity_earth">Earth</string>
+    <string name="gravity_mars">Mars</string>
+    <string name="gravity_moon">Moon</string>
+    <string name="gravity_micro">Microgravity</string>
+    <string name="gravity_micro_short">Micro-g</string>
+    <string name="load_low">low</string>
+    <string name="load_medium">medium</string>
+    <string name="load_high">high</string>
+    <string name="load_critical">critical</string>
+    <string name="checksum_verified">checksum verified</string>
+    <string name="checksum_mismatch">the checksum does not match</string>
+    <string name="checksum_missing">no checksum</string>
+    <string name="block_sleep">Sleep</string>
+    <string name="block_presleep">Pre/post-sleep</string>
+    <string name="block_meal">Meal</string>
+    <string name="block_exercise">Exercise</string>
+    <string name="block_maneuver">Maneuver</string>
+    <string name="block_test">Test (FTO/DFTO)</string>
+    <string name="block_operation">Operation</string>
+    <string name="block_communication">Conferences and PAO</string>
+    <string name="block_health">Health</string>
+    <string name="block_free">Off-duty time</string>
+    <string name="event_maneuver">Maneuver</string>
+    <string name="event_milestone">Milestone</string>
+    <string name="event_test">Test</string>
+    <string name="event_operation">Operation</string>
+    <string name="event_eva">EVA</string>
+    <string name="category_exercise">Exercise</string>
+    <string name="category_nutrition">Nutrition</string>
+    <string name="category_assessment">Assessment</string>
+    <string name="category_supplement">Supplement</string>
+    <string name="category_recovery">Recovery</string>
+    <string name="category_preparation">Preparation</string>
+
+    <!-- Motivos de las adaptaciones (AdaptationEngine): viajan a control de misión en el idioma activo -->
+    <string name="reason_capacity">«%1$s» in %2$s: %3$s = %4$s%5$s (demo threshold %6$s, %7$s data, MET %8$s)</string>
+    <string name="reason_capacity_level">«%1$s» in %2$s</string>
+    <string name="reason_critical_next_day">%1$s («%2$s») has critical operational load: no intense activities are proposed the day before</string>
+    <string name="evidence_planned_load">Planned operational load of %1$s (package v%2$d)</string>
+    <string name="reason_red_tail">In red, AURA decides nothing more: it refers to the mission procedure.</string>
+    <string name="reason_prep_tail">Attention: %1$s prepares the transition (%2$s); this adaptation loses it and requires a mission control decision.</string>
+    <string name="reason_substitution">%1$s. %2$s · %3$s (%4$s) is replaced by %5$s · %6$s, with a lower load; no load is added to compensate.</string>
+    <string name="reason_omission">%1$s. %2$s · %3$s (%4$s) is omitted: there is no lower-load alternative in the catalog.</string>
+    <string name="reason_amber_action">%1$s. %2$s · %3$s (%4$s) is changed to %5$s · %6$s, the action mission control sets for «%7$s» in amber.</string>
+    <string name="level_word_green">green</string>
+    <string name="level_word_amber">amber</string>
+    <string name="level_word_red">red</string>
+    <string name="level_word_gray">gray</string>
+    <string name="origin_manual">self-reported</string>
+    <string name="origin_sensor">sensor</string>
+    <string name="origin_simulated">simulated</string>
+    <string name="unit_scale">(scale %1$s)</string>
+    <string name="threshold_true">true</string>
+
+    <!-- Avisos a control de misión (AlertRules) -->
+    <string name="alert_message_red">%1$s in red: %2$s. %3$s</string>
+    <string name="alert_message_prep">AURA has removed a transition preparation measure (%1$s). It requires a mission control decision.</string>
+
+    <!-- Prioridades de la transición -->
+    <string name="short_cardiovascular">Orthostatic</string>
+    <string name="short_vestibular">Balance</string>
+
+    <!-- Escenarios de demo -->
+    <string name="scenario_stable">Stable profile</string>
+    <string name="scenario_stable_desc">Signals within the usual range compared with the astronaut’s own baseline.</string>
+    <string name="scenario_fatigue">Accumulated fatigue</string>
+    <string name="scenario_fatigue_desc">After a day of critical operational load: low night-time variability, high resting HR and muscle fatigue.</string>
+    <string name="scenario_coordination">Coordination worsens</string>
+    <string name="scenario_coordination_desc">Other signals stable; the touch test clearly worsens compared with the astronaut’s own baseline.</string>
+
+    <!-- Lectura del paquete de misión -->
+    <string name="pkg_not_json">The package is not valid JSON.</string>
+    <string name="pkg_schema">Unsupported schema: «%1$s». Expected «%2$s».</string>
+    <string name="pkg_no_schema">no schema</string>
+    <string name="pkg_contract">The package does not meet the %1$s contract: %2$s</string>
+    <string name="pkg_incoherent">Inconsistent package: %1$s</string>
+    <string name="pkg_no_crew">there is no crew</string>
+    <string name="pkg_no_days">there are no flight days</string>
+    <string name="pkg_day_order">%1$s: the end is not after the start</string>
+    <string name="pkg_days_overlap">%1$s and %2$s overlap</string>
+    <string name="pkg_plan_missing">the plan for %1$s is missing</string>
+    <string name="pkg_plan_day">plan for %1$s: day %2$d does not exist</string>
+    <string name="pkg_plan_item">%1$s: «%2$s» is not in the catalog</string>
+    <string name="pkg_plan_order">plan for %1$s, day %2$d: activities out of order</string>
+    <string name="pkg_no_capacities">the capacities are missing</string>
+    <string name="pkg_default_language">defaultLanguage «%1$s» is not in languages</string>
+    <string name="pkg_q_item">questionnaire: «%1$s» is not in the catalog</string>
+    <string name="pkg_signal_capacity">signal %1$s: unknown capacity «%2$s»</string>
+    <string name="pkg_question_capacity">question %1$s: unknown capacity «%2$s»</string>
+    <string name="pkg_question_variants">question %1$s: no wording</string>
+    <string name="pkg_question_scale">question %1$s: invalid scale</string>
+    <string name="pkg_question_signal">question %1$s: unknown signal «%2$s»</string>
+    <string name="pkg_check_question">consistency %1$s: unknown question «%2$s»</string>
+    <string name="pkg_check_signal">consistency %1$s: unknown signal «%2$s»</string>
+    <string name="pkg_invalid">invalid package</string>
+    <string name="pkg_checksum_download">the checksum does not match: the download may be corrupt</string>
+    <string name="pkg_embedded_unreadable">The embedded package could not be read.</string>
+
+    <!-- Pantalla principal y controles -->
+    <string name="loading_package">Loading mission package…</string>
+    <string name="questionnaire_title">QUESTIONNAIRE · %1$s</string>
+    <string name="control_plan_change">PLAN\n1 CHANGE</string>
+    <string name="control_plan_changes">PLAN\n%1$d CHANGES</string>
+    <string name="control_plan_warning">PLAN\n1 WARNING</string>
+    <string name="control_plan_warnings">PLAN\n%1$d WARNINGS</string>
+    <string name="control_plan_day">TODAY’S\nPLAN</string>
+    <string name="control_voice_off">VOICE\nOFF</string>
+    <string name="control_voice_on">VOICE\nON</string>
+    <string name="control_voice_starting">VOICE…</string>
+    <string name="control_voice_install">INSTALL\nVOICE</string>
+    <string name="control_no_voice">NO VOICE</string>
+    <string name="control_demo">DEMO</string>
+    <string name="control_no_camera">NO\nCAMERA</string>
+    <string name="control_camera_unavailable">CAMERA\nUNAVAILABLE</string>
+    <string name="package_error_title">MISSION PACKAGE UNAVAILABLE</string>
+    <string name="package_error_body">Without a valid package, AURA cannot show today’s plan.</string>
+    <string name="camera_off_title">CAMERA OFF</string>
+    <string name="camera_off_body">The camera is only the viewer’s background; the image is not analysed. Without it, AURA works the same over a neutral background.</string>
+    <string name="camera_blocked">The permission is blocked: turn it on in Android settings.</string>
+    <string name="camera_open_settings">OPEN SETTINGS</string>
+    <string name="camera_allow">ALLOW CAMERA</string>
+    <string name="camera_continue_without">CONTINUE WITHOUT CAMERA</string>
+    <string name="crew_pick_title">SELECT CREW MEMBER</string>
+    <string name="crew_pick_body">The viewer will show this crew member’s plan. You can change it in demo mode.</string>
+    <string name="crew_pick_demo">Demonstration crew: they are not real people.</string>
+
+    <!-- Paneles del HUD -->
+    <string name="phase_before_launch">Before launch</string>
+    <string name="phase_after_end">End of the mission timeline</string>
+    <string name="phase_unscheduled">Outside the package’s flight days</string>
+    <string name="op_load">OL %1$s</string>
+    <string name="page_milestone">Milestone of the day</string>
+    <string name="package_version">package v%1$d</string>
+    <string name="page_package_warning">Package warning</string>
+    <string name="tag_sim">SIM</string>
+    <string name="banner_transition_day">TRANSITION · end of %1$s</string>
+    <string name="banner_in">⚠ %1$s in %2$s</string>
+    <string name="banner_prep">Preparation · lost: %1$d · to do: %2$d</string>
+    <string name="status_omitted_by_aura">OMITTED BY AURA</string>
+    <string name="status_done">DONE</string>
+    <string name="status_omitted">OMITTED</string>
+    <string name="status_now">NOW</string>
+    <string name="status_unconfirmed">NOT CONFIRMED</string>
+    <string name="status_changed_by_aura">CHANGED BY AURA</string>
+    <string name="status_moved_by_aura">MOVED BY AURA</string>
+    <string name="status_conditional">CONDITIONAL</string>
+    <string name="status_adaptable">ADAPTABLE</string>
+    <string name="status_fixed">FIXED</string>
+    <string name="no_more_activities">No more prevention activities in the plan.</string>
+    <string name="next_now_upper">DUE NOW</string>
+    <string name="next_in_upper">NEXT · in %1$s</string>
+    <string name="next_changed_from">Changed · was %1$s · %2$s</string>
+    <string name="conditional_word">Conditional</string>
+    <string name="now_before_launch">NOW · Before launch</string>
+    <string name="now_after_end">NOW · Mission completed according to the timeline</string>
+    <string name="now_blocks">NOW · %1$s · until %2$s</string>
+    <string name="now_no_block">NOW · No block in the timeline</string>
+    <string name="now_then">then %1$s at %2$s</string>
+
+    <!-- Semáforo -->
+    <string name="capacities_title">CAPACITIES · %1$s</string>
+    <string name="tag_demo">DEMO</string>
+    <string name="count_red">%1$d red</string>
+    <string name="count_amber">%1$d amber</string>
+    <string name="count_green">%1$d no deviation</string>
+    <string name="count_gray">%1$d no data</string>
+    <string name="capacities_all_gray">No data today: answer the questionnaire</string>
+    <string name="follow_procedure">Follow the mission procedure</string>
+    <string name="capacity_detail_title">STATUS BY CAPACITY · %1$s</string>
+    <string name="close">CLOSE</string>
+    <string name="demo_thresholds_note">Demonstration thresholds, not clinical. This is not a diagnosis and does not certify fitness.</string>
+    <string name="capacity_detail_no_data">No data today: answer the questionnaire or load the signals.</string>
+    <string name="origin_self_report_normalized">self-reported (normalized: high = worse)</string>
+    <string name="simulated_upper">SIMULATED</string>
+    <string name="threshold_word">threshold %1$s</string>
+    <string name="consistency_prefix">Consistency: %1$s</string>
+    <string name="adaptations_title">AURA ADAPTATIONS</string>
+    <string name="send_now">SEND NOW</string>
+    <string name="mission_control_status">Mission control: %1$s · %2$s</string>
+    <string name="sync_offline_retry">offline (%1$s); retrying automatically</string>
+    <string name="sync_connected_at">connected, last check %1$s</string>
+    <string name="sync_not_checked">not checked yet</string>
+    <string name="decided_at">Decided at MET %1$s · rule «%2$s»</string>
+    <string name="evidence_line">· Evidence: %1$s</string>
+    <string name="policy_ok">Server check: within the package policy.</string>
+    <string name="policy_bad">Server check: %1$s</string>
+    <string name="policy_out">outside the policy</string>
+
+    <!-- Preparación para la transición -->
+    <string name="trend_worsening">↗ worsening</string>
+    <string name="trend_stable">→ stable</string>
+    <string name="trend_improving">↘ improving</string>
+    <string name="trend_none">no trend</string>
+    <string name="measure_done">DONE</string>
+    <string name="measure_replaced_keeps">CHANGED, STILL PREPARES</string>
+    <string name="measure_replaced_lost">LOST: CHANGED BY AURA</string>
+    <string name="measure_omitted">LOST: OMITTED</string>
+    <string name="measure_omitted_aura">LOST: OMITTED BY AURA</string>
+    <string name="measure_missed">LOST: NOT CONFIRMED</string>
+    <string name="measure_now">NOW</string>
+    <string name="measure_upcoming">PENDING</string>
+    <string name="prep_summary">Preparation · done: %1$d · lost: %2$d · to do: %3$d</string>
+    <string name="readiness_title">TRANSITION READINESS</string>
+    <string name="critical_provisional">Provisional critical capacities · demonstration thresholds · does not certify fitness.</string>
+    <string name="critical_from_package">Critical capacities according to mission control · demonstration thresholds · does not certify fitness.</string>
+    <string name="readiness_indicators">INDICATORS FOR EGRESS, DAY BY DAY</string>
+    <string name="readiness_measures">PREPARATION MEASURES · %1$s</string>
+    <string name="readiness_exercise">EXERCISE SO FAR</string>
+    <string name="readiness_exercise_counts">Sessions planned: %1$d · done: %2$d · omitted: %3$d · not confirmed: %4$d</string>
+    <string name="readiness_exercise_replaced">(%1$d of them changed by AURA to a lower load)</string>
+    <string name="measure_replaced_by">changed to %1$s · %2$s</string>
+    <string name="measure_reason">reason: %1$s</string>
+
+    <!-- Recogida de datos -->
+    <string name="omit_reason_operations">No time due to operations</string>
+    <string name="omit_reason_fatigue">Fatigue or discomfort</string>
+    <string name="omit_reason_equipment">Equipment unavailable</string>
+    <string name="omit_reason_mission_control">Mission control instruction</string>
+    <string name="omit_reason_other">Other reason</string>
+    <string name="omit_title">OMIT ACTIVITY</string>
+    <string name="omit_why">Why is it not being done?</string>
+    <string name="cancel">CANCEL</string>
+    <string name="q_fixed_block">FIXED BLOCK · %1$s</string>
+    <string name="q_why_today">WHY TODAY: %1$s</string>
+    <string name="q_inspired">Inspired by %1$s; a single question is not the validated instrument.</string>
+    <string name="q_demo_thresholds">The thresholds are for demonstration.</string>
+    <string name="back">◀ BACK</string>
+    <string name="next">NEXT ▶</string>
+    <string name="q_save">SAVE ANSWERS</string>
+    <string name="answer">ANSWER</string>
+    <string name="mark_done">✓ DONE</string>
+    <string name="omit">OMIT</string>
+    <string name="answered">✓ ANSWERED</string>
+    <string name="omitted_reason">OMITTED: %1$s</string>
+    <string name="undo">UNDO</string>
+
+    <!-- Plan del día -->
+    <string name="plan_title">PLAN %1$s · %2$s</string>
+    <string name="changes">CHANGES</string>
+    <string name="plan_timeline_note">Timeline: %1$s. Blocks are approximate; «~» = approximate MET.</string>
+    <string name="plan_mc_warnings">MISSION CONTROL WARNINGS</string>
+    <string name="block_adaptable">ADAPTABLE BLOCK · %1$s</string>
+    <string name="item_record">Record: %1$s</string>
+    <string name="item_limit">Limit: %1$s</string>
+    <string name="item_dose">Dose: %1$s</string>
+    <string name="item_no_dose">no prescribed dose (pending medical protocol)</string>
+    <string name="item_experimental">Experimental</string>
+    <string name="plan_original">Original plan: %1$s · %2$s.</string>
+    <string name="plan_changed">Changed: %1$s</string>
+    <string name="now_met">NOW · MET %1$s</string>
+    <string name="severity_warning">WARNING</string>
+    <string name="severity_blocker">BLOCKER</string>
+    <string name="severity_info">INFO</string>
+    <string name="mission_word">Mission</string>
+
+    <!-- Silueta y frecuencia cardiaca -->
+    <string name="sim_label">SIM · %1$s</string>
+    <string name="heart_bpm">♥︎ %1$d bpm</string>
+    <string name="heart_off">HR off</string>
+    <string name="heart_no_watch_data">no watch data · %1$s</string>
+    <string name="heart_no_data">no data</string>
+    <string name="heart_simulated">SIMULATED</string>
+    <string name="heart_watch_age">watch · %1$d s ago</string>
+    <string name="watch_off">off</string>
+    <string name="watch_unavailable">no Bluetooth LE</string>
+    <string name="watch_no_permission">permission missing</string>
+    <string name="watch_bt_off">Bluetooth off</string>
+    <string name="watch_not_paired">choose your watch</string>
+    <string name="watch_scanning">searching</string>
+    <string name="watch_connecting">connecting</string>
+    <string name="watch_connected">connected</string>
+    <string name="watch_disconnected">reconnecting</string>
+    <string name="motion_squat">squatting · quadriceps, glutes, abdomen</string>
+    <string name="motion_walk">walking · quadriceps, glutes, calves</string>
+
+    <!-- Modo demo -->
+    <string name="demo_mode">DEMO MODE</string>
+    <string name="demo_crew">Crew member</string>
+    <string name="demo_no_previous_event">◀ No earlier events</string>
+    <string name="demo_no_next_event">No later events ▶</string>
+    <string name="demo_scenario_section">Simulated scenario · %1$s</string>
+    <string name="demo_outside_mission">outside the mission</string>
+    <string name="demo_scenario_note">Loads SIMULATED signals (smart garment, watch and test) for the current flight day. Today: %1$s.</string>
+    <string name="demo_no_signals">no signals</string>
+    <string name="demo_clear_signals">NO SIGNALS</string>
+    <string name="demo_speed">Speed</string>
+    <string name="demo_pause">PAUSE</string>
+    <string name="demo_resume">RESUME</string>
+    <string name="demo_met_source">MET source</string>
+    <string name="demo_manual">MANUAL (DEMO)</string>
+    <string name="demo_launch_clock">CLOCK FROM LAUNCH</string>
+    <string name="demo_no_launch">The package does not set the launch time (launchUtc), so the MET can only be set by hand.</string>
+    <string name="demo_silhouette">Silhouette · SIMULATED muscle activity</string>
+    <string name="demo_silhouette_note">With SENSOR, the silhouette replays the steps and squats detected by the tablet’s accelerometer. The other buttons force the movement.</string>
+    <string name="motion_sensor">SENSOR</string>
+    <string name="motion_walk_button">WALK</string>
+    <string name="motion_squat_button">SQUAT</string>
+    <string name="motion_still_button">STILL</string>
+    <string name="demo_no_motion_sensor">This device has no accelerometer and gravity sensor: use the buttons.</string>
+    <string name="demo_heart">Heart rate</string>
+    <string name="heart_source_watch">WATCH</string>
+    <string name="heart_source_simulated">SIMULATED</string>
+    <string name="heart_source_off">OFF</string>
+    <string name="demo_configure_watch">SET UP WATCH</string>
+    <string name="demo_voice">Voice</string>
+    <string name="demo_repeat_voice">REPEAT VOICE ALERTS</string>
+    <string name="demo_voice_note">The voice does not repeat an alert already spoken, even after reopening the app. This lets it start over for another demonstration.</string>
+    <string name="demo_language">Language</string>
+    <string name="demo_language_system">SYSTEM</string>
+    <string name="demo_language_unsupported">Choosing the app language requires Android 13 or later: change the system language.</string>
+    <string name="demo_mission_control">Mission control</string>
+    <string name="preset_usb">MAC VIA USB</string>
+    <string name="preset_emulator">EMULATOR</string>
+    <string name="demo_sync_offline">offline: %1$s</string>
+    <string name="demo_sync_connected">connected</string>
+    <string name="demo_sync_checking">checking…</string>
+    <string name="demo_package">Mission package</string>
+    <string name="demo_package_info">Version %1$d · schema %2$s · published %3$s · %4$s</string>
+    <string name="demo_package_origin">Source: %1$s</string>
+    <string name="demo_check_package">CHECK FOR NEW PACKAGE</string>
+    <string name="demo_use_embedded">USE EMBEDDED</string>
+    <string name="demo_timeline">Timeline: %1$s</string>
+    <string name="demo_attribution">3D silhouette: adapted from BodyParts3D © DBCLS (CC BY-SA 2.1 JP), via anatomia.alexisparron.com; simplified mesh, CC BY-SA 4.0.</string>
+    <string name="demo_simulated_mission">Simulated mission: the crew, operational load and prevention plan are a team example.</string>
+    <string name="met_input_error">Write the MET as DD/HH:MM or DD/HH:MM:SS, for example 01/01:08:42.</string>
+    <string name="met_input_label">Go to MET (DD/HH:MM)</string>
+    <string name="go">GO</string>
+    <string name="rate_real_time">×1 · REAL TIME</string>
+    <string name="origin_embedded">embedded in the app</string>
+    <string name="origin_downloaded">downloaded from %1$s · %2$s</string>
+    <string name="check_checking">Looking for a package in mission control…</string>
+    <string name="check_up_to_date">You already have the latest published package (v%1$d).</string>
+    <string name="check_updated">Package v%1$d downloaded and loaded.</string>
+    <string name="check_none">Mission control has not published any package yet: keeping the current one.</string>
+    <string name="check_rejected">Published package not usable (%1$s): keeping the current one.</string>
+    <string name="check_offline">No connection with mission control: keeping the current package.</string>
+
+    <!-- Reloj -->
+    <string name="watch_title">HEART RATE</string>
+    <string name="watch_simulated_note">SIMULATED values that rise when walking or squatting. They are stored and shown as simulated.</string>
+    <string name="watch_off_note">No heart rate: the silhouette’s heart does not beat.</string>
+    <string name="watch_status">Status: %1$s</string>
+    <string name="watch_allow_bt">ALLOW BLUETOOTH</string>
+    <string name="watch_enable_bt">TURN ON BLUETOOTH</string>
+    <string name="watch_no_ble">This device has no Bluetooth LE: use the simulated heart rate.</string>
+    <string name="watch_stop_search">STOP SEARCH</string>
+    <string name="watch_search">FIND WATCH</string>
+    <string name="watch_forget">FORGET WATCH</string>
+    <string name="watch_found">WATCHES FOUND</string>
+    <string name="watch_garmin_help">On the Garmin, turn on broadcasting: hold UP (menu) › Sensors &amp; Accessories › Wrist Heart Rate › Broadcast Heart Rate. The watch will appear when searching. Garmin Connect and an internet connection are not needed.</string>
+    <string name="watch_disclaimer">Heart rate is one more indicator: it does not diagnose. The resting baseline is for demonstration.</string>
+</resources>

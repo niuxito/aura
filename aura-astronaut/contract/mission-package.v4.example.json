@@ -1,0 +1,4604 @@
+{
+  "schema": "aura.mission-package/v4",
+  "packageVersion": 4,
+  "publishedAt": "2026-11-14T17:46:13.339Z",
+  "simulated": true,
+  "mission": {
+    "id": "artemis-ii-plan",
+    "name": "Artemis II · cronograma planificado",
+    "destination": "Sobrevuelo lunar",
+    "description": "Vuelo tripulado de unos nueve días alrededor de la Luna, sin alunizaje. El cronograma procede del Overview Timeline de NASA; la carga operativa, la tripulación de demostración y el plan de prevención son un ejemplo del equipo.",
+    "launchUtc": null,
+    "timelineSource": "NASA — Artemis II Overview Timeline (18/03/2026, STRIVES 20260002249)",
+    "simulated": true
+  },
+  "gravityReference": {
+    "tierra": 1,
+    "marte": 0.38,
+    "luna": 0.165,
+    "micro": 0
+  },
+  "crew": [
+    {
+      "id": "cdr",
+      "name": "CDR · Comandante",
+      "role": "Tripulante de demostración"
+    },
+    {
+      "id": "plt",
+      "name": "PLT · Piloto",
+      "role": "Tripulante de demostración"
+    },
+    {
+      "id": "ms1",
+      "name": "MS1 · Especialista de misión 1",
+      "role": "Tripulante de demostración"
+    },
+    {
+      "id": "ms2",
+      "name": "MS2 · Especialista de misión 2",
+      "role": "Tripulante de demostración"
+    }
+  ],
+  "days": [
+    {
+      "day": 1,
+      "startMet": 0,
+      "endMet": 61200,
+      "phase": "LEO → órbita terrestre alta",
+      "milestone": "Lanzamiento, ARB, operaciones de proximidad y PRB",
+      "gravity": "micro",
+      "transitionFrom": "tierra",
+      "co": "critica",
+      "label": "FD01",
+      "startMetLabel": "00/00:00",
+      "endMetLabel": "00/17:00"
+    },
+    {
+      "day": 2,
+      "startMet": 61200,
+      "endMet": 147600,
+      "phase": "Órbita terrestre alta → translunar",
+      "milestone": "Inyección translunar (TLI)",
+      "gravity": "micro",
+      "co": "critica",
+      "label": "FD02",
+      "startMetLabel": "00/17:00",
+      "endMetLabel": "01/17:00"
+    },
+    {
+      "day": 3,
+      "startMet": 147600,
+      "endMet": 234000,
+      "phase": "Translunar",
+      "milestone": "OTC-1 y demostraciones médicas y de comunicaciones",
+      "gravity": "micro",
+      "co": "media",
+      "label": "FD03",
+      "startMetLabel": "01/17:00",
+      "endMetLabel": "02/17:00"
+    },
+    {
+      "day": 4,
+      "startMet": 234000,
+      "endMet": 320400,
+      "phase": "Translunar",
+      "milestone": "OTC-2 y pilotaje manual",
+      "gravity": "micro",
+      "co": "media",
+      "label": "FD04",
+      "startMetLabel": "02/17:00",
+      "endMetLabel": "03/17:00"
+    },
+    {
+      "day": 5,
+      "startMet": 320400,
+      "endMet": 406800,
+      "phase": "Translunar",
+      "milestone": "Operaciones con trajes OCSS, OTC-3 y entrada en la esfera de influencia lunar",
+      "gravity": "micro",
+      "co": "alta",
+      "label": "FD05",
+      "startMetLabel": "03/17:00",
+      "endMetLabel": "04/17:00"
+    },
+    {
+      "day": 6,
+      "startMet": 406800,
+      "endMet": 493200,
+      "phase": "Translunar → transterrestre",
+      "milestone": "Sobrevuelo lunar: máxima aproximación",
+      "gravity": "micro",
+      "co": "alta",
+      "label": "FD06",
+      "startMetLabel": "04/17:00",
+      "endMetLabel": "05/17:00"
+    },
+    {
+      "day": 7,
+      "startMet": 493200,
+      "endMet": 579600,
+      "phase": "Transterrestre",
+      "milestone": "RTC-1 y tiempo libre de la tripulación",
+      "gravity": "micro",
+      "co": "baja",
+      "label": "FD07",
+      "startMetLabel": "05/17:00",
+      "endMetLabel": "06/17:00"
+    },
+    {
+      "day": 8,
+      "startMet": 579600,
+      "endMet": 666000,
+      "phase": "Transterrestre",
+      "milestone": "Ejercicio, refugio de radiación y pilotaje manual",
+      "gravity": "micro",
+      "co": "media",
+      "label": "FD08",
+      "startMetLabel": "06/17:00",
+      "endMetLabel": "07/17:00"
+    },
+    {
+      "day": 9,
+      "startMet": 666000,
+      "endMet": 752400,
+      "phase": "Transterrestre",
+      "milestone": "Preparación de la entrada y RTC-2",
+      "gravity": "micro",
+      "co": "alta",
+      "label": "FD09",
+      "startMetLabel": "07/17:00",
+      "endMetLabel": "08/17:00"
+    },
+    {
+      "day": 10,
+      "startMet": 752400,
+      "endMet": 783768,
+      "phase": "Transterrestre → EDL",
+      "milestone": "RTC-3, entrada y amerizaje",
+      "gravity": "tierra",
+      "transitionFrom": "micro",
+      "co": "critica",
+      "label": "FD10",
+      "startMetLabel": "08/17:00",
+      "endMetLabel": "09/01:42:48"
+    }
+  ],
+  "events": [
+    {
+      "id": "ev-1",
+      "met": 0,
+      "name": "Despegue",
+      "kind": "hito",
+      "approx": false,
+      "metLabel": "00/00:00",
+      "day": 1
+    },
+    {
+      "id": "ev-2",
+      "met": 1800,
+      "name": "Inicio de la despresurización de cabina (DFTO)",
+      "kind": "prueba",
+      "approx": true,
+      "metLabel": "00/00:30",
+      "day": 1
+    },
+    {
+      "id": "ev-3",
+      "met": 3000,
+      "name": "ICPS PRM",
+      "kind": "maniobra",
+      "approx": false,
+      "metLabel": "00/00:50",
+      "day": 1
+    },
+    {
+      "id": "ev-4",
+      "met": 6420,
+      "name": "ARB TIG",
+      "kind": "maniobra",
+      "approx": false,
+      "metLabel": "00/01:47",
+      "day": 1
+    },
+    {
+      "id": "ev-5",
+      "met": 12180,
+      "name": "Separación Orion/ICPS",
+      "kind": "hito",
+      "approx": false,
+      "metLabel": "00/03:23",
+      "day": 1
+    },
+    {
+      "id": "ev-6",
+      "met": 17460,
+      "name": "Orion USS",
+      "kind": "maniobra",
+      "approx": false,
+      "metLabel": "00/04:51",
+      "day": 1
+    },
+    {
+      "id": "ev-7",
+      "met": 18000,
+      "name": "Dock Cam Bearing (FTO 225)",
+      "kind": "prueba",
+      "approx": true,
+      "metLabel": "00/05:00",
+      "day": 1
+    },
+    {
+      "id": "ev-8",
+      "met": 18120,
+      "name": "ICPS Disposal Burn",
+      "kind": "maniobra",
+      "approx": false,
+      "metLabel": "00/05:02",
+      "day": 1
+    },
+    {
+      "id": "ev-9",
+      "met": 19620,
+      "name": "Despliegue de cargas secundarias (SPL)",
+      "kind": "hito",
+      "approx": true,
+      "metLabel": "00/05:27",
+      "day": 1
+    },
+    {
+      "id": "ev-10",
+      "met": 36360,
+      "name": "Activación inicial de OpComm",
+      "kind": "operacion",
+      "approx": true,
+      "metLabel": "00/10:06",
+      "day": 1
+    },
+    {
+      "id": "ev-11",
+      "met": 48600,
+      "name": "Orion PRB",
+      "kind": "maniobra",
+      "approx": true,
+      "metLabel": "00/13:30",
+      "day": 1
+    },
+    {
+      "id": "ev-12",
+      "met": 51300,
+      "name": "Comprobación de OpNav",
+      "kind": "operacion",
+      "approx": true,
+      "metLabel": "00/14:15",
+      "day": 1
+    },
+    {
+      "id": "ev-13",
+      "met": 90522,
+      "name": "Orion TLI",
+      "kind": "maniobra",
+      "approx": true,
+      "metLabel": "01/01:08:42",
+      "day": 2
+    },
+    {
+      "id": "ev-14",
+      "met": 136800,
+      "name": "Inspección CM/SM",
+      "kind": "operacion",
+      "approx": false,
+      "metLabel": "01/14:00",
+      "day": 2
+    },
+    {
+      "id": "ev-15",
+      "met": 150000,
+      "name": "Paneles solares en sombra total",
+      "kind": "hito",
+      "approx": true,
+      "metLabel": "01/17:40",
+      "day": 3
+    },
+    {
+      "id": "ev-16",
+      "met": 176922,
+      "name": "OTC-1",
+      "kind": "maniobra",
+      "approx": true,
+      "metLabel": "02/01:08:42",
+      "day": 3
+    },
+    {
+      "id": "ev-17",
+      "met": 263322,
+      "name": "OTC-2",
+      "kind": "maniobra",
+      "approx": false,
+      "metLabel": "03/01:08:42",
+      "day": 4
+    },
+    {
+      "id": "ev-18",
+      "met": 284400,
+      "name": "NAV FTO EM2-223",
+      "kind": "prueba",
+      "approx": false,
+      "metLabel": "03/07:00",
+      "day": 4
+    },
+    {
+      "id": "ev-19",
+      "met": 361792,
+      "name": "OTC-3",
+      "kind": "maniobra",
+      "approx": false,
+      "metLabel": "04/04:29:52",
+      "day": 5
+    },
+    {
+      "id": "ev-20",
+      "met": 369480,
+      "name": "Entrada en la esfera de influencia lunar",
+      "kind": "hito",
+      "approx": false,
+      "metLabel": "04/06:38",
+      "day": 5
+    },
+    {
+      "id": "ev-21",
+      "met": 433799,
+      "name": "Máxima aproximación a la Luna",
+      "kind": "hito",
+      "approx": false,
+      "metLabel": "05/00:29:59",
+      "day": 6
+    },
+    {
+      "id": "ev-22",
+      "met": 434100,
+      "name": "Distancia máxima a la Tierra",
+      "kind": "hito",
+      "approx": false,
+      "metLabel": "05/00:35",
+      "day": 6
+    },
+    {
+      "id": "ev-23",
+      "met": 477000,
+      "name": "Inspección CM/SM",
+      "kind": "operacion",
+      "approx": false,
+      "metLabel": "05/12:30",
+      "day": 6
+    },
+    {
+      "id": "ev-24",
+      "met": 499980,
+      "name": "Salida de la esfera de influencia lunar",
+      "kind": "hito",
+      "approx": false,
+      "metLabel": "05/18:53",
+      "day": 7
+    },
+    {
+      "id": "ev-25",
+      "met": 523792,
+      "name": "RTC-1",
+      "kind": "maniobra",
+      "approx": false,
+      "metLabel": "06/01:29:52",
+      "day": 7
+    },
+    {
+      "id": "ev-26",
+      "met": 667800,
+      "name": "Comprobaciones del FCS",
+      "kind": "operacion",
+      "approx": false,
+      "metLabel": "07/17:30",
+      "day": 9
+    },
+    {
+      "id": "ev-27",
+      "met": 707350,
+      "name": "RTC-2",
+      "kind": "maniobra",
+      "approx": false,
+      "metLabel": "08/04:29:10",
+      "day": 9
+    },
+    {
+      "id": "ev-28",
+      "met": 764950,
+      "name": "RTC-3",
+      "kind": "maniobra",
+      "approx": false,
+      "metLabel": "08/20:29:10",
+      "day": 10
+    },
+    {
+      "id": "ev-29",
+      "met": 781740,
+      "name": "Separación CM/SM",
+      "kind": "hito",
+      "approx": false,
+      "metLabel": "09/01:09",
+      "day": 10
+    },
+    {
+      "id": "ev-30",
+      "met": 782940,
+      "name": "Interfaz de entrada (EI)",
+      "kind": "hito",
+      "approx": false,
+      "metLabel": "09/01:29",
+      "day": 10
+    },
+    {
+      "id": "ev-31",
+      "met": 783768,
+      "name": "Amerizaje",
+      "kind": "hito",
+      "approx": false,
+      "metLabel": "09/01:42:48",
+      "day": 10
+    }
+  ],
+  "blocks": [
+    {
+      "id": "bl-1",
+      "startMet": 0,
+      "endMet": 900,
+      "name": "Ascenso",
+      "kind": "maniobra",
+      "startMetLabel": "00/00:00",
+      "endMetLabel": "00/00:15",
+      "adaptable": false,
+      "adaptableCategories": []
+    },
+    {
+      "id": "bl-2",
+      "startMet": 1800,
+      "endMet": 5400,
+      "name": "Comprobaciones previas a ARB",
+      "kind": "operacion",
+      "startMetLabel": "00/00:30",
+      "endMetLabel": "00/01:30",
+      "adaptable": false,
+      "adaptableCategories": []
+    },
+    {
+      "id": "bl-3",
+      "startMet": 5400,
+      "endMet": 7200,
+      "name": "ARB",
+      "kind": "maniobra",
+      "startMetLabel": "00/01:30",
+      "endMetLabel": "00/02:00",
+      "adaptable": false,
+      "adaptableCategories": []
+    },
+    {
+      "id": "bl-4",
+      "startMet": 7200,
+      "endMet": 11700,
+      "name": "DCAM y retirada de trajes OCSS",
+      "kind": "operacion",
+      "startMetLabel": "00/02:00",
+      "endMetLabel": "00/03:15",
+      "adaptable": false,
+      "adaptableCategories": []
+    },
+    {
+      "id": "bl-5",
+      "startMet": 11700,
+      "endMet": 17100,
+      "name": "Demostración de operaciones de proximidad",
+      "kind": "prueba",
+      "startMetLabel": "00/03:15",
+      "endMetLabel": "00/04:45",
+      "adaptable": false,
+      "adaptableCategories": []
+    },
+    {
+      "id": "bl-6",
+      "startMet": 17100,
+      "endMet": 18000,
+      "name": "USS",
+      "kind": "maniobra",
+      "startMetLabel": "00/04:45",
+      "endMetLabel": "00/05:00",
+      "adaptable": false,
+      "adaptableCategories": []
+    },
+    {
+      "id": "bl-7",
+      "startMet": 18000,
+      "endMet": 21600,
+      "name": "Configuración de cabina",
+      "kind": "operacion",
+      "startMetLabel": "00/05:00",
+      "endMetLabel": "00/06:00",
+      "adaptable": false,
+      "adaptableCategories": []
+    },
+    {
+      "id": "bl-8",
+      "startMet": 21600,
+      "endMet": 25200,
+      "name": "PAO, PMC y conferencia de día de vuelo",
+      "kind": "comunicacion",
+      "startMetLabel": "00/06:00",
+      "endMetLabel": "00/07:00",
+      "adaptable": false,
+      "adaptableCategories": []
+    },
+    {
+      "id": "bl-9",
+      "startMet": 25200,
+      "endMet": 30600,
+      "name": "Pre/postsueño",
+      "kind": "presueno",
+      "startMetLabel": "00/07:00",
+      "endMetLabel": "00/08:30",
+      "adaptable": false,
+      "adaptableCategories": []
+    },
+    {
+      "id": "bl-10",
+      "startMet": 30600,
+      "endMet": 45000,
+      "name": "Sueño (4 h)",
+      "kind": "sueno",
+      "startMetLabel": "00/08:30",
+      "endMetLabel": "00/12:30",
+      "adaptable": false,
+      "adaptableCategories": []
+    },
+    {
+      "id": "bl-11",
+      "startMet": 45000,
+      "endMet": 46800,
+      "name": "Pre/postsueño",
+      "kind": "presueno",
+      "startMetLabel": "00/12:30",
+      "endMetLabel": "00/13:00",
+      "adaptable": false,
+      "adaptableCategories": []
+    },
+    {
+      "id": "bl-12",
+      "startMet": 46800,
+      "endMet": 49500,
+      "name": "PRB",
+      "kind": "maniobra",
+      "startMetLabel": "00/13:00",
+      "endMetLabel": "00/13:45",
+      "adaptable": false,
+      "adaptableCategories": []
+    },
+    {
+      "id": "bl-13",
+      "startMet": 50400,
+      "endMet": 54000,
+      "name": "Pre/postsueño",
+      "kind": "presueno",
+      "startMetLabel": "00/14:00",
+      "endMetLabel": "00/15:00",
+      "adaptable": false,
+      "adaptableCategories": []
+    },
+    {
+      "id": "bl-14",
+      "startMet": 54000,
+      "endMet": 70200,
+      "name": "Sueño (4,5 h)",
+      "kind": "sueno",
+      "startMetLabel": "00/15:00",
+      "endMetLabel": "00/19:30",
+      "adaptable": false,
+      "adaptableCategories": []
+    },
+    {
+      "id": "bl-15",
+      "startMet": 70200,
+      "endMet": 75600,
+      "name": "Pre/postsueño",
+      "kind": "presueno",
+      "startMetLabel": "00/19:30",
+      "endMetLabel": "00/21:00",
+      "adaptable": false,
+      "adaptableCategories": []
+    },
+    {
+      "id": "bl-16",
+      "startMet": 75600,
+      "endMet": 78300,
+      "name": "DPC y conferencia de TLI",
+      "kind": "comunicacion",
+      "startMetLabel": "00/21:00",
+      "endMetLabel": "00/21:45",
+      "adaptable": false,
+      "adaptableCategories": []
+    },
+    {
+      "id": "bl-17",
+      "startMet": 79200,
+      "endMet": 84600,
+      "name": "Prueba de ejercicio (Exercise Test)",
+      "kind": "ejercicio",
+      "startMetLabel": "00/22:00",
+      "endMetLabel": "00/23:30",
+      "adaptable": true,
+      "adaptableCategories": [
+        "ejercicio"
+      ]
+    },
+    {
+      "id": "bl-18",
+      "startMet": 87300,
+      "endMet": 91800,
+      "name": "TLI",
+      "kind": "maniobra",
+      "startMetLabel": "01/00:15",
+      "endMetLabel": "01/01:30",
+      "adaptable": false,
+      "adaptableCategories": []
+    },
+    {
+      "id": "bl-19",
+      "startMet": 91800,
+      "endMet": 95400,
+      "name": "Comida",
+      "kind": "comida",
+      "startMetLabel": "01/01:30",
+      "endMetLabel": "01/02:30",
+      "adaptable": true,
+      "adaptableCategories": [
+        "nutricion"
+      ]
+    },
+    {
+      "id": "bl-20",
+      "startMet": 95400,
+      "endMet": 96600,
+      "name": "Pulsioximetría",
+      "kind": "salud",
+      "startMetLabel": "01/02:30",
+      "endMetLabel": "01/02:50",
+      "adaptable": false,
+      "adaptableCategories": []
+    },
+    {
+      "id": "bl-21",
+      "startMet": 100800,
+      "endMet": 102600,
+      "name": "PAO",
+      "kind": "comunicacion",
+      "startMetLabel": "01/04:00",
+      "endMetLabel": "01/04:30",
+      "adaptable": false,
+      "adaptableCategories": []
+    },
+    {
+      "id": "bl-22",
+      "startMet": 104400,
+      "endMet": 108000,
+      "name": "Inspección de ventanas",
+      "kind": "operacion",
+      "startMetLabel": "01/05:00",
+      "endMetLabel": "01/06:00",
+      "adaptable": false,
+      "adaptableCategories": []
+    },
+    {
+      "id": "bl-23",
+      "startMet": 110400,
+      "endMet": 112800,
+      "name": "PMC y conferencia de día de vuelo",
+      "kind": "comunicacion",
+      "startMetLabel": "01/06:40",
+      "endMetLabel": "01/07:20",
+      "adaptable": false,
+      "adaptableCategories": []
+    },
+    {
+      "id": "bl-24",
+      "startMet": 113400,
+      "endMet": 120600,
+      "name": "Pre/postsueño",
+      "kind": "presueno",
+      "startMetLabel": "01/07:30",
+      "endMetLabel": "01/09:30",
+      "adaptable": false,
+      "adaptableCategories": []
+    },
+    {
+      "id": "bl-25",
+      "startMet": 120600,
+      "endMet": 151200,
+      "name": "Sueño (8,5 h)",
+      "kind": "sueno",
+      "startMetLabel": "01/09:30",
+      "endMetLabel": "01/18:00",
+      "adaptable": false,
+      "adaptableCategories": []
+    },
+    {
+      "id": "bl-26",
+      "startMet": 151200,
+      "endMet": 158400,
+      "name": "Pre/postsueño",
+      "kind": "presueno",
+      "startMetLabel": "01/18:00",
+      "endMetLabel": "01/20:00",
+      "adaptable": false,
+      "adaptableCategories": []
+    },
+    {
+      "id": "bl-27",
+      "startMet": 158400,
+      "endMet": 162900,
+      "name": "DPC, pulsioximetría y PFC",
+      "kind": "comunicacion",
+      "startMetLabel": "01/20:00",
+      "endMetLabel": "01/21:15",
+      "adaptable": false,
+      "adaptableCategories": []
+    },
+    {
+      "id": "bl-28",
+      "startMet": 166500,
+      "endMet": 169200,
+      "name": "Ruido del aseo (DFTO)",
+      "kind": "prueba",
+      "startMetLabel": "01/22:15",
+      "endMetLabel": "01/23:00",
+      "adaptable": false,
+      "adaptableCategories": []
+    },
+    {
+      "id": "bl-29",
+      "startMet": 174000,
+      "endMet": 177300,
+      "name": "OTC-1",
+      "kind": "maniobra",
+      "startMetLabel": "02/00:20",
+      "endMetLabel": "02/01:15",
+      "adaptable": false,
+      "adaptableCategories": []
+    },
+    {
+      "id": "bl-30",
+      "startMet": 177300,
+      "endMet": 180900,
+      "name": "Comida",
+      "kind": "comida",
+      "startMetLabel": "02/01:15",
+      "endMetLabel": "02/02:15",
+      "adaptable": true,
+      "adaptableCategories": [
+        "nutricion"
+      ]
+    },
+    {
+      "id": "bl-31",
+      "startMet": 181800,
+      "endMet": 183600,
+      "name": "Demostración de RCP",
+      "kind": "salud",
+      "startMetLabel": "02/02:30",
+      "endMetLabel": "02/03:00",
+      "adaptable": false,
+      "adaptableCategories": []
+    },
+    {
+      "id": "bl-32",
+      "startMet": 183600,
+      "endMet": 184800,
+      "name": "PAO",
+      "kind": "comunicacion",
+      "startMetLabel": "02/03:00",
+      "endMetLabel": "02/03:20",
+      "adaptable": false,
+      "adaptableCategories": []
+    },
+    {
+      "id": "bl-33",
+      "startMet": 186300,
+      "endMet": 189900,
+      "name": "Botiquín médico",
+      "kind": "salud",
+      "startMetLabel": "02/03:45",
+      "endMetLabel": "02/04:45",
+      "adaptable": false,
+      "adaptableCategories": []
+    },
+    {
+      "id": "bl-34",
+      "startMet": 189900,
+      "endMet": 191700,
+      "name": "Cabina lunar",
+      "kind": "operacion",
+      "startMetLabel": "02/04:45",
+      "endMetLabel": "02/05:15",
+      "adaptable": false,
+      "adaptableCategories": []
+    },
+    {
+      "id": "bl-35",
+      "startMet": 192600,
+      "endMet": 195300,
+      "name": "Comunicaciones de emergencia DSN (DFTO)",
+      "kind": "prueba",
+      "startMetLabel": "02/05:30",
+      "endMetLabel": "02/06:15",
+      "adaptable": false,
+      "adaptableCategories": []
+    },
+    {
+      "id": "bl-36",
+      "startMet": 196200,
+      "endMet": 199200,
+      "name": "CSA PAO, PMC y conferencia de día de vuelo",
+      "kind": "comunicacion",
+      "startMetLabel": "02/06:30",
+      "endMetLabel": "02/07:20",
+      "adaptable": false,
+      "adaptableCategories": []
+    },
+    {
+      "id": "bl-37",
+      "startMet": 199200,
+      "endMet": 207000,
+      "name": "Pre/postsueño",
+      "kind": "presueno",
+      "startMetLabel": "02/07:20",
+      "endMetLabel": "02/09:30",
+      "adaptable": false,
+      "adaptableCategories": []
+    },
+    {
+      "id": "bl-38",
+      "startMet": 207000,
+      "endMet": 237600,
+      "name": "Sueño (8,5 h)",
+      "kind": "sueno",
+      "startMetLabel": "02/09:30",
+      "endMetLabel": "02/18:00",
+      "adaptable": false,
+      "adaptableCategories": []
+    },
+    {
+      "id": "bl-39",
+      "startMet": 237600,
+      "endMet": 245700,
+      "name": "Pre/postsueño",
+      "kind": "presueno",
+      "startMetLabel": "02/18:00",
+      "endMetLabel": "02/20:15",
+      "adaptable": false,
+      "adaptableCategories": []
+    },
+    {
+      "id": "bl-40",
+      "startMet": 245700,
+      "endMet": 248400,
+      "name": "DPC y pulsioximetría",
+      "kind": "comunicacion",
+      "startMetLabel": "02/20:15",
+      "endMetLabel": "02/21:00",
+      "adaptable": false,
+      "adaptableCategories": []
+    },
+    {
+      "id": "bl-41",
+      "startMet": 248400,
+      "endMet": 258300,
+      "name": "PAO, PFC y divulgación",
+      "kind": "comunicacion",
+      "startMetLabel": "02/21:00",
+      "endMetLabel": "02/23:45",
+      "adaptable": false,
+      "adaptableCategories": []
+    },
+    {
+      "id": "bl-42",
+      "startMet": 260400,
+      "endMet": 263700,
+      "name": "OTC-2",
+      "kind": "maniobra",
+      "startMetLabel": "03/00:20",
+      "endMetLabel": "03/01:15",
+      "adaptable": false,
+      "adaptableCategories": []
+    },
+    {
+      "id": "bl-43",
+      "startMet": 263700,
+      "endMet": 268200,
+      "name": "Comida",
+      "kind": "comida",
+      "startMetLabel": "03/01:15",
+      "endMetLabel": "03/02:30",
+      "adaptable": true,
+      "adaptableCategories": [
+        "nutricion"
+      ]
+    },
+    {
+      "id": "bl-44",
+      "startMet": 268200,
+      "endMet": 270000,
+      "name": "Pilotaje manual (Man PLT)",
+      "kind": "prueba",
+      "startMetLabel": "03/02:30",
+      "endMetLabel": "03/03:00",
+      "adaptable": false,
+      "adaptableCategories": []
+    },
+    {
+      "id": "bl-45",
+      "startMet": 270300,
+      "endMet": 271500,
+      "name": "Cognición (COGN)",
+      "kind": "salud",
+      "startMetLabel": "03/03:05",
+      "endMetLabel": "03/03:25",
+      "adaptable": false,
+      "adaptableCategories": []
+    },
+    {
+      "id": "bl-46",
+      "startMet": 271800,
+      "endMet": 276300,
+      "name": "Volante de inercia: «Flywheel Day in the life»",
+      "kind": "ejercicio",
+      "startMetLabel": "03/03:30",
+      "endMetLabel": "03/04:45",
+      "adaptable": true,
+      "adaptableCategories": [
+        "ejercicio"
+      ]
+    },
+    {
+      "id": "bl-47",
+      "startMet": 281400,
+      "endMet": 283500,
+      "name": "PMC y conferencia de día de vuelo",
+      "kind": "comunicacion",
+      "startMetLabel": "03/06:10",
+      "endMetLabel": "03/06:45",
+      "adaptable": false,
+      "adaptableCategories": []
+    },
+    {
+      "id": "bl-48",
+      "startMet": 283500,
+      "endMet": 290700,
+      "name": "Pre/postsueño",
+      "kind": "presueno",
+      "startMetLabel": "03/06:45",
+      "endMetLabel": "03/08:45",
+      "adaptable": false,
+      "adaptableCategories": []
+    },
+    {
+      "id": "bl-49",
+      "startMet": 290700,
+      "endMet": 321300,
+      "name": "Sueño (8,5 h), adelantado 45 min",
+      "kind": "sueno",
+      "startMetLabel": "03/08:45",
+      "endMetLabel": "03/17:15",
+      "adaptable": false,
+      "adaptableCategories": []
+    },
+    {
+      "id": "bl-50",
+      "startMet": 321300,
+      "endMet": 328500,
+      "name": "Pre/postsueño",
+      "kind": "presueno",
+      "startMetLabel": "03/17:15",
+      "endMetLabel": "03/19:15",
+      "adaptable": false,
+      "adaptableCategories": []
+    },
+    {
+      "id": "bl-51",
+      "startMet": 328500,
+      "endMet": 331200,
+      "name": "DPC y pulsioximetría",
+      "kind": "comunicacion",
+      "startMetLabel": "03/19:15",
+      "endMetLabel": "03/20:00",
+      "adaptable": false,
+      "adaptableCategories": []
+    },
+    {
+      "id": "bl-52",
+      "startMet": 331200,
+      "endMet": 345600,
+      "name": "Operaciones con trajes OCSS (DFTO)",
+      "kind": "prueba",
+      "startMetLabel": "03/20:00",
+      "endMetLabel": "04/00:00",
+      "adaptable": false,
+      "adaptableCategories": []
+    },
+    {
+      "id": "bl-53",
+      "startMet": 345600,
+      "endMet": 350100,
+      "name": "Despresurización (Depress Ops)",
+      "kind": "operacion",
+      "startMetLabel": "04/00:00",
+      "endMetLabel": "04/01:15",
+      "adaptable": false,
+      "adaptableCategories": []
+    },
+    {
+      "id": "bl-54",
+      "startMet": 351000,
+      "endMet": 354600,
+      "name": "Comida",
+      "kind": "comida",
+      "startMetLabel": "04/01:30",
+      "endMetLabel": "04/02:30",
+      "adaptable": true,
+      "adaptableCategories": [
+        "nutricion"
+      ]
+    },
+    {
+      "id": "bl-55",
+      "startMet": 356400,
+      "endMet": 359100,
+      "name": "ECLSS Wall",
+      "kind": "prueba",
+      "startMetLabel": "04/03:00",
+      "endMetLabel": "04/03:45",
+      "adaptable": false,
+      "adaptableCategories": []
+    },
+    {
+      "id": "bl-56",
+      "startMet": 359100,
+      "endMet": 362700,
+      "name": "OTC-3",
+      "kind": "maniobra",
+      "startMetLabel": "04/03:45",
+      "endMetLabel": "04/04:45",
+      "adaptable": false,
+      "adaptableCategories": []
+    },
+    {
+      "id": "bl-57",
+      "startMet": 364500,
+      "endMet": 366300,
+      "name": "PMC y conferencia de día de vuelo",
+      "kind": "comunicacion",
+      "startMetLabel": "04/05:15",
+      "endMetLabel": "04/05:45",
+      "adaptable": false,
+      "adaptableCategories": []
+    },
+    {
+      "id": "bl-58",
+      "startMet": 366300,
+      "endMet": 373500,
+      "name": "Pre/postsueño",
+      "kind": "presueno",
+      "startMetLabel": "04/05:45",
+      "endMetLabel": "04/07:45",
+      "adaptable": false,
+      "adaptableCategories": []
+    },
+    {
+      "id": "bl-59",
+      "startMet": 373500,
+      "endMet": 404100,
+      "name": "Sueño (8,5 h), adelantado 1 h",
+      "kind": "sueno",
+      "startMetLabel": "04/07:45",
+      "endMetLabel": "04/16:15",
+      "adaptable": false,
+      "adaptableCategories": []
+    },
+    {
+      "id": "bl-60",
+      "startMet": 404100,
+      "endMet": 411300,
+      "name": "Pre/postsueño",
+      "kind": "presueno",
+      "startMetLabel": "04/16:15",
+      "endMetLabel": "04/18:15",
+      "adaptable": false,
+      "adaptableCategories": []
+    },
+    {
+      "id": "bl-61",
+      "startMet": 411300,
+      "endMet": 415800,
+      "name": "DPC, pulsioximetría, conferencia lunar y PAO",
+      "kind": "comunicacion",
+      "startMetLabel": "04/18:15",
+      "endMetLabel": "04/19:30",
+      "adaptable": false,
+      "adaptableCategories": []
+    },
+    {
+      "id": "bl-62",
+      "startMet": 415800,
+      "endMet": 417600,
+      "name": "Configuración lunar",
+      "kind": "operacion",
+      "startMetLabel": "04/19:30",
+      "endMetLabel": "04/20:00",
+      "adaptable": false,
+      "adaptableCategories": []
+    },
+    {
+      "id": "bl-63",
+      "startMet": 417600,
+      "endMet": 434700,
+      "name": "Observación lunar",
+      "kind": "operacion",
+      "startMetLabel": "04/20:00",
+      "endMetLabel": "05/00:45",
+      "adaptable": false,
+      "adaptableCategories": []
+    },
+    {
+      "id": "bl-64",
+      "startMet": 435600,
+      "endMet": 439200,
+      "name": "Comida",
+      "kind": "comida",
+      "startMetLabel": "05/01:00",
+      "endMetLabel": "05/02:00",
+      "adaptable": true,
+      "adaptableCategories": [
+        "nutricion"
+      ]
+    },
+    {
+      "id": "bl-65",
+      "startMet": 439200,
+      "endMet": 441900,
+      "name": "Observación lunar",
+      "kind": "operacion",
+      "startMetLabel": "05/02:00",
+      "endMetLabel": "05/02:45",
+      "adaptable": false,
+      "adaptableCategories": []
+    },
+    {
+      "id": "bl-66",
+      "startMet": 441900,
+      "endMet": 446400,
+      "name": "Documentación y transferencia lunar",
+      "kind": "operacion",
+      "startMetLabel": "05/02:45",
+      "endMetLabel": "05/04:00",
+      "adaptable": false,
+      "adaptableCategories": []
+    },
+    {
+      "id": "bl-67",
+      "startMet": 447300,
+      "endMet": 451800,
+      "name": "PAO, PMC y conferencia de día de vuelo",
+      "kind": "comunicacion",
+      "startMetLabel": "05/04:15",
+      "endMetLabel": "05/05:30",
+      "adaptable": false,
+      "adaptableCategories": []
+    },
+    {
+      "id": "bl-68",
+      "startMet": 451800,
+      "endMet": 459000,
+      "name": "Pre/postsueño",
+      "kind": "presueno",
+      "startMetLabel": "05/05:30",
+      "endMetLabel": "05/07:30",
+      "adaptable": false,
+      "adaptableCategories": []
+    },
+    {
+      "id": "bl-69",
+      "startMet": 459000,
+      "endMet": 493200,
+      "name": "Sueño (9,5 h), retrasado 1 h",
+      "kind": "sueno",
+      "startMetLabel": "05/07:30",
+      "endMetLabel": "05/17:00",
+      "adaptable": false,
+      "adaptableCategories": []
+    },
+    {
+      "id": "bl-70",
+      "startMet": 493200,
+      "endMet": 502200,
+      "name": "Pre/postsueño",
+      "kind": "presueno",
+      "startMetLabel": "05/17:00",
+      "endMetLabel": "05/19:30",
+      "adaptable": false,
+      "adaptableCategories": []
+    },
+    {
+      "id": "bl-71",
+      "startMet": 502200,
+      "endMet": 507600,
+      "name": "DPC, pulsioximetría, llamada C2C y debrief poslunar",
+      "kind": "comunicacion",
+      "startMetLabel": "05/19:30",
+      "endMetLabel": "05/21:00",
+      "adaptable": false,
+      "adaptableCategories": []
+    },
+    {
+      "id": "bl-72",
+      "startMet": 507600,
+      "endMet": 516600,
+      "name": "Tiempo libre (Off Duty)",
+      "kind": "libre",
+      "startMetLabel": "05/21:00",
+      "endMetLabel": "05/23:30",
+      "adaptable": false,
+      "adaptableCategories": []
+    },
+    {
+      "id": "bl-73",
+      "startMet": 518400,
+      "endMet": 521100,
+      "name": "Comida",
+      "kind": "comida",
+      "startMetLabel": "06/00:00",
+      "endMetLabel": "06/00:45",
+      "adaptable": true,
+      "adaptableCategories": [
+        "nutricion"
+      ]
+    },
+    {
+      "id": "bl-74",
+      "startMet": 521100,
+      "endMet": 524700,
+      "name": "RTC-1",
+      "kind": "maniobra",
+      "startMetLabel": "06/00:45",
+      "endMetLabel": "06/01:45",
+      "adaptable": false,
+      "adaptableCategories": []
+    },
+    {
+      "id": "bl-75",
+      "startMet": 525600,
+      "endMet": 528300,
+      "name": "PFC",
+      "kind": "comunicacion",
+      "startMetLabel": "06/02:00",
+      "endMetLabel": "06/02:45",
+      "adaptable": false,
+      "adaptableCategories": []
+    },
+    {
+      "id": "bl-76",
+      "startMet": 528300,
+      "endMet": 536400,
+      "name": "Ejercicio (P/TV Exercise)",
+      "kind": "ejercicio",
+      "startMetLabel": "06/02:45",
+      "endMetLabel": "06/05:00",
+      "adaptable": true,
+      "adaptableCategories": [
+        "ejercicio"
+      ]
+    },
+    {
+      "id": "bl-77",
+      "startMet": 537300,
+      "endMet": 540900,
+      "name": "PMC y conferencia de día de vuelo",
+      "kind": "comunicacion",
+      "startMetLabel": "06/05:15",
+      "endMetLabel": "06/06:15",
+      "adaptable": false,
+      "adaptableCategories": []
+    },
+    {
+      "id": "bl-78",
+      "startMet": 540900,
+      "endMet": 549000,
+      "name": "Pre/postsueño",
+      "kind": "presueno",
+      "startMetLabel": "06/06:15",
+      "endMetLabel": "06/08:30",
+      "adaptable": false,
+      "adaptableCategories": []
+    },
+    {
+      "id": "bl-79",
+      "startMet": 549000,
+      "endMet": 579600,
+      "name": "Sueño (8,5 h)",
+      "kind": "sueno",
+      "startMetLabel": "06/08:30",
+      "endMetLabel": "06/17:00",
+      "adaptable": false,
+      "adaptableCategories": []
+    },
+    {
+      "id": "bl-80",
+      "startMet": 579600,
+      "endMet": 587700,
+      "name": "Pre/postsueño",
+      "kind": "presueno",
+      "startMetLabel": "06/17:00",
+      "endMetLabel": "06/19:15",
+      "adaptable": false,
+      "adaptableCategories": []
+    },
+    {
+      "id": "bl-81",
+      "startMet": 587700,
+      "endMet": 590400,
+      "name": "DPC y pulsioximetría",
+      "kind": "comunicacion",
+      "startMetLabel": "06/19:15",
+      "endMetLabel": "06/20:00",
+      "adaptable": false,
+      "adaptableCategories": []
+    },
+    {
+      "id": "bl-82",
+      "startMet": 590400,
+      "endMet": 602100,
+      "name": "Ejercicio (P/TV Exercise)",
+      "kind": "ejercicio",
+      "startMetLabel": "06/20:00",
+      "endMetLabel": "06/23:15",
+      "adaptable": true,
+      "adaptableCategories": [
+        "ejercicio"
+      ]
+    },
+    {
+      "id": "bl-83",
+      "startMet": 603900,
+      "endMet": 606600,
+      "name": "Represurización",
+      "kind": "operacion",
+      "startMetLabel": "06/23:45",
+      "endMetLabel": "07/00:30",
+      "adaptable": false,
+      "adaptableCategories": []
+    },
+    {
+      "id": "bl-84",
+      "startMet": 606600,
+      "endMet": 610200,
+      "name": "Comida",
+      "kind": "comida",
+      "startMetLabel": "07/00:30",
+      "endMetLabel": "07/01:30",
+      "adaptable": true,
+      "adaptableCategories": [
+        "nutricion"
+      ]
+    },
+    {
+      "id": "bl-85",
+      "startMet": 611100,
+      "endMet": 617400,
+      "name": "Demostración de refugio de radiación",
+      "kind": "prueba",
+      "startMetLabel": "07/01:45",
+      "endMetLabel": "07/03:30",
+      "adaptable": false,
+      "adaptableCategories": []
+    },
+    {
+      "id": "bl-86",
+      "startMet": 620100,
+      "endMet": 623700,
+      "name": "Pilotaje manual (Man PLT DFTO 1)",
+      "kind": "prueba",
+      "startMetLabel": "07/04:15",
+      "endMetLabel": "07/05:15",
+      "adaptable": false,
+      "adaptableCategories": []
+    },
+    {
+      "id": "bl-87",
+      "startMet": 625800,
+      "endMet": 628200,
+      "name": "PMC y conferencia de día de vuelo",
+      "kind": "comunicacion",
+      "startMetLabel": "07/05:50",
+      "endMetLabel": "07/06:30",
+      "adaptable": false,
+      "adaptableCategories": []
+    },
+    {
+      "id": "bl-88",
+      "startMet": 628200,
+      "endMet": 635400,
+      "name": "Pre/postsueño",
+      "kind": "presueno",
+      "startMetLabel": "07/06:30",
+      "endMetLabel": "07/08:30",
+      "adaptable": false,
+      "adaptableCategories": []
+    },
+    {
+      "id": "bl-89",
+      "startMet": 635400,
+      "endMet": 666000,
+      "name": "Sueño (8,5 h)",
+      "kind": "sueno",
+      "startMetLabel": "07/08:30",
+      "endMetLabel": "07/17:00",
+      "adaptable": false,
+      "adaptableCategories": []
+    },
+    {
+      "id": "bl-90",
+      "startMet": 666000,
+      "endMet": 674100,
+      "name": "Pre/postsueño",
+      "kind": "presueno",
+      "startMetLabel": "07/17:00",
+      "endMetLabel": "07/19:15",
+      "adaptable": false,
+      "adaptableCategories": []
+    },
+    {
+      "id": "bl-91",
+      "startMet": 674100,
+      "endMet": 675900,
+      "name": "DPC y pulsioximetría",
+      "kind": "comunicacion",
+      "startMetLabel": "07/19:15",
+      "endMetLabel": "07/19:45",
+      "adaptable": false,
+      "adaptableCategories": []
+    },
+    {
+      "id": "bl-92",
+      "startMet": 675900,
+      "endMet": 682200,
+      "name": "Prenda de intolerancia ortostática (OIG Don DFTO)",
+      "kind": "prueba",
+      "startMetLabel": "07/19:45",
+      "endMetLabel": "07/21:30",
+      "adaptable": false,
+      "adaptableCategories": []
+    },
+    {
+      "id": "bl-93",
+      "startMet": 682200,
+      "endMet": 688500,
+      "name": "Estudio y conferencia de entrada",
+      "kind": "operacion",
+      "startMetLabel": "07/21:30",
+      "endMetLabel": "07/23:15",
+      "adaptable": false,
+      "adaptableCategories": []
+    },
+    {
+      "id": "bl-94",
+      "startMet": 689400,
+      "endMet": 693000,
+      "name": "PAO",
+      "kind": "comunicacion",
+      "startMetLabel": "07/23:30",
+      "endMetLabel": "08/00:30",
+      "adaptable": false,
+      "adaptableCategories": []
+    },
+    {
+      "id": "bl-95",
+      "startMet": 693000,
+      "endMet": 696600,
+      "name": "Comida",
+      "kind": "comida",
+      "startMetLabel": "08/00:30",
+      "endMetLabel": "08/01:30",
+      "adaptable": true,
+      "adaptableCategories": [
+        "nutricion"
+      ]
+    },
+    {
+      "id": "bl-96",
+      "startMet": 699300,
+      "endMet": 704700,
+      "name": "OIG Don DFTO y estiba de entrada",
+      "kind": "prueba",
+      "startMetLabel": "08/02:15",
+      "endMetLabel": "08/03:45",
+      "adaptable": false,
+      "adaptableCategories": []
+    },
+    {
+      "id": "bl-97",
+      "startMet": 704700,
+      "endMet": 708300,
+      "name": "RTC-2",
+      "kind": "maniobra",
+      "startMetLabel": "08/03:45",
+      "endMetLabel": "08/04:45",
+      "adaptable": false,
+      "adaptableCategories": []
+    },
+    {
+      "id": "bl-98",
+      "startMet": 710100,
+      "endMet": 712800,
+      "name": "Estiba de entrada",
+      "kind": "operacion",
+      "startMetLabel": "08/05:15",
+      "endMetLabel": "08/06:00",
+      "adaptable": false,
+      "adaptableCategories": []
+    },
+    {
+      "id": "bl-99",
+      "startMet": 712800,
+      "endMet": 714600,
+      "name": "PMC y conferencia de día de vuelo",
+      "kind": "comunicacion",
+      "startMetLabel": "08/06:00",
+      "endMetLabel": "08/06:30",
+      "adaptable": false,
+      "adaptableCategories": []
+    },
+    {
+      "id": "bl-100",
+      "startMet": 714600,
+      "endMet": 721800,
+      "name": "Pre/postsueño",
+      "kind": "presueno",
+      "startMetLabel": "08/06:30",
+      "endMetLabel": "08/08:30",
+      "adaptable": false,
+      "adaptableCategories": []
+    },
+    {
+      "id": "bl-101",
+      "startMet": 721800,
+      "endMet": 752400,
+      "name": "Sueño (8,5 h)",
+      "kind": "sueno",
+      "startMetLabel": "08/08:30",
+      "endMetLabel": "08/17:00",
+      "adaptable": false,
+      "adaptableCategories": []
+    },
+    {
+      "id": "bl-102",
+      "startMet": 752400,
+      "endMet": 759600,
+      "name": "Pre/postsueño",
+      "kind": "presueno",
+      "startMetLabel": "08/17:00",
+      "endMetLabel": "08/19:00",
+      "adaptable": false,
+      "adaptableCategories": []
+    },
+    {
+      "id": "bl-103",
+      "startMet": 760200,
+      "endMet": 761400,
+      "name": "PMC",
+      "kind": "comunicacion",
+      "startMetLabel": "08/19:10",
+      "endMetLabel": "08/19:30",
+      "adaptable": false,
+      "adaptableCategories": []
+    },
+    {
+      "id": "bl-104",
+      "startMet": 763200,
+      "endMet": 765900,
+      "name": "RTC-3",
+      "kind": "maniobra",
+      "startMetLabel": "08/20:00",
+      "endMetLabel": "08/20:45",
+      "adaptable": false,
+      "adaptableCategories": []
+    },
+    {
+      "id": "bl-105",
+      "startMet": 766800,
+      "endMet": 772200,
+      "name": "Configuración de cabina",
+      "kind": "operacion",
+      "startMetLabel": "08/21:00",
+      "endMetLabel": "08/22:30",
+      "adaptable": false,
+      "adaptableCategories": []
+    },
+    {
+      "id": "bl-106",
+      "startMet": 772200,
+      "endMet": 781740,
+      "name": "Lista de comprobación de entrada",
+      "kind": "operacion",
+      "startMetLabel": "08/22:30",
+      "endMetLabel": "09/01:09",
+      "adaptable": false,
+      "adaptableCategories": []
+    },
+    {
+      "id": "bl-107",
+      "startMet": 781740,
+      "endMet": 783768,
+      "name": "Entrada, descenso y amerizaje (EDL)",
+      "kind": "maniobra",
+      "startMetLabel": "09/01:09",
+      "endMetLabel": "09/01:42:48",
+      "adaptable": false,
+      "adaptableCategories": []
+    }
+  ],
+  "catalog": [
+    {
+      "intense": false,
+      "transitionPrep": false,
+      "selfReport": false,
+      "dose": null,
+      "experimental": false,
+      "id": "P",
+      "code": "P",
+      "name": "Calibración y chequeo de capacidad",
+      "category": "evaluacion",
+      "loadType": "ninguna",
+      "capabilities": [
+        "Referencia individual"
+      ],
+      "record": "Baseline preflight, ensayo actual, fuente, método y contexto",
+      "limit": "La baseline en microgravedad no sustituye a la terrestre",
+      "source": "Especificación AURA v0.4"
+    },
+    {
+      "intense": true,
+      "transitionPrep": false,
+      "selfReport": false,
+      "dose": null,
+      "experimental": false,
+      "id": "R",
+      "code": "R",
+      "name": "Resistencia en volante de inercia",
+      "category": "ejercicio",
+      "loadType": "CA",
+      "capabilities": [
+        "Fuerza",
+        "Control postural"
+      ],
+      "record": "Sesión, carga, repeticiones y esfuerzo percibido",
+      "limit": "Solo con el dispositivo y el régimen permitidos",
+      "source": "NASA OCHMO — Exercise Overview",
+      "sourceUrl": "https://www.nasa.gov/ochmo-tb-031-exercise-overview-2/"
+    },
+    {
+      "intense": true,
+      "transitionPrep": false,
+      "selfReport": false,
+      "dose": null,
+      "experimental": false,
+      "id": "A",
+      "code": "A",
+      "name": "Acondicionamiento aeróbico",
+      "category": "ejercicio",
+      "loadType": "CA",
+      "capabilities": [
+        "Resistencia",
+        "Reserva cardiovascular"
+      ],
+      "record": "Duración, esfuerzo y respuesta fisiológica si existe sensor",
+      "limit": "Ajuste solo según protocolo",
+      "source": "NASA OCHMO — Exercise Overview",
+      "sourceUrl": "https://www.nasa.gov/ochmo-tb-031-exercise-overview-2/"
+    },
+    {
+      "intense": false,
+      "transitionPrep": false,
+      "selfReport": false,
+      "dose": null,
+      "experimental": false,
+      "id": "RB",
+      "code": "RB",
+      "name": "Resistencia con bandas, carga reducida",
+      "category": "ejercicio",
+      "loadType": "CA",
+      "capabilities": [
+        "Fuerza"
+      ],
+      "record": "Sesión, repeticiones y esfuerzo percibido",
+      "limit": "Alternativa de menor carga; no equivale a la sesión completa",
+      "source": "Ejemplo del equipo, pendiente de protocolo"
+    },
+    {
+      "intense": false,
+      "transitionPrep": false,
+      "selfReport": false,
+      "dose": null,
+      "experimental": false,
+      "id": "M",
+      "code": "M",
+      "name": "Movilidad y estiramientos",
+      "category": "ejercicio",
+      "loadType": "CA",
+      "capabilities": [
+        "Movilidad"
+      ],
+      "record": "Sesión realizada y molestias",
+      "limit": "Alternativa de baja carga; no sustituye el estímulo de fuerza o aeróbico",
+      "source": "Ejemplo del equipo, pendiente de protocolo"
+    },
+    {
+      "intense": false,
+      "transitionPrep": false,
+      "selfReport": false,
+      "dose": null,
+      "experimental": false,
+      "id": "N1",
+      "code": "N1",
+      "name": "Menú estándar de misión",
+      "category": "nutricion",
+      "loadType": "ninguna",
+      "capabilities": [
+        "Aporte energético"
+      ],
+      "record": "Comida realizada y apetito",
+      "limit": "Ejemplo; la composición depende del plan nutricional y del inventario",
+      "source": "Ejemplo del equipo, pendiente del plan nutricional de misión"
+    },
+    {
+      "intense": false,
+      "transitionPrep": false,
+      "selfReport": false,
+      "dose": null,
+      "experimental": false,
+      "id": "N2",
+      "code": "N2",
+      "name": "Menú con refuerzo de hidratación",
+      "category": "nutricion",
+      "loadType": "ninguna",
+      "capabilities": [
+        "Hidratación"
+      ],
+      "record": "Comida realizada, líquidos y síntomas",
+      "limit": "Ejemplo; la composición depende del plan nutricional y del inventario",
+      "source": "Ejemplo del equipo, pendiente del plan nutricional de misión"
+    },
+    {
+      "intense": false,
+      "transitionPrep": false,
+      "selfReport": false,
+      "dose": null,
+      "experimental": false,
+      "id": "N3",
+      "code": "N3",
+      "name": "Menú de mayor aporte energético",
+      "category": "nutricion",
+      "loadType": "ninguna",
+      "capabilities": [
+        "Aporte energético"
+      ],
+      "record": "Comida realizada y apetito",
+      "limit": "Ejemplo; la composición depende del plan nutricional y del inventario",
+      "source": "Ejemplo del equipo, pendiente del plan nutricional de misión"
+    },
+    {
+      "intense": false,
+      "transitionPrep": false,
+      "selfReport": false,
+      "dose": null,
+      "experimental": false,
+      "id": "N4",
+      "code": "N4",
+      "name": "Menú ligero",
+      "category": "nutricion",
+      "loadType": "ninguna",
+      "capabilities": [
+        "Tolerancia digestiva"
+      ],
+      "record": "Comida realizada y síntomas",
+      "limit": "Ejemplo; la composición depende del plan nutricional y del inventario",
+      "source": "Ejemplo del equipo, pendiente del plan nutricional de misión"
+    },
+    {
+      "intense": false,
+      "transitionPrep": false,
+      "selfReport": false,
+      "dose": null,
+      "experimental": true,
+      "id": "C",
+      "code": "C",
+      "name": "Coordinación visomotora breve",
+      "category": "evaluacion",
+      "loadType": "CA",
+      "capabilities": [
+        "Coordinación ojo-mano",
+        "Destreza"
+      ],
+      "record": "Errores y tiempo de reacción",
+      "limit": "Prueba experimental; no certifica aptitud para tareas críticas",
+      "source": "Especificación AURA v0.4"
+    },
+    {
+      "intense": false,
+      "transitionPrep": false,
+      "selfReport": true,
+      "dose": null,
+      "experimental": false,
+      "id": "F",
+      "code": "F",
+      "name": "Cuestionario de fatiga, descanso y síntomas",
+      "category": "evaluacion",
+      "loadType": "ninguna",
+      "capabilities": [
+        "Fatiga y recuperación"
+      ],
+      "record": "Autoinforme y sueño, con hora y fiabilidad",
+      "limit": "Las señales de alarma se escalan; no se tratan con más carga",
+      "source": "Especificación AURA v0.4"
+    },
+    {
+      "intense": false,
+      "transitionPrep": true,
+      "selfReport": false,
+      "dose": null,
+      "experimental": false,
+      "id": "T",
+      "code": "T",
+      "name": "Preparación para aterrizaje en superficie",
+      "category": "preparacion",
+      "loadType": "CA",
+      "capabilities": [
+        "Equilibrio",
+        "Control sensoriomotor"
+      ],
+      "record": "Evaluaciones y guías específicas de la fase",
+      "limit": "Marcha y equilibrio reales solo cuando proceda y sea seguro",
+      "source": "NASA — Sensorimotor Risk",
+      "sourceUrl": "https://www.nasa.gov/directorates/esdmd/hhp/sensorimotor-risk/"
+    },
+    {
+      "intense": false,
+      "transitionPrep": true,
+      "selfReport": false,
+      "dose": null,
+      "experimental": false,
+      "id": "V",
+      "code": "V",
+      "name": "Preparación del retorno terrestre",
+      "category": "preparacion",
+      "loadType": "CA",
+      "capabilities": [
+        "Reserva cardiovascular",
+        "Fuerza",
+        "Sensoriomotricidad"
+      ],
+      "record": "Tendencias cardiovasculares, de fuerza y sensoriomotoras",
+      "limit": "Continúa con el protocolo postflight; no «aprueba» el regreso",
+      "source": "NASA — Pre-/Postflight Medical Care",
+      "sourceUrl": "https://www.nasa.gov/ochmo/health-and-medical-systems/pre-postflight-medical-care/"
+    },
+    {
+      "intense": false,
+      "transitionPrep": true,
+      "selfReport": false,
+      "dose": null,
+      "experimental": false,
+      "id": "OIG",
+      "code": "OIG",
+      "name": "Prenda contra la intolerancia ortostática",
+      "category": "preparacion",
+      "loadType": "ninguna",
+      "capabilities": [
+        "Tolerancia ortostática"
+      ],
+      "record": "Colocación confirmada, ajuste y síntomas",
+      "limit": "En Artemis II es un objetivo de prueba (OIG Don DFTO), no un protocolo cerrado",
+      "source": "NASA — Artemis II Overview Timeline (18/03/2026, STRIVES 20260002249)"
+    },
+    {
+      "intense": false,
+      "transitionPrep": false,
+      "selfReport": false,
+      "dose": null,
+      "experimental": false,
+      "id": "RE",
+      "code": "RE",
+      "name": "Ventana de recuperación protegida",
+      "category": "recuperacion",
+      "loadType": "RE",
+      "capabilities": [
+        "Fatiga y recuperación"
+      ],
+      "record": "Sueño, descansos y carga acumulada",
+      "limit": "Es un requisito de planificación, no tiempo libre prescindible",
+      "source": "Especificación AURA v0.4"
+    },
+    {
+      "intense": false,
+      "transitionPrep": false,
+      "selfReport": false,
+      "dose": null,
+      "experimental": false,
+      "id": "SD",
+      "code": "SD",
+      "name": "Suplemento de vitamina D (ejemplo)",
+      "category": "suplemento",
+      "loadType": "ninguna",
+      "capabilities": [
+        "Salud ósea"
+      ],
+      "record": "Toma confirmada por el astronauta",
+      "limit": "Ejemplo de catálogo; requiere prescripción médica de misión",
+      "source": "Ejemplo del equipo, pendiente de protocolo médico"
+    },
+    {
+      "intense": false,
+      "transitionPrep": false,
+      "selfReport": false,
+      "dose": null,
+      "experimental": false,
+      "id": "SF",
+      "code": "SF",
+      "name": "Carga de fluidos y sal previa al regreso (ejemplo)",
+      "category": "suplemento",
+      "loadType": "ninguna",
+      "capabilities": [
+        "Tolerancia ortostática"
+      ],
+      "record": "Toma confirmada y síntomas",
+      "limit": "Ejemplo de catálogo; requiere prescripción médica de misión",
+      "source": "Ejemplo del equipo, pendiente de protocolo médico"
+    }
+  ],
+  "adaptationPolicy": {
+    "windows": {
+      "ejercicio": "ejercicio",
+      "nutricion": "comida"
+    },
+    "allowed": [
+      "sustitucion",
+      "reprogramacion",
+      "omision"
+    ],
+    "rules": [
+      "Solo se adaptan las actividades con adaptable: true. Las demás, y todos los bloques con adaptable: false (maniobras, pruebas, sueño, operaciones), no se modifican nunca desde la interfaz.",
+      "Sustitución: solo por otra acción del catálogo de la misma categoría.",
+      "Una sustitución no puede aumentar la carga: no se cambia una acción por otra con intense: true si la original no lo era.",
+      "Reprogramación: solo a un MET dentro de un bloque adaptable de su categoría y en el mismo día de vuelo.",
+      "Omisión: permitida en actividades adaptables, siempre con motivo.",
+      "Cada adaptación se aplica a bordo sin esperar respuesta y se envía a control de misión para su registro y validación. Si no hay conexión, se guarda y se envía después."
+    ],
+    "report": {
+      "endpoint": "/api/adaptations",
+      "method": "POST",
+      "blocking": false
+    }
+  },
+  "plans": {
+    "cdr": [
+      {
+        "day": 1,
+        "activities": [
+          {
+            "entryId": "cdr-SD-19800",
+            "itemId": "SD",
+            "met": 19800,
+            "metLabel": "00/05:30",
+            "status": "condicional",
+            "adaptable": false
+          },
+          {
+            "entryId": "cdr-F-26100",
+            "itemId": "F",
+            "met": 26100,
+            "metLabel": "00/07:15",
+            "status": "autorizado",
+            "adaptable": false
+          }
+        ]
+      },
+      {
+        "day": 2,
+        "activities": [
+          {
+            "entryId": "cdr-F-71100",
+            "itemId": "F",
+            "met": 71100,
+            "metLabel": "00/19:45",
+            "status": "autorizado",
+            "adaptable": false
+          },
+          {
+            "entryId": "cdr-P-79200",
+            "itemId": "P",
+            "met": 79200,
+            "metLabel": "00/22:00",
+            "status": "autorizado",
+            "adaptable": false
+          },
+          {
+            "entryId": "cdr-N1-91800",
+            "itemId": "N1",
+            "met": 91800,
+            "metLabel": "01/01:30",
+            "status": "autorizado",
+            "adaptable": true
+          },
+          {
+            "entryId": "cdr-SD-92700",
+            "itemId": "SD",
+            "met": 92700,
+            "metLabel": "01/01:45",
+            "status": "condicional",
+            "adaptable": false
+          },
+          {
+            "entryId": "cdr-C-97200",
+            "itemId": "C",
+            "met": 97200,
+            "metLabel": "01/03:00",
+            "status": "autorizado",
+            "adaptable": false
+          },
+          {
+            "entryId": "cdr-RE-114300",
+            "itemId": "RE",
+            "met": 114300,
+            "metLabel": "01/07:45",
+            "status": "autorizado",
+            "adaptable": false
+          }
+        ]
+      },
+      {
+        "day": 3,
+        "activities": [
+          {
+            "entryId": "cdr-F-152100",
+            "itemId": "F",
+            "met": 152100,
+            "metLabel": "01/18:15",
+            "status": "autorizado",
+            "adaptable": false
+          },
+          {
+            "entryId": "cdr-N1-177300",
+            "itemId": "N1",
+            "met": 177300,
+            "metLabel": "02/01:15",
+            "status": "autorizado",
+            "adaptable": true
+          },
+          {
+            "entryId": "cdr-SD-178200",
+            "itemId": "SD",
+            "met": 178200,
+            "metLabel": "02/01:30",
+            "status": "condicional",
+            "adaptable": false
+          },
+          {
+            "entryId": "cdr-RE-199800",
+            "itemId": "RE",
+            "met": 199800,
+            "metLabel": "02/07:30",
+            "status": "autorizado",
+            "adaptable": false
+          }
+        ]
+      },
+      {
+        "day": 4,
+        "activities": [
+          {
+            "entryId": "cdr-F-238500",
+            "itemId": "F",
+            "met": 238500,
+            "metLabel": "02/18:15",
+            "status": "autorizado",
+            "adaptable": false
+          },
+          {
+            "entryId": "cdr-N1-263700",
+            "itemId": "N1",
+            "met": 263700,
+            "metLabel": "03/01:15",
+            "status": "autorizado",
+            "adaptable": true
+          },
+          {
+            "entryId": "cdr-SD-264600",
+            "itemId": "SD",
+            "met": 264600,
+            "metLabel": "03/01:30",
+            "status": "condicional",
+            "adaptable": false
+          },
+          {
+            "entryId": "cdr-C-270300",
+            "itemId": "C",
+            "met": 270300,
+            "metLabel": "03/03:05",
+            "status": "autorizado",
+            "adaptable": false
+          },
+          {
+            "entryId": "cdr-R-273600",
+            "itemId": "R",
+            "met": 273600,
+            "metLabel": "03/04:00",
+            "status": "autorizado",
+            "adaptable": true
+          }
+        ]
+      },
+      {
+        "day": 5,
+        "activities": [
+          {
+            "entryId": "cdr-F-322200",
+            "itemId": "F",
+            "met": 322200,
+            "metLabel": "03/17:30",
+            "status": "autorizado",
+            "adaptable": false
+          },
+          {
+            "entryId": "cdr-N1-351000",
+            "itemId": "N1",
+            "met": 351000,
+            "metLabel": "04/01:30",
+            "status": "autorizado",
+            "adaptable": true
+          },
+          {
+            "entryId": "cdr-SD-351900",
+            "itemId": "SD",
+            "met": 351900,
+            "metLabel": "04/01:45",
+            "status": "condicional",
+            "adaptable": false
+          },
+          {
+            "entryId": "cdr-C-355200",
+            "itemId": "C",
+            "met": 355200,
+            "metLabel": "04/02:40",
+            "status": "autorizado",
+            "adaptable": false
+          }
+        ]
+      },
+      {
+        "day": 6,
+        "activities": [
+          {
+            "entryId": "cdr-F-407700",
+            "itemId": "F",
+            "met": 407700,
+            "metLabel": "04/17:15",
+            "status": "autorizado",
+            "adaptable": false
+          },
+          {
+            "entryId": "cdr-N1-435600",
+            "itemId": "N1",
+            "met": 435600,
+            "metLabel": "05/01:00",
+            "status": "autorizado",
+            "adaptable": true
+          },
+          {
+            "entryId": "cdr-SD-436500",
+            "itemId": "SD",
+            "met": 436500,
+            "metLabel": "05/01:15",
+            "status": "condicional",
+            "adaptable": false
+          },
+          {
+            "entryId": "cdr-RE-452700",
+            "itemId": "RE",
+            "met": 452700,
+            "metLabel": "05/05:45",
+            "status": "autorizado",
+            "adaptable": false
+          }
+        ]
+      },
+      {
+        "day": 7,
+        "activities": [
+          {
+            "entryId": "cdr-F-494100",
+            "itemId": "F",
+            "met": 494100,
+            "metLabel": "05/17:15",
+            "status": "autorizado",
+            "adaptable": false
+          },
+          {
+            "entryId": "cdr-RE-508500",
+            "itemId": "RE",
+            "met": 508500,
+            "metLabel": "05/21:15",
+            "status": "autorizado",
+            "adaptable": false
+          },
+          {
+            "entryId": "cdr-N1-518400",
+            "itemId": "N1",
+            "met": 518400,
+            "metLabel": "06/00:00",
+            "status": "autorizado",
+            "adaptable": true
+          },
+          {
+            "entryId": "cdr-SD-519300",
+            "itemId": "SD",
+            "met": 519300,
+            "metLabel": "06/00:15",
+            "status": "condicional",
+            "adaptable": false
+          },
+          {
+            "entryId": "cdr-A-528300",
+            "itemId": "A",
+            "met": 528300,
+            "metLabel": "06/02:45",
+            "status": "autorizado",
+            "adaptable": true
+          },
+          {
+            "entryId": "cdr-V-537300",
+            "itemId": "V",
+            "met": 537300,
+            "metLabel": "06/05:15",
+            "status": "autorizado",
+            "adaptable": false
+          }
+        ]
+      },
+      {
+        "day": 8,
+        "activities": [
+          {
+            "entryId": "cdr-F-580500",
+            "itemId": "F",
+            "met": 580500,
+            "metLabel": "06/17:15",
+            "status": "autorizado",
+            "adaptable": false
+          },
+          {
+            "entryId": "cdr-R-591300",
+            "itemId": "R",
+            "met": 591300,
+            "metLabel": "06/20:15",
+            "status": "autorizado",
+            "adaptable": true
+          },
+          {
+            "entryId": "cdr-C-605100",
+            "itemId": "C",
+            "met": 605100,
+            "metLabel": "07/00:05",
+            "status": "autorizado",
+            "adaptable": false
+          },
+          {
+            "entryId": "cdr-N1-606600",
+            "itemId": "N1",
+            "met": 606600,
+            "metLabel": "07/00:30",
+            "status": "autorizado",
+            "adaptable": true
+          },
+          {
+            "entryId": "cdr-SD-608400",
+            "itemId": "SD",
+            "met": 608400,
+            "metLabel": "07/01:00",
+            "status": "condicional",
+            "adaptable": false
+          },
+          {
+            "entryId": "cdr-V-624600",
+            "itemId": "V",
+            "met": 624600,
+            "metLabel": "07/05:30",
+            "status": "autorizado",
+            "adaptable": false
+          }
+        ]
+      },
+      {
+        "day": 9,
+        "activities": [
+          {
+            "entryId": "cdr-F-666900",
+            "itemId": "F",
+            "met": 666900,
+            "metLabel": "07/17:15",
+            "status": "autorizado",
+            "adaptable": false
+          },
+          {
+            "entryId": "cdr-OIG-675900",
+            "itemId": "OIG",
+            "met": 675900,
+            "metLabel": "07/19:45",
+            "status": "autorizado",
+            "adaptable": false
+          },
+          {
+            "entryId": "cdr-V-683100",
+            "itemId": "V",
+            "met": 683100,
+            "metLabel": "07/21:45",
+            "status": "autorizado",
+            "adaptable": false
+          },
+          {
+            "entryId": "cdr-N1-693000",
+            "itemId": "N1",
+            "met": 693000,
+            "metLabel": "08/00:30",
+            "status": "autorizado",
+            "adaptable": true
+          },
+          {
+            "entryId": "cdr-SD-693900",
+            "itemId": "SD",
+            "met": 693900,
+            "metLabel": "08/00:45",
+            "status": "condicional",
+            "adaptable": false
+          },
+          {
+            "entryId": "cdr-A-710100",
+            "itemId": "A",
+            "met": 710100,
+            "metLabel": "08/05:15",
+            "status": "autorizado",
+            "adaptable": true
+          },
+          {
+            "entryId": "cdr-SF-713400",
+            "itemId": "SF",
+            "met": 713400,
+            "metLabel": "08/06:10",
+            "status": "condicional",
+            "adaptable": false
+          }
+        ]
+      },
+      {
+        "day": 10,
+        "activities": [
+          {
+            "entryId": "cdr-F-754200",
+            "itemId": "F",
+            "met": 754200,
+            "metLabel": "08/17:30",
+            "status": "autorizado",
+            "adaptable": false
+          },
+          {
+            "entryId": "cdr-V-767700",
+            "itemId": "V",
+            "met": 767700,
+            "metLabel": "08/21:15",
+            "status": "autorizado",
+            "adaptable": false
+          },
+          {
+            "entryId": "cdr-SF-774000",
+            "itemId": "SF",
+            "met": 774000,
+            "metLabel": "08/23:00",
+            "status": "autorizado",
+            "adaptable": false
+          },
+          {
+            "entryId": "cdr-OIG-778500",
+            "itemId": "OIG",
+            "met": 778500,
+            "metLabel": "09/00:15",
+            "status": "autorizado",
+            "adaptable": false
+          }
+        ]
+      }
+    ],
+    "plt": [
+      {
+        "day": 1,
+        "activities": [
+          {
+            "entryId": "plt-SD-19800",
+            "itemId": "SD",
+            "met": 19800,
+            "metLabel": "00/05:30",
+            "status": "condicional",
+            "adaptable": false
+          },
+          {
+            "entryId": "plt-F-26100",
+            "itemId": "F",
+            "met": 26100,
+            "metLabel": "00/07:15",
+            "status": "autorizado",
+            "adaptable": false
+          }
+        ]
+      },
+      {
+        "day": 2,
+        "activities": [
+          {
+            "entryId": "plt-F-71100",
+            "itemId": "F",
+            "met": 71100,
+            "metLabel": "00/19:45",
+            "status": "autorizado",
+            "adaptable": false
+          },
+          {
+            "entryId": "plt-P-79200",
+            "itemId": "P",
+            "met": 79200,
+            "metLabel": "00/22:00",
+            "status": "autorizado",
+            "adaptable": false
+          },
+          {
+            "entryId": "plt-N1-91800",
+            "itemId": "N1",
+            "met": 91800,
+            "metLabel": "01/01:30",
+            "status": "autorizado",
+            "adaptable": true
+          },
+          {
+            "entryId": "plt-SD-92700",
+            "itemId": "SD",
+            "met": 92700,
+            "metLabel": "01/01:45",
+            "status": "condicional",
+            "adaptable": false
+          },
+          {
+            "entryId": "plt-C-97200",
+            "itemId": "C",
+            "met": 97200,
+            "metLabel": "01/03:00",
+            "status": "autorizado",
+            "adaptable": false
+          },
+          {
+            "entryId": "plt-RE-114300",
+            "itemId": "RE",
+            "met": 114300,
+            "metLabel": "01/07:45",
+            "status": "autorizado",
+            "adaptable": false
+          }
+        ]
+      },
+      {
+        "day": 3,
+        "activities": [
+          {
+            "entryId": "plt-F-152100",
+            "itemId": "F",
+            "met": 152100,
+            "metLabel": "01/18:15",
+            "status": "autorizado",
+            "adaptable": false
+          },
+          {
+            "entryId": "plt-N1-177300",
+            "itemId": "N1",
+            "met": 177300,
+            "metLabel": "02/01:15",
+            "status": "autorizado",
+            "adaptable": true
+          },
+          {
+            "entryId": "plt-SD-178200",
+            "itemId": "SD",
+            "met": 178200,
+            "metLabel": "02/01:30",
+            "status": "condicional",
+            "adaptable": false
+          },
+          {
+            "entryId": "plt-RE-199800",
+            "itemId": "RE",
+            "met": 199800,
+            "metLabel": "02/07:30",
+            "status": "autorizado",
+            "adaptable": false
+          }
+        ]
+      },
+      {
+        "day": 4,
+        "activities": [
+          {
+            "entryId": "plt-F-238500",
+            "itemId": "F",
+            "met": 238500,
+            "metLabel": "02/18:15",
+            "status": "autorizado",
+            "adaptable": false
+          },
+          {
+            "entryId": "plt-N1-263700",
+            "itemId": "N1",
+            "met": 263700,
+            "metLabel": "03/01:15",
+            "status": "autorizado",
+            "adaptable": true
+          },
+          {
+            "entryId": "plt-SD-264600",
+            "itemId": "SD",
+            "met": 264600,
+            "metLabel": "03/01:30",
+            "status": "condicional",
+            "adaptable": false
+          },
+          {
+            "entryId": "plt-C-270300",
+            "itemId": "C",
+            "met": 270300,
+            "metLabel": "03/03:05",
+            "status": "autorizado",
+            "adaptable": false
+          },
+          {
+            "entryId": "plt-R-273600",
+            "itemId": "R",
+            "met": 273600,
+            "metLabel": "03/04:00",
+            "status": "autorizado",
+            "adaptable": true
+          }
+        ]
+      },
+      {
+        "day": 5,
+        "activities": [
+          {
+            "entryId": "plt-F-322200",
+            "itemId": "F",
+            "met": 322200,
+            "metLabel": "03/17:30",
+            "status": "autorizado",
+            "adaptable": false
+          },
+          {
+            "entryId": "plt-N1-351000",
+            "itemId": "N1",
+            "met": 351000,
+            "metLabel": "04/01:30",
+            "status": "autorizado",
+            "adaptable": true
+          },
+          {
+            "entryId": "plt-SD-351900",
+            "itemId": "SD",
+            "met": 351900,
+            "metLabel": "04/01:45",
+            "status": "condicional",
+            "adaptable": false
+          },
+          {
+            "entryId": "plt-C-355200",
+            "itemId": "C",
+            "met": 355200,
+            "metLabel": "04/02:40",
+            "status": "autorizado",
+            "adaptable": false
+          }
+        ]
+      },
+      {
+        "day": 6,
+        "activities": [
+          {
+            "entryId": "plt-F-407700",
+            "itemId": "F",
+            "met": 407700,
+            "metLabel": "04/17:15",
+            "status": "autorizado",
+            "adaptable": false
+          },
+          {
+            "entryId": "plt-N1-435600",
+            "itemId": "N1",
+            "met": 435600,
+            "metLabel": "05/01:00",
+            "status": "autorizado",
+            "adaptable": true
+          },
+          {
+            "entryId": "plt-SD-436500",
+            "itemId": "SD",
+            "met": 436500,
+            "metLabel": "05/01:15",
+            "status": "condicional",
+            "adaptable": false
+          },
+          {
+            "entryId": "plt-RE-452700",
+            "itemId": "RE",
+            "met": 452700,
+            "metLabel": "05/05:45",
+            "status": "autorizado",
+            "adaptable": false
+          }
+        ]
+      },
+      {
+        "day": 7,
+        "activities": [
+          {
+            "entryId": "plt-F-494100",
+            "itemId": "F",
+            "met": 494100,
+            "metLabel": "05/17:15",
+            "status": "autorizado",
+            "adaptable": false
+          },
+          {
+            "entryId": "plt-RE-508500",
+            "itemId": "RE",
+            "met": 508500,
+            "metLabel": "05/21:15",
+            "status": "autorizado",
+            "adaptable": false
+          },
+          {
+            "entryId": "plt-N1-518400",
+            "itemId": "N1",
+            "met": 518400,
+            "metLabel": "06/00:00",
+            "status": "autorizado",
+            "adaptable": true
+          },
+          {
+            "entryId": "plt-SD-519300",
+            "itemId": "SD",
+            "met": 519300,
+            "metLabel": "06/00:15",
+            "status": "condicional",
+            "adaptable": false
+          },
+          {
+            "entryId": "plt-A-528300",
+            "itemId": "A",
+            "met": 528300,
+            "metLabel": "06/02:45",
+            "status": "autorizado",
+            "adaptable": true
+          },
+          {
+            "entryId": "plt-V-537300",
+            "itemId": "V",
+            "met": 537300,
+            "metLabel": "06/05:15",
+            "status": "autorizado",
+            "adaptable": false
+          }
+        ]
+      },
+      {
+        "day": 8,
+        "activities": [
+          {
+            "entryId": "plt-F-580500",
+            "itemId": "F",
+            "met": 580500,
+            "metLabel": "06/17:15",
+            "status": "autorizado",
+            "adaptable": false
+          },
+          {
+            "entryId": "plt-R-591300",
+            "itemId": "R",
+            "met": 591300,
+            "metLabel": "06/20:15",
+            "status": "autorizado",
+            "adaptable": true
+          },
+          {
+            "entryId": "plt-C-605100",
+            "itemId": "C",
+            "met": 605100,
+            "metLabel": "07/00:05",
+            "status": "autorizado",
+            "adaptable": false
+          },
+          {
+            "entryId": "plt-N1-606600",
+            "itemId": "N1",
+            "met": 606600,
+            "metLabel": "07/00:30",
+            "status": "autorizado",
+            "adaptable": true
+          },
+          {
+            "entryId": "plt-SD-608400",
+            "itemId": "SD",
+            "met": 608400,
+            "metLabel": "07/01:00",
+            "status": "condicional",
+            "adaptable": false
+          },
+          {
+            "entryId": "plt-V-624600",
+            "itemId": "V",
+            "met": 624600,
+            "metLabel": "07/05:30",
+            "status": "autorizado",
+            "adaptable": false
+          }
+        ]
+      },
+      {
+        "day": 9,
+        "activities": [
+          {
+            "entryId": "plt-F-666900",
+            "itemId": "F",
+            "met": 666900,
+            "metLabel": "07/17:15",
+            "status": "autorizado",
+            "adaptable": false
+          },
+          {
+            "entryId": "plt-OIG-675900",
+            "itemId": "OIG",
+            "met": 675900,
+            "metLabel": "07/19:45",
+            "status": "autorizado",
+            "adaptable": false
+          },
+          {
+            "entryId": "plt-V-683100",
+            "itemId": "V",
+            "met": 683100,
+            "metLabel": "07/21:45",
+            "status": "autorizado",
+            "adaptable": false
+          },
+          {
+            "entryId": "plt-N1-693000",
+            "itemId": "N1",
+            "met": 693000,
+            "metLabel": "08/00:30",
+            "status": "autorizado",
+            "adaptable": true
+          },
+          {
+            "entryId": "plt-SD-693900",
+            "itemId": "SD",
+            "met": 693900,
+            "metLabel": "08/00:45",
+            "status": "condicional",
+            "adaptable": false
+          },
+          {
+            "entryId": "plt-A-710100",
+            "itemId": "A",
+            "met": 710100,
+            "metLabel": "08/05:15",
+            "status": "autorizado",
+            "adaptable": true
+          },
+          {
+            "entryId": "plt-SF-713400",
+            "itemId": "SF",
+            "met": 713400,
+            "metLabel": "08/06:10",
+            "status": "condicional",
+            "adaptable": false
+          }
+        ]
+      },
+      {
+        "day": 10,
+        "activities": [
+          {
+            "entryId": "plt-F-754200",
+            "itemId": "F",
+            "met": 754200,
+            "metLabel": "08/17:30",
+            "status": "autorizado",
+            "adaptable": false
+          },
+          {
+            "entryId": "plt-V-767700",
+            "itemId": "V",
+            "met": 767700,
+            "metLabel": "08/21:15",
+            "status": "autorizado",
+            "adaptable": false
+          },
+          {
+            "entryId": "plt-SF-774000",
+            "itemId": "SF",
+            "met": 774000,
+            "metLabel": "08/23:00",
+            "status": "autorizado",
+            "adaptable": false
+          },
+          {
+            "entryId": "plt-OIG-778500",
+            "itemId": "OIG",
+            "met": 778500,
+            "metLabel": "09/00:15",
+            "status": "autorizado",
+            "adaptable": false
+          }
+        ]
+      }
+    ],
+    "ms1": [
+      {
+        "day": 1,
+        "activities": [
+          {
+            "entryId": "ms1-SD-19800",
+            "itemId": "SD",
+            "met": 19800,
+            "metLabel": "00/05:30",
+            "status": "condicional",
+            "adaptable": false
+          },
+          {
+            "entryId": "ms1-F-26100",
+            "itemId": "F",
+            "met": 26100,
+            "metLabel": "00/07:15",
+            "status": "autorizado",
+            "adaptable": false
+          }
+        ]
+      },
+      {
+        "day": 2,
+        "activities": [
+          {
+            "entryId": "ms1-F-71100",
+            "itemId": "F",
+            "met": 71100,
+            "metLabel": "00/19:45",
+            "status": "autorizado",
+            "adaptable": false
+          },
+          {
+            "entryId": "ms1-P-79200",
+            "itemId": "P",
+            "met": 79200,
+            "metLabel": "00/22:00",
+            "status": "autorizado",
+            "adaptable": false
+          },
+          {
+            "entryId": "ms1-N1-91800",
+            "itemId": "N1",
+            "met": 91800,
+            "metLabel": "01/01:30",
+            "status": "autorizado",
+            "adaptable": true
+          },
+          {
+            "entryId": "ms1-SD-92700",
+            "itemId": "SD",
+            "met": 92700,
+            "metLabel": "01/01:45",
+            "status": "condicional",
+            "adaptable": false
+          },
+          {
+            "entryId": "ms1-C-97200",
+            "itemId": "C",
+            "met": 97200,
+            "metLabel": "01/03:00",
+            "status": "autorizado",
+            "adaptable": false
+          },
+          {
+            "entryId": "ms1-RE-114300",
+            "itemId": "RE",
+            "met": 114300,
+            "metLabel": "01/07:45",
+            "status": "autorizado",
+            "adaptable": false
+          }
+        ]
+      },
+      {
+        "day": 3,
+        "activities": [
+          {
+            "entryId": "ms1-F-152100",
+            "itemId": "F",
+            "met": 152100,
+            "metLabel": "01/18:15",
+            "status": "autorizado",
+            "adaptable": false
+          },
+          {
+            "entryId": "ms1-N1-177300",
+            "itemId": "N1",
+            "met": 177300,
+            "metLabel": "02/01:15",
+            "status": "autorizado",
+            "adaptable": true
+          },
+          {
+            "entryId": "ms1-SD-178200",
+            "itemId": "SD",
+            "met": 178200,
+            "metLabel": "02/01:30",
+            "status": "condicional",
+            "adaptable": false
+          },
+          {
+            "entryId": "ms1-RE-199800",
+            "itemId": "RE",
+            "met": 199800,
+            "metLabel": "02/07:30",
+            "status": "autorizado",
+            "adaptable": false
+          }
+        ]
+      },
+      {
+        "day": 4,
+        "activities": [
+          {
+            "entryId": "ms1-F-238500",
+            "itemId": "F",
+            "met": 238500,
+            "metLabel": "02/18:15",
+            "status": "autorizado",
+            "adaptable": false
+          },
+          {
+            "entryId": "ms1-N1-263700",
+            "itemId": "N1",
+            "met": 263700,
+            "metLabel": "03/01:15",
+            "status": "autorizado",
+            "adaptable": true
+          },
+          {
+            "entryId": "ms1-SD-264600",
+            "itemId": "SD",
+            "met": 264600,
+            "metLabel": "03/01:30",
+            "status": "condicional",
+            "adaptable": false
+          },
+          {
+            "entryId": "ms1-C-270300",
+            "itemId": "C",
+            "met": 270300,
+            "metLabel": "03/03:05",
+            "status": "autorizado",
+            "adaptable": false
+          },
+          {
+            "entryId": "ms1-R-273600",
+            "itemId": "R",
+            "met": 273600,
+            "metLabel": "03/04:00",
+            "status": "autorizado",
+            "adaptable": true
+          }
+        ]
+      },
+      {
+        "day": 5,
+        "activities": [
+          {
+            "entryId": "ms1-F-322200",
+            "itemId": "F",
+            "met": 322200,
+            "metLabel": "03/17:30",
+            "status": "autorizado",
+            "adaptable": false
+          },
+          {
+            "entryId": "ms1-N1-351000",
+            "itemId": "N1",
+            "met": 351000,
+            "metLabel": "04/01:30",
+            "status": "autorizado",
+            "adaptable": true
+          },
+          {
+            "entryId": "ms1-SD-351900",
+            "itemId": "SD",
+            "met": 351900,
+            "metLabel": "04/01:45",
+            "status": "condicional",
+            "adaptable": false
+          },
+          {
+            "entryId": "ms1-C-355200",
+            "itemId": "C",
+            "met": 355200,
+            "metLabel": "04/02:40",
+            "status": "autorizado",
+            "adaptable": false
+          }
+        ]
+      },
+      {
+        "day": 6,
+        "activities": [
+          {
+            "entryId": "ms1-F-407700",
+            "itemId": "F",
+            "met": 407700,
+            "metLabel": "04/17:15",
+            "status": "autorizado",
+            "adaptable": false
+          },
+          {
+            "entryId": "ms1-N1-435600",
+            "itemId": "N1",
+            "met": 435600,
+            "metLabel": "05/01:00",
+            "status": "autorizado",
+            "adaptable": true
+          },
+          {
+            "entryId": "ms1-SD-436500",
+            "itemId": "SD",
+            "met": 436500,
+            "metLabel": "05/01:15",
+            "status": "condicional",
+            "adaptable": false
+          },
+          {
+            "entryId": "ms1-RE-452700",
+            "itemId": "RE",
+            "met": 452700,
+            "metLabel": "05/05:45",
+            "status": "autorizado",
+            "adaptable": false
+          }
+        ]
+      },
+      {
+        "day": 7,
+        "activities": [
+          {
+            "entryId": "ms1-F-494100",
+            "itemId": "F",
+            "met": 494100,
+            "metLabel": "05/17:15",
+            "status": "autorizado",
+            "adaptable": false
+          },
+          {
+            "entryId": "ms1-RE-508500",
+            "itemId": "RE",
+            "met": 508500,
+            "metLabel": "05/21:15",
+            "status": "autorizado",
+            "adaptable": false
+          },
+          {
+            "entryId": "ms1-N1-518400",
+            "itemId": "N1",
+            "met": 518400,
+            "metLabel": "06/00:00",
+            "status": "autorizado",
+            "adaptable": true
+          },
+          {
+            "entryId": "ms1-SD-519300",
+            "itemId": "SD",
+            "met": 519300,
+            "metLabel": "06/00:15",
+            "status": "condicional",
+            "adaptable": false
+          },
+          {
+            "entryId": "ms1-A-528300",
+            "itemId": "A",
+            "met": 528300,
+            "metLabel": "06/02:45",
+            "status": "autorizado",
+            "adaptable": true
+          },
+          {
+            "entryId": "ms1-V-537300",
+            "itemId": "V",
+            "met": 537300,
+            "metLabel": "06/05:15",
+            "status": "autorizado",
+            "adaptable": false
+          }
+        ]
+      },
+      {
+        "day": 8,
+        "activities": [
+          {
+            "entryId": "ms1-F-580500",
+            "itemId": "F",
+            "met": 580500,
+            "metLabel": "06/17:15",
+            "status": "autorizado",
+            "adaptable": false
+          },
+          {
+            "entryId": "ms1-R-591300",
+            "itemId": "R",
+            "met": 591300,
+            "metLabel": "06/20:15",
+            "status": "autorizado",
+            "adaptable": true
+          },
+          {
+            "entryId": "ms1-C-605100",
+            "itemId": "C",
+            "met": 605100,
+            "metLabel": "07/00:05",
+            "status": "autorizado",
+            "adaptable": false
+          },
+          {
+            "entryId": "ms1-N1-606600",
+            "itemId": "N1",
+            "met": 606600,
+            "metLabel": "07/00:30",
+            "status": "autorizado",
+            "adaptable": true
+          },
+          {
+            "entryId": "ms1-SD-608400",
+            "itemId": "SD",
+            "met": 608400,
+            "metLabel": "07/01:00",
+            "status": "condicional",
+            "adaptable": false
+          },
+          {
+            "entryId": "ms1-V-624600",
+            "itemId": "V",
+            "met": 624600,
+            "metLabel": "07/05:30",
+            "status": "autorizado",
+            "adaptable": false
+          }
+        ]
+      },
+      {
+        "day": 9,
+        "activities": [
+          {
+            "entryId": "ms1-F-666900",
+            "itemId": "F",
+            "met": 666900,
+            "metLabel": "07/17:15",
+            "status": "autorizado",
+            "adaptable": false
+          },
+          {
+            "entryId": "ms1-OIG-675900",
+            "itemId": "OIG",
+            "met": 675900,
+            "metLabel": "07/19:45",
+            "status": "autorizado",
+            "adaptable": false
+          },
+          {
+            "entryId": "ms1-V-683100",
+            "itemId": "V",
+            "met": 683100,
+            "metLabel": "07/21:45",
+            "status": "autorizado",
+            "adaptable": false
+          },
+          {
+            "entryId": "ms1-N1-693000",
+            "itemId": "N1",
+            "met": 693000,
+            "metLabel": "08/00:30",
+            "status": "autorizado",
+            "adaptable": true
+          },
+          {
+            "entryId": "ms1-SD-693900",
+            "itemId": "SD",
+            "met": 693900,
+            "metLabel": "08/00:45",
+            "status": "condicional",
+            "adaptable": false
+          },
+          {
+            "entryId": "ms1-A-710100",
+            "itemId": "A",
+            "met": 710100,
+            "metLabel": "08/05:15",
+            "status": "autorizado",
+            "adaptable": true
+          },
+          {
+            "entryId": "ms1-SF-713400",
+            "itemId": "SF",
+            "met": 713400,
+            "metLabel": "08/06:10",
+            "status": "condicional",
+            "adaptable": false
+          }
+        ]
+      },
+      {
+        "day": 10,
+        "activities": [
+          {
+            "entryId": "ms1-F-754200",
+            "itemId": "F",
+            "met": 754200,
+            "metLabel": "08/17:30",
+            "status": "autorizado",
+            "adaptable": false
+          },
+          {
+            "entryId": "ms1-V-767700",
+            "itemId": "V",
+            "met": 767700,
+            "metLabel": "08/21:15",
+            "status": "autorizado",
+            "adaptable": false
+          },
+          {
+            "entryId": "ms1-SF-774000",
+            "itemId": "SF",
+            "met": 774000,
+            "metLabel": "08/23:00",
+            "status": "autorizado",
+            "adaptable": false
+          },
+          {
+            "entryId": "ms1-OIG-778500",
+            "itemId": "OIG",
+            "met": 778500,
+            "metLabel": "09/00:15",
+            "status": "autorizado",
+            "adaptable": false
+          }
+        ]
+      }
+    ],
+    "ms2": [
+      {
+        "day": 1,
+        "activities": [
+          {
+            "entryId": "ms2-SD-19800",
+            "itemId": "SD",
+            "met": 19800,
+            "metLabel": "00/05:30",
+            "status": "condicional",
+            "adaptable": false
+          },
+          {
+            "entryId": "ms2-F-26100",
+            "itemId": "F",
+            "met": 26100,
+            "metLabel": "00/07:15",
+            "status": "autorizado",
+            "adaptable": false
+          }
+        ]
+      },
+      {
+        "day": 2,
+        "activities": [
+          {
+            "entryId": "ms2-F-71100",
+            "itemId": "F",
+            "met": 71100,
+            "metLabel": "00/19:45",
+            "status": "autorizado",
+            "adaptable": false
+          },
+          {
+            "entryId": "ms2-P-79200",
+            "itemId": "P",
+            "met": 79200,
+            "metLabel": "00/22:00",
+            "status": "autorizado",
+            "adaptable": false
+          },
+          {
+            "entryId": "ms2-N1-91800",
+            "itemId": "N1",
+            "met": 91800,
+            "metLabel": "01/01:30",
+            "status": "autorizado",
+            "adaptable": true
+          },
+          {
+            "entryId": "ms2-SD-92700",
+            "itemId": "SD",
+            "met": 92700,
+            "metLabel": "01/01:45",
+            "status": "condicional",
+            "adaptable": false
+          },
+          {
+            "entryId": "ms2-C-97200",
+            "itemId": "C",
+            "met": 97200,
+            "metLabel": "01/03:00",
+            "status": "autorizado",
+            "adaptable": false
+          },
+          {
+            "entryId": "ms2-RE-114300",
+            "itemId": "RE",
+            "met": 114300,
+            "metLabel": "01/07:45",
+            "status": "autorizado",
+            "adaptable": false
+          }
+        ]
+      },
+      {
+        "day": 3,
+        "activities": [
+          {
+            "entryId": "ms2-F-152100",
+            "itemId": "F",
+            "met": 152100,
+            "metLabel": "01/18:15",
+            "status": "autorizado",
+            "adaptable": false
+          },
+          {
+            "entryId": "ms2-N1-177300",
+            "itemId": "N1",
+            "met": 177300,
+            "metLabel": "02/01:15",
+            "status": "autorizado",
+            "adaptable": true
+          },
+          {
+            "entryId": "ms2-SD-178200",
+            "itemId": "SD",
+            "met": 178200,
+            "metLabel": "02/01:30",
+            "status": "condicional",
+            "adaptable": false
+          },
+          {
+            "entryId": "ms2-RE-199800",
+            "itemId": "RE",
+            "met": 199800,
+            "metLabel": "02/07:30",
+            "status": "autorizado",
+            "adaptable": false
+          }
+        ]
+      },
+      {
+        "day": 4,
+        "activities": [
+          {
+            "entryId": "ms2-F-238500",
+            "itemId": "F",
+            "met": 238500,
+            "metLabel": "02/18:15",
+            "status": "autorizado",
+            "adaptable": false
+          },
+          {
+            "entryId": "ms2-N1-263700",
+            "itemId": "N1",
+            "met": 263700,
+            "metLabel": "03/01:15",
+            "status": "autorizado",
+            "adaptable": true
+          },
+          {
+            "entryId": "ms2-SD-264600",
+            "itemId": "SD",
+            "met": 264600,
+            "metLabel": "03/01:30",
+            "status": "condicional",
+            "adaptable": false
+          },
+          {
+            "entryId": "ms2-C-270300",
+            "itemId": "C",
+            "met": 270300,
+            "metLabel": "03/03:05",
+            "status": "autorizado",
+            "adaptable": false
+          },
+          {
+            "entryId": "ms2-R-273600",
+            "itemId": "R",
+            "met": 273600,
+            "metLabel": "03/04:00",
+            "status": "autorizado",
+            "adaptable": true
+          }
+        ]
+      },
+      {
+        "day": 5,
+        "activities": [
+          {
+            "entryId": "ms2-F-322200",
+            "itemId": "F",
+            "met": 322200,
+            "metLabel": "03/17:30",
+            "status": "autorizado",
+            "adaptable": false
+          },
+          {
+            "entryId": "ms2-N1-351000",
+            "itemId": "N1",
+            "met": 351000,
+            "metLabel": "04/01:30",
+            "status": "autorizado",
+            "adaptable": true
+          },
+          {
+            "entryId": "ms2-SD-351900",
+            "itemId": "SD",
+            "met": 351900,
+            "metLabel": "04/01:45",
+            "status": "condicional",
+            "adaptable": false
+          },
+          {
+            "entryId": "ms2-C-355200",
+            "itemId": "C",
+            "met": 355200,
+            "metLabel": "04/02:40",
+            "status": "autorizado",
+            "adaptable": false
+          }
+        ]
+      },
+      {
+        "day": 6,
+        "activities": [
+          {
+            "entryId": "ms2-F-407700",
+            "itemId": "F",
+            "met": 407700,
+            "metLabel": "04/17:15",
+            "status": "autorizado",
+            "adaptable": false
+          },
+          {
+            "entryId": "ms2-N1-435600",
+            "itemId": "N1",
+            "met": 435600,
+            "metLabel": "05/01:00",
+            "status": "autorizado",
+            "adaptable": true
+          },
+          {
+            "entryId": "ms2-SD-436500",
+            "itemId": "SD",
+            "met": 436500,
+            "metLabel": "05/01:15",
+            "status": "condicional",
+            "adaptable": false
+          },
+          {
+            "entryId": "ms2-RE-452700",
+            "itemId": "RE",
+            "met": 452700,
+            "metLabel": "05/05:45",
+            "status": "autorizado",
+            "adaptable": false
+          }
+        ]
+      },
+      {
+        "day": 7,
+        "activities": [
+          {
+            "entryId": "ms2-F-494100",
+            "itemId": "F",
+            "met": 494100,
+            "metLabel": "05/17:15",
+            "status": "autorizado",
+            "adaptable": false
+          },
+          {
+            "entryId": "ms2-RE-508500",
+            "itemId": "RE",
+            "met": 508500,
+            "metLabel": "05/21:15",
+            "status": "autorizado",
+            "adaptable": false
+          },
+          {
+            "entryId": "ms2-N1-518400",
+            "itemId": "N1",
+            "met": 518400,
+            "metLabel": "06/00:00",
+            "status": "autorizado",
+            "adaptable": true
+          },
+          {
+            "entryId": "ms2-SD-519300",
+            "itemId": "SD",
+            "met": 519300,
+            "metLabel": "06/00:15",
+            "status": "condicional",
+            "adaptable": false
+          },
+          {
+            "entryId": "ms2-A-528300",
+            "itemId": "A",
+            "met": 528300,
+            "metLabel": "06/02:45",
+            "status": "autorizado",
+            "adaptable": true
+          },
+          {
+            "entryId": "ms2-V-537300",
+            "itemId": "V",
+            "met": 537300,
+            "metLabel": "06/05:15",
+            "status": "autorizado",
+            "adaptable": false
+          }
+        ]
+      },
+      {
+        "day": 8,
+        "activities": [
+          {
+            "entryId": "ms2-F-580500",
+            "itemId": "F",
+            "met": 580500,
+            "metLabel": "06/17:15",
+            "status": "autorizado",
+            "adaptable": false
+          },
+          {
+            "entryId": "ms2-R-591300",
+            "itemId": "R",
+            "met": 591300,
+            "metLabel": "06/20:15",
+            "status": "autorizado",
+            "adaptable": true
+          },
+          {
+            "entryId": "ms2-C-605100",
+            "itemId": "C",
+            "met": 605100,
+            "metLabel": "07/00:05",
+            "status": "autorizado",
+            "adaptable": false
+          },
+          {
+            "entryId": "ms2-N1-606600",
+            "itemId": "N1",
+            "met": 606600,
+            "metLabel": "07/00:30",
+            "status": "autorizado",
+            "adaptable": true
+          },
+          {
+            "entryId": "ms2-SD-608400",
+            "itemId": "SD",
+            "met": 608400,
+            "metLabel": "07/01:00",
+            "status": "condicional",
+            "adaptable": false
+          },
+          {
+            "entryId": "ms2-V-624600",
+            "itemId": "V",
+            "met": 624600,
+            "metLabel": "07/05:30",
+            "status": "autorizado",
+            "adaptable": false
+          }
+        ]
+      },
+      {
+        "day": 9,
+        "activities": [
+          {
+            "entryId": "ms2-F-666900",
+            "itemId": "F",
+            "met": 666900,
+            "metLabel": "07/17:15",
+            "status": "autorizado",
+            "adaptable": false
+          },
+          {
+            "entryId": "ms2-OIG-675900",
+            "itemId": "OIG",
+            "met": 675900,
+            "metLabel": "07/19:45",
+            "status": "autorizado",
+            "adaptable": false
+          },
+          {
+            "entryId": "ms2-V-683100",
+            "itemId": "V",
+            "met": 683100,
+            "metLabel": "07/21:45",
+            "status": "autorizado",
+            "adaptable": false
+          },
+          {
+            "entryId": "ms2-N1-693000",
+            "itemId": "N1",
+            "met": 693000,
+            "metLabel": "08/00:30",
+            "status": "autorizado",
+            "adaptable": true
+          },
+          {
+            "entryId": "ms2-SD-693900",
+            "itemId": "SD",
+            "met": 693900,
+            "metLabel": "08/00:45",
+            "status": "condicional",
+            "adaptable": false
+          },
+          {
+            "entryId": "ms2-A-710100",
+            "itemId": "A",
+            "met": 710100,
+            "metLabel": "08/05:15",
+            "status": "autorizado",
+            "adaptable": true
+          },
+          {
+            "entryId": "ms2-SF-713400",
+            "itemId": "SF",
+            "met": 713400,
+            "metLabel": "08/06:10",
+            "status": "condicional",
+            "adaptable": false
+          }
+        ]
+      },
+      {
+        "day": 10,
+        "activities": [
+          {
+            "entryId": "ms2-F-754200",
+            "itemId": "F",
+            "met": 754200,
+            "metLabel": "08/17:30",
+            "status": "autorizado",
+            "adaptable": false
+          },
+          {
+            "entryId": "ms2-V-767700",
+            "itemId": "V",
+            "met": 767700,
+            "metLabel": "08/21:15",
+            "status": "autorizado",
+            "adaptable": false
+          },
+          {
+            "entryId": "ms2-SF-774000",
+            "itemId": "SF",
+            "met": 774000,
+            "metLabel": "08/23:00",
+            "status": "autorizado",
+            "adaptable": false
+          },
+          {
+            "entryId": "ms2-OIG-778500",
+            "itemId": "OIG",
+            "met": 778500,
+            "metLabel": "09/00:15",
+            "status": "autorizado",
+            "adaptable": false
+          }
+        ]
+      }
+    ]
+  },
+  "capacities": [
+    {
+      "id": "fatiga",
+      "name": "Fatiga y recuperación",
+      "description": "Fatiga operativa, reserva mental y calidad del descanso.",
+      "onAmbar": "Sustituye el ejercicio intenso por uno de menor carga del catálogo o lo omite, y protege la recuperación.",
+      "onRojo": "No decide por su cuenta: remite al procedimiento de misión, avisa a control de misión y no propone carga intensa."
+    },
+    {
+      "id": "musculoesqueletico",
+      "name": "Fuerza y sistema musculoesquelético",
+      "description": "Rigidez, molestias, fatiga localizada y pérdida de fuerza.",
+      "onAmbar": "Sustituye el ejercicio resistivo por otro de menor carga (bandas, movilidad) o lo omite. Nunca añade carga.",
+      "onRojo": "No decide por su cuenta: remite al procedimiento de misión, avisa a control de misión y no propone carga intensa."
+    },
+    {
+      "id": "vestibular",
+      "name": "Equilibrio y adaptación vestibular",
+      "description": "Estabilidad de la mirada, desorientación y equilibrio, sobre todo cerca de un cambio de gravedad.",
+      "onAmbar": "Avisa y prioriza las actividades de preparación de la transición ya planificadas. No crea ejercicios nuevos.",
+      "onRojo": "No decide por su cuenta: remite al procedimiento de misión, avisa a control de misión y no propone carga intensa."
+    },
+    {
+      "id": "cardiovascular",
+      "name": "Tolerancia cardiovascular y ortostática",
+      "description": "Mareo al incorporarse, palpitaciones, recuperación tras el esfuerzo e hidratación.",
+      "onAmbar": "Cambia al menú con refuerzo de hidratación y sustituye el ejercicio intenso por uno de menor carga.",
+      "onRojo": "No decide por su cuenta: remite al procedimiento de misión, avisa a control de misión y no propone carga intensa."
+    },
+    {
+      "id": "vision",
+      "name": "Visión y síntomas cefálicos",
+      "description": "Pesadez craneal, presión ocular y dificultad para enfocar.",
+      "onAmbar": "Sustituye el ejercicio resistivo intenso (con maniobra de Valsalva) por uno de menor carga y avisa.",
+      "onRojo": "No decide por su cuenta: remite al procedimiento de misión, avisa a control de misión y no propone carga intensa."
+    },
+    {
+      "id": "coordinacion",
+      "name": "Coordinación visomotora",
+      "description": "Resultado de la prueba táctil de coordinación (experimental) respecto a la referencia propia.",
+      "onAmbar": "Pide repetir la prueba y no propone actividades que aumenten la carga.",
+      "onRojo": "No decide por su cuenta: remite al procedimiento de misión, avisa a control de misión y no propone carga intensa."
+    }
+  ],
+  "signals": [
+    {
+      "id": "fc_reposo_delta",
+      "name": "Frecuencia cardiaca en reposo respecto a la referencia propia",
+      "unit": "lpm",
+      "source": "reloj",
+      "simulated": false,
+      "capacityId": "cardiovascular",
+      "kind": "number",
+      "worseWhen": "mayor",
+      "ambar": 10,
+      "rojo": 15,
+      "description": "Diferencia entre la FC en reposo de hoy y la referencia del propio astronauta."
+    },
+    {
+      "id": "recuperacion_fc_lenta",
+      "name": "Recuperación lenta de la FC tras el ejercicio",
+      "unit": "",
+      "source": "reloj",
+      "simulated": false,
+      "capacityId": "cardiovascular",
+      "kind": "boolean",
+      "whenTrue": "ambar",
+      "description": "La FC tarda más de lo habitual en bajar tras una sesión de ejercicio."
+    },
+    {
+      "id": "hrv_nocturna_delta",
+      "name": "Variabilidad cardiaca nocturna (RMSSD) respecto a la referencia propia",
+      "unit": "%",
+      "source": "ropa",
+      "simulated": true,
+      "capacityId": "fatiga",
+      "kind": "number",
+      "worseWhen": "menor",
+      "ambar": -15,
+      "rojo": -25,
+      "description": "Variación porcentual del RMSSD durante el sueño."
+    },
+    {
+      "id": "fr_delta",
+      "name": "Frecuencia respiratoria respecto a la referencia propia",
+      "unit": "%",
+      "source": "ropa",
+      "simulated": true,
+      "capacityId": "cardiovascular",
+      "kind": "number",
+      "worseWhen": "mayor",
+      "ambar": 25,
+      "rojo": null,
+      "description": "Variación porcentual de la frecuencia respiratoria en reposo."
+    },
+    {
+      "id": "spo2",
+      "name": "Saturación de oxígeno",
+      "unit": "%",
+      "source": "ropa",
+      "simulated": true,
+      "capacityId": "cardiovascular",
+      "kind": "number",
+      "worseWhen": "menor",
+      "ambar": null,
+      "rojo": 92,
+      "description": "SpO2 en reposo."
+    },
+    {
+      "id": "arritmia_ecg",
+      "name": "Extrasístoles o ritmo irregular en el ECG",
+      "unit": "",
+      "source": "ropa",
+      "simulated": true,
+      "capacityId": "cardiovascular",
+      "kind": "boolean",
+      "whenTrue": "ambar",
+      "description": "El ECG de la prenda registra latidos irregulares en las últimas 24 h."
+    },
+    {
+      "id": "fatiga_emg",
+      "name": "Fatiga muscular (sEMG)",
+      "unit": "%",
+      "source": "ropa",
+      "simulated": true,
+      "capacityId": "musculoesqueletico",
+      "kind": "number",
+      "worseWhen": "mayor",
+      "ambar": 20,
+      "rojo": null,
+      "description": "Indicador de fatiga muscular de la electromiografía de superficie de la prenda."
+    },
+    {
+      "id": "coordinacion_delta",
+      "name": "Empeoramiento en la prueba de coordinación respecto a la referencia propia",
+      "unit": "%",
+      "source": "prueba",
+      "simulated": false,
+      "capacityId": "coordinacion",
+      "kind": "number",
+      "worseWhen": "mayor",
+      "ambar": 15,
+      "rojo": 30,
+      "description": "Empeoramiento combinado de errores y latencia en la prueba táctil (código C)."
+    }
+  ],
+  "questionnaire": {
+    "catalogItemId": "F",
+    "name": "Cuestionario diario de fatiga, descanso y síntomas",
+    "source": "ARTEMIS-MED — Lógica médica, cuestionario y semáforo (equipo, Ingeniería Biomédica A)",
+    "fixedPerDay": 3,
+    "bankPerDay": 2,
+    "items": [
+      {
+        "id": "Q1_FATIGA",
+        "block": "fijo",
+        "domain": "Fatiga operativa y reserva mental",
+        "capacityId": "fatiga",
+        "scale": {
+          "min": 1,
+          "max": 7
+        },
+        "inspiredBy": "Samn-Perelli (USAF)",
+        "variants": [
+          {
+            "id": "Q1_V1",
+            "text": "¿Cuál es tu nivel de fatiga operativa ahora mismo?",
+            "minLabel": "Totalmente despejado",
+            "maxLabel": "Agotamiento extremo",
+            "inverted": false
+          },
+          {
+            "id": "Q1_V2",
+            "text": "¿Cuánto esfuerzo mental extra necesitas hoy para mantener la concentración en tareas de precisión?",
+            "minLabel": "Ninguno",
+            "maxLabel": "Extremo",
+            "inverted": false
+          },
+          {
+            "id": "Q1_V3",
+            "text": "¿Qué nivel de agilidad mental y reserva de energía sientes hoy?",
+            "minLabel": "Mínima",
+            "maxLabel": "Máxima",
+            "inverted": true
+          }
+        ],
+        "ambar": 4,
+        "rojo": 6,
+        "triggers": []
+      },
+      {
+        "id": "Q2_SANS",
+        "block": "fijo",
+        "domain": "Redistribución de fluidos hacia la cabeza",
+        "capacityId": "vision",
+        "scale": {
+          "min": 0,
+          "max": 3
+        },
+        "inspiredBy": "Cribado de síntomas SANS (NASA)",
+        "variants": [
+          {
+            "id": "Q2_V1",
+            "text": "¿Percibes pesadez craneal o dolor de cabeza pulsátil hoy?",
+            "minLabel": "No",
+            "maxLabel": "Intenso",
+            "inverted": false
+          },
+          {
+            "id": "Q2_V2",
+            "text": "¿Notas mayor dificultad hoy para enfocar con nitidez los indicadores pequeños de la consola?",
+            "minLabel": "No",
+            "maxLabel": "Mucha",
+            "inverted": false
+          },
+          {
+            "id": "Q2_V3",
+            "text": "¿Sientes congestión sinusal o presión detrás de los ojos similar a estar inclinado hacia abajo?",
+            "minLabel": "No",
+            "maxLabel": "Intensa",
+            "inverted": false
+          }
+        ],
+        "ambar": 2,
+        "rojo": 3,
+        "triggers": []
+      },
+      {
+        "id": "Q3_MUSCULAR",
+        "block": "fijo",
+        "domain": "Integridad musculoesquelética global",
+        "capacityId": "musculoesqueletico",
+        "scale": {
+          "min": 1,
+          "max": 5
+        },
+        "inspiredBy": "Escala visual analógica discretizada",
+        "variants": [
+          {
+            "id": "Q3_V1",
+            "text": "¿Qué grado de rigidez o molestia musculoesquelética sientes hoy?",
+            "minLabel": "Ninguna",
+            "maxLabel": "Severa",
+            "inverted": false
+          },
+          {
+            "id": "Q3_V2",
+            "text": "¿Cuánta resistencia o falta de elasticidad notas en tobillos y espalda al iniciar el movimiento?",
+            "minLabel": "Ninguna",
+            "maxLabel": "Mucha",
+            "inverted": false
+          },
+          {
+            "id": "Q3_V3",
+            "text": "¿Con qué soltura y ligereza sientes tus articulaciones hoy?",
+            "minLabel": "Muy rígidas",
+            "maxLabel": "Totalmente fluidas",
+            "inverted": true
+          }
+        ],
+        "ambar": 3,
+        "rojo": 4,
+        "triggers": []
+      },
+      {
+        "id": "LOC-01",
+        "block": "banco",
+        "domain": "Tendón de Aquiles y sóleo",
+        "capacityId": "musculoesqueletico",
+        "scale": {
+          "min": 1,
+          "max": 5
+        },
+        "inspiredBy": "VISA-A",
+        "variants": [
+          {
+            "id": "LOC-01_V1",
+            "text": "¿Cuánta rigidez o tirantez notas en el tendón de Aquiles al iniciar el movimiento?",
+            "minLabel": "Nada",
+            "maxLabel": "Mucha",
+            "inverted": false
+          },
+          {
+            "id": "LOC-01_V2",
+            "text": "¿Sientes falta de elasticidad o sobrecarga en la parte baja del gemelo al apoyar el pie?",
+            "minLabel": "Nada",
+            "maxLabel": "Mucha",
+            "inverted": false
+          }
+        ],
+        "ambar": 3,
+        "rojo": 4,
+        "triggers": [
+          {
+            "kind": "relleno",
+            "priority": 2,
+            "reason": "Pregunta de relleno cuando no hay otras disparadas."
+          }
+        ]
+      },
+      {
+        "id": "LOC-02",
+        "block": "banco",
+        "domain": "Columna lumbar",
+        "capacityId": "musculoesqueletico",
+        "scale": {
+          "min": 1,
+          "max": 5
+        },
+        "inspiredBy": "Oswestry (ODI)",
+        "variants": [
+          {
+            "id": "LOC-02_V1",
+            "text": "¿Sientes presión o dolor lumbar bajo al realizar flexión de tronco o estirarte?",
+            "minLabel": "Nada",
+            "maxLabel": "Mucho",
+            "inverted": false
+          },
+          {
+            "id": "LOC-02_V2",
+            "text": "¿Notas tensión o fatiga postural en la zona baja de la espalda al mantenerte erguido?",
+            "minLabel": "Nada",
+            "maxLabel": "Mucha",
+            "inverted": false
+          }
+        ],
+        "ambar": 3,
+        "rojo": 4,
+        "triggers": [
+          {
+            "kind": "dias-micro",
+            "min": 7,
+            "priority": 6,
+            "reason": "Llevas 7 o más días de vuelo seguidos en microgravedad."
+          }
+        ]
+      },
+      {
+        "id": "LOC-03",
+        "block": "banco",
+        "domain": "Extremidad superior tras una EVA",
+        "capacityId": "musculoesqueletico",
+        "scale": {
+          "min": 1,
+          "max": 5
+        },
+        "inspiredBy": "Cuestionario Nórdico (NMQ)",
+        "variants": [
+          {
+            "id": "LOC-03_V1",
+            "text": "¿Percibes fatiga en antebrazos o rigidez articular en hombros por el traje presurizado?",
+            "minLabel": "Nada",
+            "maxLabel": "Mucha",
+            "inverted": false
+          },
+          {
+            "id": "LOC-03_V2",
+            "text": "¿Notas pérdida de fuerza de agarre o sobrecarga en muñecas y hombros tras la actividad?",
+            "minLabel": "Nada",
+            "maxLabel": "Mucha",
+            "inverted": false
+          }
+        ],
+        "ambar": 3,
+        "rojo": 4,
+        "triggers": [
+          {
+            "kind": "evento",
+            "eventKind": "eva",
+            "withinDays": 1,
+            "priority": 6,
+            "reason": "Hubo una EVA en el último día de vuelo."
+          }
+        ]
+      },
+      {
+        "id": "LOC-04",
+        "block": "banco",
+        "domain": "Fatiga aguda del tren inferior",
+        "capacityId": "musculoesqueletico",
+        "scale": {
+          "min": 1,
+          "max": 5
+        },
+        "inspiredBy": "LEFS",
+        "variants": [
+          {
+            "id": "LOC-04_V1",
+            "text": "¿Sientes pesadez muscular o fatiga en muslos y glúteos durante los ejercicios resistivos?",
+            "minLabel": "Nada",
+            "maxLabel": "Mucha",
+            "inverted": false
+          },
+          {
+            "id": "LOC-04_V2",
+            "text": "¿Cuánta fatiga localizada percibes en las piernas al realizar movimientos de empuje?",
+            "minLabel": "Nada",
+            "maxLabel": "Mucha",
+            "inverted": false
+          }
+        ],
+        "ambar": 3,
+        "rojo": 4,
+        "triggers": []
+      },
+      {
+        "id": "LOC-05",
+        "block": "banco",
+        "domain": "Atrofia y pérdida de fuerza muscular",
+        "capacityId": "musculoesqueletico",
+        "scale": {
+          "min": 1,
+          "max": 5
+        },
+        "inspiredBy": "Escala MRC / NASA HRP",
+        "variants": [
+          {
+            "id": "LOC-05_V1",
+            "text": "¿Notas dificultad para mover cargas resistivas que la semana pasada levantabas sin problema?",
+            "minLabel": "Nada",
+            "maxLabel": "Mucha",
+            "inverted": false
+          },
+          {
+            "id": "LOC-05_V2",
+            "text": "¿Percibes pérdida de firmeza o sensación de debilidad en piernas y tronco al estabilizarte?",
+            "minLabel": "Nada",
+            "maxLabel": "Mucha",
+            "inverted": false
+          }
+        ],
+        "ambar": 3,
+        "rojo": 4,
+        "triggers": [
+          {
+            "kind": "senal",
+            "signalId": "fatiga_emg",
+            "op": ">=",
+            "value": 20,
+            "priority": 9,
+            "reason": "La prenda registra fatiga muscular elevada."
+          },
+          {
+            "kind": "transicion",
+            "toGravity": [
+              "marte"
+            ],
+            "daysBefore": 3,
+            "daysAfter": 0,
+            "minDaysInMicro": 150,
+            "priority": 9,
+            "reason": "Llegada a Marte tras un tránsito largo en microgravedad."
+          }
+        ]
+      },
+      {
+        "id": "VES-01",
+        "block": "banco",
+        "domain": "Reflejo vestíbulo-ocular",
+        "capacityId": "vestibular",
+        "scale": {
+          "min": 0,
+          "max": 2
+        },
+        "inspiredBy": "Graybiel / DHI",
+        "variants": [
+          {
+            "id": "VES-01_V1",
+            "text": "Al girar rápido la cabeza de lado a lado, ¿notas que los objetos tardan en estabilizarse?",
+            "minLabel": "No",
+            "maxLabel": "Claramente",
+            "inverted": false
+          },
+          {
+            "id": "VES-01_V2",
+            "text": "¿Percibes sensación de rebote visual o desorientación breve al cambiar rápido de mirada?",
+            "minLabel": "No",
+            "maxLabel": "Claramente",
+            "inverted": false
+          }
+        ],
+        "ambar": 1,
+        "rojo": 2,
+        "triggers": [
+          {
+            "kind": "transicion",
+            "toGravity": [],
+            "daysBefore": 3,
+            "daysAfter": 3,
+            "priority": 9,
+            "reason": "Estás a 3 días de vuelo o menos de un cambio de gravedad."
+          },
+          {
+            "kind": "relleno",
+            "priority": 1,
+            "reason": "Pregunta de relleno cuando no hay otras disparadas."
+          }
+        ]
+      },
+      {
+        "id": "VES-02",
+        "block": "banco",
+        "domain": "Intolerancia ortostática",
+        "capacityId": "cardiovascular",
+        "scale": {
+          "min": 0,
+          "max": 3
+        },
+        "inspiredBy": "NASA HRP — riesgo ortostático",
+        "variants": [
+          {
+            "id": "VES-02_V1",
+            "text": "¿Has sentido aturdimiento o visión en túnel al incorporarte o cambiar de posición?",
+            "minLabel": "No",
+            "maxLabel": "Intenso",
+            "inverted": false
+          },
+          {
+            "id": "VES-02_V2",
+            "text": "¿Notas sensación de mareo leve o inestabilidad al pasar a posición vertical?",
+            "minLabel": "No",
+            "maxLabel": "Intensa",
+            "inverted": false
+          }
+        ],
+        "ambar": 1,
+        "rojo": 2,
+        "triggers": [
+          {
+            "kind": "transicion",
+            "toGravity": [
+              "tierra",
+              "luna",
+              "marte"
+            ],
+            "daysBefore": 3,
+            "daysAfter": 0,
+            "priority": 10,
+            "reason": "Faltan 3 días de vuelo o menos para un aterrizaje."
+          },
+          {
+            "kind": "senal",
+            "signalId": "fc_reposo_delta",
+            "op": ">=",
+            "value": 12,
+            "priority": 7,
+            "reason": "Tu FC en reposo está 12 lpm o más por encima de tu referencia."
+          }
+        ]
+      },
+      {
+        "id": "VES-03",
+        "block": "banco",
+        "domain": "Equilibrio y propiocepción plantar",
+        "capacityId": "vestibular",
+        "scale": {
+          "min": 1,
+          "max": 5
+        },
+        "inspiredBy": "Escala ABC",
+        "variants": [
+          {
+            "id": "VES-03_V1",
+            "text": "¿Cuánta inseguridad o falta de estabilidad notas en la planta de los pies al caminar?",
+            "minLabel": "Nada",
+            "maxLabel": "Mucha",
+            "inverted": false
+          },
+          {
+            "id": "VES-03_V2",
+            "text": "¿Sientes dificultad para mantener el equilibrio en línea recta sin apoyarte?",
+            "minLabel": "Nada",
+            "maxLabel": "Mucha",
+            "inverted": false
+          }
+        ],
+        "ambar": 3,
+        "rojo": 4,
+        "triggers": [
+          {
+            "kind": "entorno",
+            "gravity": [
+              "tierra",
+              "luna",
+              "marte"
+            ],
+            "priority": 8,
+            "reason": "Estás en un entorno con gravedad."
+          }
+        ]
+      },
+      {
+        "id": "SAN-01",
+        "block": "banco",
+        "domain": "Agudeza visual",
+        "capacityId": "vision",
+        "scale": {
+          "min": 0,
+          "max": 3
+        },
+        "inspiredBy": "Guías SANS (NASA)",
+        "variants": [
+          {
+            "id": "SAN-01_V1",
+            "text": "¿Notas mayor dificultad hoy para enfocar texto pequeño a distancia de lectura?",
+            "minLabel": "No",
+            "maxLabel": "Mucha",
+            "inverted": false
+          },
+          {
+            "id": "SAN-01_V2",
+            "text": "¿Percibes visión borrosa cercana o fatiga ocular al leer pantallas de cabina?",
+            "minLabel": "No",
+            "maxLabel": "Mucha",
+            "inverted": false
+          }
+        ],
+        "ambar": 2,
+        "rojo": 3,
+        "triggers": [
+          {
+            "kind": "transicion",
+            "toGravity": [
+              "marte"
+            ],
+            "daysBefore": 3,
+            "daysAfter": 0,
+            "priority": 9,
+            "reason": "Faltan 3 días de vuelo o menos para aterrizar en Marte."
+          }
+        ]
+      },
+      {
+        "id": "CIR-01",
+        "block": "banco",
+        "domain": "Calidad del sueño",
+        "capacityId": "fatiga",
+        "scale": {
+          "min": 1,
+          "max": 5
+        },
+        "inspiredBy": "KSS / PSQI",
+        "variants": [
+          {
+            "id": "CIR-01_V1",
+            "text": "¿Qué tan poco reparador sentiste tu descanso nocturno?",
+            "minLabel": "Óptimo",
+            "maxLabel": "Muy fragmentado",
+            "inverted": false
+          },
+          {
+            "id": "CIR-01_V2",
+            "text": "¿Con qué frecuencia te despertaste o tuviste sueño ligero durante el último descanso?",
+            "minLabel": "Nunca",
+            "maxLabel": "Muy a menudo",
+            "inverted": false
+          }
+        ],
+        "ambar": 4,
+        "rojo": null,
+        "triggers": [
+          {
+            "kind": "senal",
+            "signalId": "hrv_nocturna_delta",
+            "op": "<=",
+            "value": -15,
+            "priority": 8,
+            "reason": "Tu variabilidad cardiaca nocturna ha caído un 15 % o más."
+          }
+        ]
+      },
+      {
+        "id": "CAR-01",
+        "block": "banco",
+        "domain": "Tolerancia cardiaca y autonómica",
+        "capacityId": "cardiovascular",
+        "scale": {
+          "min": 0,
+          "max": 3
+        },
+        "inspiredBy": "NASA HRP — riesgo cardiovascular",
+        "variants": [
+          {
+            "id": "CAR-01_V1",
+            "text": "¿Has percibido palpitaciones, latidos irregulares o falta de aire inusual hoy?",
+            "minLabel": "No",
+            "maxLabel": "Intensas",
+            "inverted": false
+          },
+          {
+            "id": "CAR-01_V2",
+            "text": "¿Notas que el corazón tarda más de lo habitual en calmarse tras un esfuerzo físico?",
+            "minLabel": "No",
+            "maxLabel": "Mucho",
+            "inverted": false
+          }
+        ],
+        "ambar": 1,
+        "rojo": 2,
+        "triggers": [
+          {
+            "kind": "senal",
+            "signalId": "arritmia_ecg",
+            "priority": 10,
+            "reason": "La prenda ha registrado latidos irregulares."
+          },
+          {
+            "kind": "senal",
+            "signalId": "recuperacion_fc_lenta",
+            "priority": 10,
+            "reason": "Tu FC tardó más de lo habitual en bajar tras el ejercicio."
+          }
+        ]
+      },
+      {
+        "id": "MET-01",
+        "block": "banco",
+        "domain": "Hidratación y estrés metabólico",
+        "capacityId": "cardiovascular",
+        "scale": {
+          "min": 1,
+          "max": 5
+        },
+        "inspiredBy": "NASA — nutrición",
+        "variants": [
+          {
+            "id": "MET-01_V1",
+            "text": "¿Sientes sed persistente, sequedad bucal o inapetencia en las últimas horas?",
+            "minLabel": "Nada",
+            "maxLabel": "Mucha",
+            "inverted": false
+          },
+          {
+            "id": "MET-01_V2",
+            "text": "¿Notas signos de deshidratación o tensión física acumulada sin causa aparente?",
+            "minLabel": "Nada",
+            "maxLabel": "Muchos",
+            "inverted": false
+          }
+        ],
+        "ambar": 3,
+        "rojo": null,
+        "triggers": []
+      }
+    ],
+    "consistencyChecks": [
+      {
+        "id": "fatiga-vs-hrv",
+        "questionId": "Q1_FATIGA",
+        "answerAtMost": 2,
+        "signalId": "hrv_nocturna_delta",
+        "op": "<=",
+        "value": -18,
+        "message": "Indicas estar despejado, pero tu variabilidad cardiaca nocturna ha caído. Se tiene en cuenta el dato del sensor."
+      }
+    ]
+  },
+  "thresholdsAreDemo": true,
+  "validation": [
+    {
+      "id": "adaptable-fuera-de-periodo-9-cdr-cdr-A-710100",
+      "rule": "adaptable-fuera-de-periodo",
+      "severity": "info",
+      "day": 9,
+      "crewId": "cdr",
+      "message": "Acondicionamiento aeróbico en MET 08/05:15: es adaptable pero no está dentro de un bloque de «Ejercicio»; la interfaz podrá sustituirla u omitirla, no moverla."
+    },
+    {
+      "id": "intenso-en-vispera-9-cdr-cdr-A-710100",
+      "rule": "intenso-en-vispera",
+      "severity": "aviso",
+      "day": 9,
+      "crewId": "cdr",
+      "message": "Acondicionamiento aeróbico en la víspera de FD10 («RTC-3, entrada y amerizaje»): proteger el descanso previo."
+    },
+    {
+      "id": "adaptable-fuera-de-periodo-9-plt-plt-A-710100",
+      "rule": "adaptable-fuera-de-periodo",
+      "severity": "info",
+      "day": 9,
+      "crewId": "plt",
+      "message": "Acondicionamiento aeróbico en MET 08/05:15: es adaptable pero no está dentro de un bloque de «Ejercicio»; la interfaz podrá sustituirla u omitirla, no moverla."
+    },
+    {
+      "id": "intenso-en-vispera-9-plt-plt-A-710100",
+      "rule": "intenso-en-vispera",
+      "severity": "aviso",
+      "day": 9,
+      "crewId": "plt",
+      "message": "Acondicionamiento aeróbico en la víspera de FD10 («RTC-3, entrada y amerizaje»): proteger el descanso previo."
+    },
+    {
+      "id": "adaptable-fuera-de-periodo-9-ms1-ms1-A-710100",
+      "rule": "adaptable-fuera-de-periodo",
+      "severity": "info",
+      "day": 9,
+      "crewId": "ms1",
+      "message": "Acondicionamiento aeróbico en MET 08/05:15: es adaptable pero no está dentro de un bloque de «Ejercicio»; la interfaz podrá sustituirla u omitirla, no moverla."
+    },
+    {
+      "id": "intenso-en-vispera-9-ms1-ms1-A-710100",
+      "rule": "intenso-en-vispera",
+      "severity": "aviso",
+      "day": 9,
+      "crewId": "ms1",
+      "message": "Acondicionamiento aeróbico en la víspera de FD10 («RTC-3, entrada y amerizaje»): proteger el descanso previo."
+    },
+    {
+      "id": "adaptable-fuera-de-periodo-9-ms2-ms2-A-710100",
+      "rule": "adaptable-fuera-de-periodo",
+      "severity": "info",
+      "day": 9,
+      "crewId": "ms2",
+      "message": "Acondicionamiento aeróbico en MET 08/05:15: es adaptable pero no está dentro de un bloque de «Ejercicio»; la interfaz podrá sustituirla u omitirla, no moverla."
+    },
+    {
+      "id": "intenso-en-vispera-9-ms2-ms2-A-710100",
+      "rule": "intenso-en-vispera",
+      "severity": "aviso",
+      "day": 9,
+      "crewId": "ms2",
+      "message": "Acondicionamiento aeróbico en la víspera de FD10 («RTC-3, entrada y amerizaje»): proteger el descanso previo."
+    },
+    {
+      "id": "suplemento-sin-dosis-SD",
+      "rule": "suplemento-sin-dosis",
+      "severity": "info",
+      "day": null,
+      "crewId": null,
+      "message": "Suplemento de vitamina D (ejemplo): dosis pendiente de protocolo médico; el paquete lo publica sin dosis."
+    },
+    {
+      "id": "suplemento-sin-dosis-SF",
+      "rule": "suplemento-sin-dosis",
+      "severity": "info",
+      "day": null,
+      "crewId": null,
+      "message": "Carga de fluidos y sal previa al regreso (ejemplo): dosis pendiente de protocolo médico; el paquete lo publica sin dosis."
+    },
+    {
+      "id": "condicionales",
+      "rule": "condicionales",
+      "severity": "info",
+      "day": null,
+      "crewId": null,
+      "message": "40 actividades condicionales: dependen de confirmar equipo, protocolo o recuperación."
+    },
+    {
+      "id": "cuestionario-nunca-LOC-04",
+      "rule": "cuestionario",
+      "severity": "info",
+      "day": null,
+      "crewId": null,
+      "message": "Pregunta LOC-04 (Fatiga aguda del tren inferior): sin disparadores disponibles; no se seleccionará nunca."
+    },
+    {
+      "id": "cuestionario-nunca-MET-01",
+      "rule": "cuestionario",
+      "severity": "info",
+      "day": null,
+      "crewId": null,
+      "message": "Pregunta MET-01 (Hidratación y estrés metabólico): sin disparadores disponibles; no se seleccionará nunca."
+    }
+  ],
+  "checksum": "sha256:62093282fd06f80985c8d7c445190ba4b4fa6a9a247fd97469979acb9c47f687"
+}
