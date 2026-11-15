@@ -44,6 +44,9 @@ export interface PackageActivity {
   status: EntryStatus;
   /** true = the interface may adapt it according to adaptationPolicy. */
   adaptable: boolean;
+  /** Planned end, from the catalog duration; absent if unknown. */
+  endMet?: number;
+  endMetLabel?: string;
   note?: LocalizedText;
 }
 
@@ -80,7 +83,12 @@ export interface MissionPackage {
   /** Gravity of each environment relative to Earth. */
   gravityReference: typeof GRAVITY_G;
   crew: AppState["crew"];
-  days: (FlightDay & { label: string; startMetLabel: string; endMetLabel: string })[];
+  days: (FlightDay & {
+    label: string;
+    startMetLabel: string;
+    endMetLabel: string;
+    transitionMetLabel?: string;
+  })[];
   events: (MissionEvent & { metLabel: string; day: number | null })[];
   blocks: (TimelineBlock & {
     startMetLabel: string;
@@ -113,6 +121,11 @@ export function buildPackageBody(
   publishedAt: string,
 ): PackageBody {
   const categoryOf = new Map(state.catalog.map((c) => [c.id, c.category]));
+  const durationOf = new Map(state.catalog.map((c) => [c.id, c.durationMin ?? null]));
+  const endOf = (itemId: string, met: number) => {
+    const minutes = durationOf.get(itemId);
+    return minutes ? { endMet: met + minutes * 60, endMetLabel: formatMet(met + minutes * 60) } : {};
+  };
   const plans: PackageBody["plans"] = {};
   for (const member of state.crew) {
     plans[member.id] = state.days.map((d) => ({
@@ -127,6 +140,7 @@ export function buildPackageBody(
           metLabel: formatMet(e.met),
           status: e.status,
           adaptable: e.adaptable && isAdaptableCategory(categoryOf.get(e.itemId) ?? "assessment"),
+          ...endOf(e.itemId, e.met),
           ...(e.note ? { note: e.note } : {}),
         })),
     }));
@@ -146,6 +160,7 @@ export function buildPackageBody(
       label: formatFlightDay(d.day),
       startMetLabel: formatMet(d.startMet),
       endMetLabel: formatMet(d.endMet),
+      ...(d.transitionMet !== undefined ? { transitionMetLabel: formatMet(d.transitionMet) } : {}),
     })),
     events: [...state.events]
       .sort((a, b) => a.met - b.met)

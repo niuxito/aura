@@ -37,7 +37,62 @@ const STATE = ["state", "current"] as const;
  * replaced by the demo mission (as was already the rule before v4).
  */
 function migrate(saved: AppState): AppState | null {
-  return saved.schemaVersion === SCHEMA_VERSION ? saved : null;
+  return saved.schemaVersion === SCHEMA_VERSION ? backfill(saved, createSeedState()) : null;
+}
+
+/**
+ * Optional fields added to v5 after its release (transition MET, durations,
+ * notes of conditional activities, amber actions, critical capacities,
+ * resting heart rate). A saved state that lacks them gets the demo value of
+ * the same id; anything mission control already set is left untouched.
+ * Returns the same object when nothing was missing.
+ */
+function backfill(saved: AppState, seed: AppState): AppState {
+  let changed = false;
+  const fill = <T extends object>(list: T[], fn: (x: T) => T): T[] =>
+    list.map((x) => {
+      const next = fn(x);
+      if (next !== x) changed = true;
+      return next;
+    });
+
+  const seedCrew = new Map(seed.crew.map((c) => [c.id, c]));
+  const seedDays = new Map(seed.days.map((d) => [d.day, d]));
+  const seedItems = new Map(seed.catalog.map((c) => [c.id, c]));
+  const seedCaps = new Map(seed.capacities.map((c) => [c.id, c]));
+  const seedPlan = new Map(seed.plan.map((e) => [e.id, e]));
+
+  const next: AppState = {
+    ...saved,
+    crew: fill(saved.crew, (c) =>
+      c.restingHrBpm !== undefined
+        ? c
+        : { ...c, restingHrBpm: seedCrew.get(c.id)?.restingHrBpm ?? null },
+    ),
+    days: fill(saved.days, (d) => {
+      const s = seedDays.get(d.day);
+      if (!d.transitionFrom || d.transitionMet !== undefined || s?.transitionMet === undefined) return d;
+      if (s.transitionFrom !== d.transitionFrom || s.transitionMet < d.startMet || s.transitionMet > d.endMet) return d;
+      return { ...d, transitionMet: s.transitionMet };
+    }),
+    catalog: fill(saved.catalog, (c) =>
+      c.durationMin !== undefined ? c : { ...c, durationMin: seedItems.get(c.id)?.durationMin ?? null },
+    ),
+    capacities: fill(saved.capacities, (c) =>
+      c.onAmberActions !== undefined && c.criticalFor !== undefined
+        ? c
+        : {
+            ...c,
+            onAmberActions: c.onAmberActions ?? seedCaps.get(c.id)?.onAmberActions ?? [],
+            criticalFor: c.criticalFor ?? seedCaps.get(c.id)?.criticalFor ?? [],
+          },
+    ),
+    plan: fill(saved.plan, (e) => {
+      const note = seedPlan.get(e.id)?.note;
+      return e.status === "conditional" && !e.note && note ? { ...e, note } : e;
+    }),
+  };
+  return changed ? next : saved;
 }
 
 export async function readState(): Promise<AppState> {

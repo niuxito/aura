@@ -277,7 +277,7 @@ const STRENGTH = L("Strength", "Fuerza");
 const CARDIO_RESERVE = L("Cardiovascular reserve", "Reserva cardiovascular");
 const ORTHOSTATIC = L("Orthostatic tolerance", "Tolerancia ortostática");
 
-export const seedCatalog: CatalogItem[] = [
+const catalogItems: CatalogItem[] = [
   {
     ...base,
     id: "P",
@@ -546,6 +546,34 @@ export const seedCatalog: CatalogItem[] = [
   },
 ];
 
+/**
+ * Planned duration of each action, in minutes: team estimate for the demo, so
+ * the interface knows when an activity is in progress. Absent = a single
+ * moment (a supplement) or set by the medical protocol (fluid loading).
+ */
+const DURATION_MIN: Record<string, number> = {
+  P: 20,
+  R: 45,
+  A: 30,
+  RB: 30,
+  M: 20,
+  N1: 30,
+  N2: 30,
+  N3: 30,
+  N4: 30,
+  C: 5,
+  F: 5,
+  T: 30,
+  V: 45,
+  OIG: 30,
+  RE: 60,
+};
+
+export const seedCatalog: CatalogItem[] = catalogItems.map((c) => ({
+  ...c,
+  durationMin: DURATION_MIN[c.id] ?? null,
+}));
+
 // ---------- Example prevention plan (the same for the whole crew) ----------
 // Placed in gaps of the real timeline and, where one exists, on the matching
 // block (exercise, meal, cognition, OIG). "?" marks a conditional activity.
@@ -593,6 +621,9 @@ const planRows: [met: string, item: string][] = [
   // FD08
   ["06/17:15", "F"],
   ["06/20:15", "R"],
+  // Aerobic before the return: in FD08's exercise block, not on the day before
+  // splashdown (FD10 has critical operational load and protects FD09's rest).
+  ["06/22:00", "A"],
   ["07/00:05", "C"],
   ["07/00:30", "N1"],
   ["07/01:00", "SD?"],
@@ -603,7 +634,6 @@ const planRows: [met: string, item: string][] = [
   ["07/21:45", "V"],
   ["08/00:30", "N1"],
   ["08/00:45", "SD?"],
-  ["08/05:15", "A"],
   ["08/06:10", "SF?"],
   // FD10
   ["08/17:30", "F"],
@@ -612,6 +642,27 @@ const planRows: [met: string, item: string][] = [
   ["09/00:15", "OIG"],
 ];
 
+/** What a conditional activity depends on, by catalog item. */
+const CONDITION_NOTE: Record<string, LocalizedText> = {
+  SD: L(
+    "Depends on the medical protocol confirming the supplement and its dose.",
+    "Depende de que el protocolo médico confirme el suplemento y su dosis.",
+  ),
+  SF: L(
+    "Depends on the medical team bringing the fluid loading forward to the day before.",
+    "Depende de que el equipo médico adelante la carga de fluidos a la víspera.",
+  ),
+};
+
+/** Exact MET of each gravity transition, by flight day. */
+const TRANSITION_MET: Record<number, string> = {
+  1: "00/00:00", // Liftoff
+  10: "09/01:42:48", // Splashdown
+};
+
+/** Resting heart rate baselines: demonstration values, not real crew data. */
+const DEMO_RESTING_HR: Record<string, number> = { cdr: 58, plt: 62, ms1: 60, ms2: 64 };
+
 export function createSeedState(): AppState {
   const demoCrew = L("Demonstration crew member", "Tripulante de demostración");
   const crew: CrewMember[] = [
@@ -619,7 +670,7 @@ export function createSeedState(): AppState {
     { id: "plt", name: "PLT · Pilot", role: demoCrew },
     { id: "ms1", name: "MS1 · Mission Specialist 1", role: demoCrew },
     { id: "ms2", name: "MS2 · Mission Specialist 2", role: demoCrew },
-  ];
+  ].map((c) => ({ ...c, restingHrBpm: DEMO_RESTING_HR[c.id] ?? null }));
 
   const days: FlightDay[] = dayRows.map(
     ([start, end, phase, milestone, opLoad, gravity, transitionFrom], i) => ({
@@ -630,6 +681,7 @@ export function createSeedState(): AppState {
       milestone,
       gravity,
       ...(transitionFrom ? { transitionFrom } : {}),
+      ...(transitionFrom && TRANSITION_MET[i + 1] ? { transitionMet: met(TRANSITION_MET[i + 1]) } : {}),
       opLoad,
     }),
   );
@@ -664,6 +716,7 @@ export function createSeedState(): AppState {
         met: met(at),
         status,
         adaptable: isAdaptableCategory(categoryOf.get(itemId) ?? "assessment"),
+        ...(conditional && CONDITION_NOTE[itemId] ? { note: CONDITION_NOTE[itemId] } : {}),
       });
     }
   }

@@ -627,6 +627,31 @@ input[type="checkbox"] {
   font-weight: 600;
 }
 
+.crew-card .inline-number {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--muted, inherit);
+}
+
+.crew-card .inline-number input,
+.num-input {
+  width: 64px;
+  font-variant-numeric: tabular-nums;
+}
+
+.days-table .met-input,
+.days-table .btn.small {
+  margin-top: 4px;
+  display: block;
+}
+
+.btn.small {
+  font-size: 12px;
+  padding: 2px 8px;
+}
+
 .table-wrap {
   overflow-x: auto;
 }

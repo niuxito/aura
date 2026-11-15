@@ -72,6 +72,7 @@ export const seedCapacities: Capacity[] = [
       "Avisa y prioriza las actividades de preparación de la transición ya planificadas. No crea ejercicios nuevos.",
     ),
     onRed: ON_RED,
+    criticalFor: ["earth", "moon", "mars"],
   },
   {
     id: "cardiovascular",
@@ -85,6 +86,8 @@ export const seedCapacities: Capacity[] = [
       "Cambia al menú con refuerzo de hidratación y sustituye el ejercicio intenso por uno de menor carga.",
     ),
     onRed: ON_RED,
+    onAmberActions: [{ category: "nutrition", replacementItemId: "N2" }],
+    criticalFor: ["earth", "moon", "mars"],
   },
   {
     id: "vision",

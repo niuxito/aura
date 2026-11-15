@@ -54,6 +54,12 @@ export interface CrewMember {
   /** Person or call sign: not translated. */
   name: string;
   role: LocalizedText;
+  /**
+   * Resting heart rate baseline (bpm) the interface compares the watch
+   * against. Demonstration value; in a real mission it comes from preflight.
+   * null or absent = unknown.
+   */
+  restingHrBpm?: number | null;
 }
 
 /** Flight day (FD). Not a calendar day: the timeline defines it. */
@@ -67,6 +73,8 @@ export interface FlightDay {
   gravity: Gravity;
   /** If present, there is a gravity transition from this environment that day. */
   transitionFrom?: Gravity;
+  /** Exact MET of the transition (launch, landing, splashdown), if known. */
+  transitionMet?: number;
   /** OL: operational load estimated by the team. */
   opLoad: LoadLevel;
 }
@@ -109,6 +117,8 @@ export interface CatalogItem {
   limit: LocalizedText;
   /** Prescribed dose or range. null = pending an authorized protocol. */
   dose: LocalizedText | null;
+  /** Planned duration in minutes (team estimate). null or absent = unknown. */
+  durationMin?: number | null;
   source: LocalizedText;
   sourceUrl?: string;
   experimental: boolean;
@@ -254,6 +264,23 @@ export interface Capacity {
   onAmber: LocalizedText;
   /** What the interface does in red: refers and alerts; does not decide on its own. */
   onRed: LocalizedText;
+  /**
+   * Concrete substitutions the interface applies in amber, within
+   * adaptationPolicy: today's adaptable activity of `category` becomes
+   * `replacementItemId` (e.g. the menu with extra hydration).
+   */
+  onAmberActions?: AmberAction[];
+  /**
+   * Arrival environments for which this capacity is critical to leave the
+   * vehicle on one's own feet (e.g. orthostatic tolerance → earth).
+   */
+  criticalFor?: Gravity[];
+}
+
+/** Substitution the interface applies when a capacity is amber. */
+export interface AmberAction {
+  category: Category;
+  replacementItemId: string;
 }
 
 /** Where an objective signal comes from. */

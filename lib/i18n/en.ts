@@ -117,6 +117,9 @@ export const en = {
     crew: "Crew",
     crewName: "Name",
     crewRole: "Role",
+    crewRestingHr: "Resting HR baseline (bpm, demo)",
+    transitionMet: "Transition MET",
+    setTransitionMet: "Set MET",
     daysTitle: (n: number) => `Flight days · ${n}`,
     daysHint: "MET boundaries from the timeline; phase, gravity and operational load (OL) are editable",
     colFd: "FD",
@@ -183,6 +186,8 @@ export const en = {
     colLoad: "Load",
     colLimit: "Limit",
     colDose: "Dose / prescribed range",
+    colDuration: "Min",
+    durationHint: "Planned duration in minutes (team estimate). Empty = a single moment or set by the protocol.",
     colSource: "Source",
     colUses: "Uses",
     demanding: "demanding",
@@ -220,6 +225,8 @@ export const en = {
     capacitiesHint: "What the interface does at each level, always within the adaptation policy.",
     colCapacity: "Capacity",
     colInAmber: "In amber",
+    amberAction: (category: string, item: string) => `Applies: ${category} → ${item}`,
+    criticalFor: (environments: string) => `Critical to leave the vehicle on arrival at: ${environments}`,
     colInRed: "In red",
     blockA: "Block A · fixed questions",
     blockB: "Block B · question bank",
@@ -368,6 +375,24 @@ export const en = {
     noSelfReport: "No fatigue questionnaire: the monitor will show gray (insufficient data).",
     supplementNoDose: (name: string) =>
       `${name}: dose pending medical protocol; the package publishes it without a dose.`,
+    conditionalNoNote: (name: string, met: string) =>
+      `${name} at MET ${met} is conditional but does not say what it depends on: add a note.`,
+    transitionMetMissing: (fd: string) =>
+      `${fd} has a gravity transition without its exact MET: the interface will estimate the countdown from the timeline.`,
+    transitionMetOutside: (fd: string, met: string) =>
+      `${fd}: the transition MET ${met} falls outside the flight day.`,
+    restingHr: (name: string, bpm: number) =>
+      `${name}: resting heart rate baseline of ${bpm} bpm is outside the expected 30–120 bpm range.`,
+    amber: {
+      itemMissing: (capacity: string, id: string) =>
+        `Capacity ${capacity}: the amber action points to ${id}, which is not in the catalog.`,
+      category: (capacity: string, id: string, category: string) =>
+        `Capacity ${capacity}: ${id} is not in the “${category}” category of its amber action.`,
+      notAdaptable: (capacity: string, category: string) =>
+        `Capacity ${capacity}: the interface cannot adapt the “${category}” category.`,
+      intense: (capacity: string, name: string) =>
+        `Capacity ${capacity}: ${name} is demanding; the interface never raises the load, so it will not apply it.`,
+    },
     conditionals: (n: number) =>
       `${n} conditional activities: they depend on confirming equipment, protocol or recovery.`,
     missingTranslation: (n: number, language: string) =>

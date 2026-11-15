@@ -112,7 +112,25 @@ export default function QuestionnaireView({ state }: Props) {
                     <strong>{tx(c.name)}</strong>
                     <small>{tx(c.description)}</small>
                   </td>
-                  <td>{tx(c.onAmber)}</td>
+                  <td>
+                    {tx(c.onAmber)}
+                    {(c.onAmberActions ?? []).map((a) => (
+                      <small key={`${a.category}-${a.replacementItemId}`}>
+                        {t.questionnaire.amberAction(
+                          t.labels.category[a.category],
+                          tx(state.catalog.find((i) => i.id === a.replacementItemId)?.name) ||
+                            a.replacementItemId,
+                        )}
+                      </small>
+                    ))}
+                    {c.criticalFor?.length ? (
+                      <small>
+                        {t.questionnaire.criticalFor(
+                          c.criticalFor.map((g) => t.labels.gravityShort[g]).join(", "),
+                        )}
+                      </small>
+                    ) : null}
+                  </td>
                   <td>{tx(c.onRed)}</td>
                 </tr>
               ))}

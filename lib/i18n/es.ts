@@ -118,6 +118,9 @@ export const es: Messages = {
     crew: "Tripulación",
     crewName: "Nombre",
     crewRole: "Función",
+    crewRestingHr: "FC en reposo de referencia (lpm, demo)",
+    transitionMet: "MET de la transición",
+    setTransitionMet: "Fijar MET",
     daysTitle: (n) => `Días de vuelo · ${n}`,
     daysHint: "Límites en MET según el cronograma; fase, gravedad y carga operativa (CO) editables",
     colFd: "FD",
@@ -184,6 +187,8 @@ export const es: Messages = {
     colLoad: "Carga",
     colLimit: "Límite",
     colDose: "Dosis / rango prescrito",
+    colDuration: "Min",
+    durationHint: "Duración prevista en minutos (estimación del equipo). Vacío = un momento puntual o lo fija el protocolo.",
     colSource: "Procedencia",
     colUses: "Usos",
     demanding: "exigente",
@@ -221,6 +226,8 @@ export const es: Messages = {
     capacitiesHint: "Qué hace la interfaz en cada nivel, siempre dentro de la política de adaptación.",
     colCapacity: "Capacidad",
     colInAmber: "En ámbar",
+    amberAction: (category, item) => `Aplica: ${category} → ${item}`,
+    criticalFor: (environments) => `Crítica para salir de la nave al llegar a: ${environments}`,
     colInRed: "En rojo",
     blockA: "Bloque A · preguntas fijas",
     blockB: "Bloque B · banco de preguntas",
@@ -366,6 +373,24 @@ export const es: Messages = {
     noSelfReport: "Sin cuestionario de fatiga: el monitor mostrará gris (datos insuficientes).",
     supplementNoDose: (name) =>
       `${name}: dosis pendiente de protocolo médico; el paquete lo publica sin dosis.`,
+    conditionalNoNote: (name, met) =>
+      `${name} en MET ${met} es condicional pero no dice de qué depende: añade una nota.`,
+    transitionMetMissing: (fd) =>
+      `${fd} tiene una transición gravitatoria sin su MET exacto: la interfaz estimará la cuenta atrás con el cronograma.`,
+    transitionMetOutside: (fd, met) =>
+      `${fd}: el MET de la transición ${met} cae fuera del día de vuelo.`,
+    restingHr: (name, bpm) =>
+      `${name}: la FC en reposo de referencia (${bpm} lpm) está fuera del rango esperado de 30–120 lpm.`,
+    amber: {
+      itemMissing: (capacity, id) =>
+        `Capacidad ${capacity}: la acción en ámbar apunta a ${id}, que no está en el catálogo.`,
+      category: (capacity, id, category) =>
+        `Capacidad ${capacity}: ${id} no es de la categoría «${category}» de su acción en ámbar.`,
+      notAdaptable: (capacity, category) =>
+        `Capacidad ${capacity}: la interfaz no puede adaptar la categoría «${category}».`,
+      intense: (capacity, name) =>
+        `Capacidad ${capacity}: ${name} es exigente; la interfaz nunca sube la carga, así que no la aplicará.`,
+    },
     conditionals: (n) =>
       `${n} actividades condicionales: dependen de confirmar equipo, protocolo o recuperación.`,
     missingTranslation: (n, language) =>

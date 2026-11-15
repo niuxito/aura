@@ -32,7 +32,10 @@ export default function MissionView({ state, issues, selectedDay, onSelect, upda
         if (d.day !== day) return d;
         const next = { ...d };
         if (value) next.transitionFrom = value as Gravity;
-        else delete next.transitionFrom;
+        else {
+          delete next.transitionFrom;
+          delete next.transitionMet;
+        }
         return next;
       }),
     }));
@@ -129,6 +132,24 @@ export default function MissionView({ state, issues, selectedDay, onSelect, upda
                   }))
                 }
               />
+              <label className="inline-number">
+                {t.mission.crewRestingHr}
+                <input
+                  type="number"
+                  min={30}
+                  max={120}
+                  value={member.restingHrBpm ?? ""}
+                  onChange={(e) => {
+                    const value = e.target.value === "" ? null : Number(e.target.value);
+                    update((s) => ({
+                      ...s,
+                      crew: s.crew.map((c) =>
+                        c.id === member.id ? { ...c, restingHrBpm: value } : c,
+                      ),
+                    }));
+                  }}
+                />
+              </label>
             </div>
           ))}
         </div>
@@ -185,6 +206,24 @@ export default function MissionView({ state, issues, selectedDay, onSelect, upda
                         </option>
                       ))}
                     </select>
+                    {d.transitionFrom ? (
+                      d.transitionMet !== undefined ? (
+                        <MetInput
+                          key={d.transitionMet}
+                          value={d.transitionMet}
+                          ariaLabel={t.mission.transitionMet}
+                          onCommit={(transitionMet) => patchDay(d.day, { transitionMet })}
+                        />
+                      ) : (
+                        <button
+                          type="button"
+                          className="btn small"
+                          onClick={() => patchDay(d.day, { transitionMet: d.startMet })}
+                        >
+                          {t.mission.setTransitionMet}
+                        </button>
+                      )
+                    ) : null}
                   </td>
                   <td>
                     <span className="cell-with-swatch">

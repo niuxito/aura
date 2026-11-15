@@ -84,6 +84,7 @@ export default function CatalogView({ state, update }: Props) {
                 <th>{t.catalog.colLoad}</th>
                 <th>{t.catalog.colLimit}</th>
                 <th>{t.catalog.colDose}</th>
+                <th title={t.catalog.durationHint}>{t.catalog.colDuration}</th>
                 <th>{t.catalog.colSource}</th>
                 <th>{t.catalog.colUses}</th>
                 <th />
@@ -116,6 +117,20 @@ export default function CatalogView({ state, update }: Props) {
                           value={c.dose}
                           placeholder={t.catalog.dosePlaceholder}
                           onChange={(dose) => patchItem(c.id, { dose })}
+                        />
+                      </td>
+                      <td>
+                        <input
+                          className="num-input"
+                          type="number"
+                          min={1}
+                          title={t.catalog.durationHint}
+                          value={c.durationMin ?? ""}
+                          onChange={(e) =>
+                            patchItem(c.id, {
+                              durationMin: e.target.value === "" ? null : Math.max(1, Number(e.target.value)),
+                            })
+                          }
                         />
                       </td>
                       <td>

@@ -71,6 +71,15 @@ export function validate(state: AppState): Issue[] {
         if (!item) continue;
         const at = formatMet(entry.met);
 
+        if (entry.status === "conditional" && !entry.note) {
+          push(
+            "conditional-without-note",
+            "warning",
+            msg((m, l) => m.rules.conditionalNoNote(tr(item.name, l), at)),
+            entry.id,
+          );
+        }
+
         const sleep = sleepBlocks.find((b) => entry.met >= b.startMet && entry.met < b.endMet);
         if (sleep && item.loadType !== "RE") {
           push(
@@ -159,6 +168,43 @@ export function validate(state: AppState): Issue[] {
 
       if (!entries.some((e) => items.get(e.itemId)?.selfReport)) {
         push("no-self-report", "info", msg((m) => m.rules.noSelfReport));
+      }
+    }
+  }
+
+  const missionIssue = (rule: string, severity: Issue["severity"], message: LocalizedText, suffix: string, day: number | null = null) =>
+    issues.push({ id: `${rule}-${suffix}`, rule, severity, day, crewId: null, message });
+
+  for (const day of state.days) {
+    if (!day.transitionFrom) continue;
+    const fd = formatFlightDay(day.day);
+    if (day.transitionMet === undefined) {
+      missionIssue("transition-met", "info", msg((m) => m.rules.transitionMetMissing(fd)), `${day.day}`, day.day);
+    } else if (day.transitionMet < day.startMet || day.transitionMet > day.endMet) {
+      const at = formatMet(day.transitionMet);
+      missionIssue("transition-met", "warning", msg((m) => m.rules.transitionMetOutside(fd, at)), `${day.day}`, day.day);
+    }
+  }
+
+  for (const member of state.crew) {
+    const bpm = member.restingHrBpm;
+    if (bpm !== undefined && bpm !== null && (bpm < 30 || bpm > 120)) {
+      missionIssue("resting-hr", "warning", msg((m) => m.rules.restingHr(member.name, bpm)), member.id);
+    }
+  }
+
+  for (const capacity of state.capacities) {
+    for (const action of capacity.onAmberActions ?? []) {
+      const item = items.get(action.replacementItemId);
+      const suffix = `${capacity.id}-${action.category}-${action.replacementItemId}`;
+      if (!(action.category in ADAPTABLE_WINDOW)) {
+        missionIssue("amber-action", "blocker", msg((m) => m.rules.amber.notAdaptable(capacity.id, m.labels.category[action.category])), suffix);
+      } else if (!item) {
+        missionIssue("amber-action", "blocker", msg((m) => m.rules.amber.itemMissing(capacity.id, action.replacementItemId)), suffix);
+      } else if (item.category !== action.category) {
+        missionIssue("amber-action", "blocker", msg((m) => m.rules.amber.category(capacity.id, item.id, m.labels.category[action.category])), suffix);
+      } else if (item.intense) {
+        missionIssue("amber-action", "warning", msg((m, l) => m.rules.amber.intense(capacity.id, tr(item.name, l))), suffix);
       }
     }
   }
