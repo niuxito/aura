@@ -1,0 +1,9 @@
+body.bin — silueta humana del HUD de AURA Astronaut.
+
+Adaptación de la malla de piel (FMA7163) de BodyParts3D, © The Database Center for Life Science (DBCLS),
+licenciado bajo CC BY-SA 2.1 Japón (https://creativecommons.org/licenses/by-sa/2.1/jp/),
+a partir de la versión web de anatomia.alexisparron.com (https://github.com/niuxito/human-body), CC BY-SA 4.0.
+
+Cambios: malla simplificada a ~6 000 triángulos con meshoptimizer, normalizada a altura 1 y exportada
+en binario (int32 nº de vértices, int32 nº de triángulos, float32 xyz por vértice, uint16 índices).
+Este fichero se distribuye bajo CC BY-SA 4.0 (https://creativecommons.org/licenses/by-sa/4.0/).

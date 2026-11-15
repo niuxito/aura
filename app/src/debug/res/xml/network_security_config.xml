@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Solo en depuración: HTTP sin cifrar hacia el Manager local (npm run dev, puerto 3000).
+  localhost = Mac por USB con `adb reverse tcp:3000 tcp:3000`; 10.0.2.2 = Mac desde el emulador;
+  172.16.41.32 = IP del Mac en la red local el 2026-11-14 (cámbiala si cambia).
+-->
+<network-security-config>
+    <base-config cleartextTrafficPermitted="false" />
+    <domain-config cleartextTrafficPermitted="true">
+        <domain includeSubdomains="false">localhost</domain>
+        <domain includeSubdomains="false">10.0.2.2</domain>
+        <domain includeSubdomains="false">172.16.41.32</domain>
+    </domain-config>
+</network-security-config>
