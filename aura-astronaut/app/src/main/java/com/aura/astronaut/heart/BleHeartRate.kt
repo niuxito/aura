@@ -28,11 +28,11 @@ import kotlinx.coroutines.flow.update
 import java.util.UUID
 
 /**
- * Frecuencia cardiaca del reloj por Bluetooth LE, perfil estándar Heart Rate (sin SDK de Garmin ni ANT+):
- * servicio 0x180D, característica 0x2A37 por notificaciones. Busca solo dispositivos que anuncian 0x180D,
- * guarda el elegido y reconecta solo al arrancar y tras una desconexión. Funciona en modo avión con el Bluetooth activo.
+ * Heart rate from the watch over Bluetooth LE, standard Heart Rate profile (no Garmin SDK or ANT+):
+ * service 0x180D, characteristic 0x2A37 via notifications. Scans only for devices advertising 0x180D,
+ * stores the chosen one and reconnects on its own at startup and after a disconnection. Works in airplane mode with Bluetooth on.
  */
-@SuppressLint("MissingPermission") // Cada llamada protegida va precedida de hasPermissions().
+@SuppressLint("MissingPermission") // Every protected call is preceded by hasPermissions().
 class BleHeartRate(context: Context, private val onDeviceChosen: (String?) -> Unit) {
     private val appContext = context.applicationContext
     private val adapter = appContext.getSystemService(BluetoothManager::class.java)?.adapter
@@ -55,7 +55,7 @@ class BleHeartRate(context: Context, private val onDeviceChosen: (String?) -> Un
         ContextCompat.checkSelfPermission(appContext, it) == PackageManager.PERMISSION_GRANTED
     }
 
-    /** Arranca con el reloj guardado (si lo hay): conecta y reconecta solo. */
+    /** Starts with the stored watch (if any): connects and reconnects on its own. */
     fun start(savedAddress: String?) {
         running = true
         wanted = savedAddress
@@ -69,7 +69,7 @@ class BleHeartRate(context: Context, private val onDeviceChosen: (String?) -> Un
         _state.value = HeartState(source = HeartSource.WATCH, status = WatchStatus.OFF)
     }
 
-    /** Vuelve a evaluar permisos y Bluetooth (por ejemplo, al volver de los ajustes). */
+    /** Re-evaluates permissions and Bluetooth (for example, when returning from settings). */
     fun refresh() {
         if (!running) return
         val status = when {
@@ -108,7 +108,7 @@ class BleHeartRate(context: Context, private val onDeviceChosen: (String?) -> Un
         if (wanted == null && running) refresh()
     }
 
-    /** El astronauta elige su reloj: se guarda y se conecta. */
+    /** The astronaut picks their watch: it is stored and connected. */
     fun choose(address: String) {
         stopScan()
         closeGatt()
@@ -156,7 +156,7 @@ class BleHeartRate(context: Context, private val onDeviceChosen: (String?) -> Un
         }
 
         override fun onScanFailed(errorCode: Int) {
-            Log.w(TAG, "Búsqueda fallida ($errorCode)")
+            Log.w(TAG, "Scan failed ($errorCode)")
             scanning = false
             refresh()
         }
@@ -167,7 +167,7 @@ class BleHeartRate(context: Context, private val onDeviceChosen: (String?) -> Un
             when (newState) {
                 BluetoothProfile.STATE_CONNECTED -> g.discoverServices()
                 BluetoothProfile.STATE_DISCONNECTED -> {
-                    Log.i(TAG, "Reloj desconectado ($status); se reintenta")
+                    Log.i(TAG, "Watch disconnected ($status); retrying")
                     setStatus(WatchStatus.DISCONNECTED)
                     main.post { scheduleReconnect() }
                 }
@@ -177,7 +177,7 @@ class BleHeartRate(context: Context, private val onDeviceChosen: (String?) -> Un
         override fun onServicesDiscovered(g: BluetoothGatt, status: Int) {
             val ch = g.getService(HEART_RATE_SERVICE)?.getCharacteristic(HEART_RATE_MEASUREMENT)
             if (ch == null) {
-                Log.w(TAG, "El dispositivo no ofrece Heart Rate Measurement")
+                Log.w(TAG, "The device does not offer Heart Rate Measurement")
                 setStatus(WatchStatus.DISCONNECTED)
                 return
             }
@@ -216,7 +216,7 @@ class BleHeartRate(context: Context, private val onDeviceChosen: (String?) -> Un
         val HEART_RATE_MEASUREMENT: UUID = UUID.fromString("00002a37-0000-1000-8000-00805f9b34fb")
         val CLIENT_CONFIG: UUID = UUID.fromString("00002902-0000-1000-8000-00805f9b34fb")
 
-        /** Android 12+: buscar y conectar; antes, ubicación para poder buscar. */
+        /** Android 12+: scan and connect; before that, location to be able to scan. */
         fun requiredPermissions(): Array<String> =
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                 arrayOf(Manifest.permission.BLUETOOTH_SCAN, Manifest.permission.BLUETOOTH_CONNECT)

@@ -53,12 +53,12 @@ import kotlin.math.sin
 import kotlin.math.sqrt
 
 /**
- * Silueta humana en 3D que gira y reproduce el movimiento detectado (caminar, agacharse),
- * iluminando los grupos musculares que trabajan, como lo mostraría la ropa inteligente.
- * SIMULADO: el movimiento sale del acelerómetro de la tablet o de los botones del modo demo;
- * no representa el estado de salud ni se guarda. (AGENTS.md, «Silueta y actividad simulada».)
+ * 3D human silhouette that rotates and reproduces the detected movement (walking, squatting),
+ * lighting up the muscle groups at work, as smart clothing would show it.
+ * SIMULATED: the movement comes from the tablet's accelerometer or from the demo mode buttons;
+ * it does not represent health status and is not stored. (AGENTS.md, "Silhouette and simulated activity".)
  *
- * Malla: piel de BodyParts3D (DBCLS, CC BY-SA) vía anatomia.alexisparron.com (assets/models/LICENSE-body.txt).
+ * Mesh: BodyParts3D skin (DBCLS, CC BY-SA) via anatomia.alexisparron.com (assets/models/LICENSE-body.txt).
  */
 @Composable
 fun BodySilhouette(
@@ -90,7 +90,7 @@ fun BodySilhouette(
             }
         }
         Canvas(Modifier.fillMaxSize()) {
-            if (frame >= 0L) drawHologram(r, anim) // leer `frame` hace que se redibuje en cada fotograma
+            if (frame >= 0L) drawHologram(r, anim) // reading `frame` makes it redraw on every frame
         }
         HeartLabel(heart, frame, onHeartClick, Modifier.align(Alignment.TopEnd))
         val label = if (frame >= 0L) anim.label() else null
@@ -107,7 +107,7 @@ fun BodySilhouette(
     }
 }
 
-/** Valor de FC, fuente y antigüedad del dato. Sin dato reciente: gris, «sin datos del reloj». */
+/** HR value, source and age of the data point. With no recent data: gray, "no watch data". */
 @Composable
 private fun HeartLabel(heart: HeartState, frame: Long, onClick: () -> Unit, modifier: Modifier = Modifier) {
     val now = if (frame >= 0L) System.currentTimeMillis() else 0L
@@ -119,7 +119,7 @@ private fun HeartLabel(heart: HeartState, frame: Long, onClick: () -> Unit, modi
         horizontalAlignment = Alignment.End,
     ) {
         Text(
-            // U+FE0E: el corazón como símbolo de texto en nuestro color, no como emoji rojo (el rojo es del semáforo).
+            // U+FE0E: the heart as a text symbol in our color, not as a red emoji (red belongs to the traffic light).
             if (fresh) str(R.string.heart_bpm, heart.bpm ?: 0) else "\u2665\uFE0E —",
             style = HudText.Title.copy(fontSize = 24.sp),
             color = if (fresh) HEART_COLOR else HudColors.Gray,
@@ -154,24 +154,24 @@ fun watchStatusText(s: WatchStatus): String = when (s) {
 }
 
 private val MIN_HEIGHT = 160.dp
-/** Altura máxima del cuerpo (antes de SIZE_FACTOR): la que tiene con el aviso de transición visible en la tablet. */
+/** Maximum body height (before SIZE_FACTOR): the one it has with the transition notice visible on the tablet. */
 private val MAX_BODY_HEIGHT = 440.dp
-/** Color del corazón y su aura: cálido y suave, distinto de los colores del semáforo (rojo y ámbar). */
+/** Color of the heart and its aura: warm and soft, distinct from the traffic-light colors (red and amber). */
 private val HEART_COLOR = Color(0xFFFF9EC4)
-/** Tamaño relativo al hueco disponible y posición horizontal del eje (0 = izquierda, 1 = derecha). */
+/** Size relative to the available space and horizontal position of the axis (0 = left, 1 = right). */
 private const val SIZE_FACTOR = 0.9f
 private const val CENTER_X = 0.62f
 private const val ROTATION_PERIOD_S = 16f
 private const val CAMERA_DISTANCE = 4f
 private val INNER_ALPHAS = floatArrayOf(0f, 0.025f, 0.06f, 0.12f)
-/** Color de la actividad muscular: más claro que el cian del HUD, distinto de los colores del semáforo. */
+/** Muscle activity color: lighter than the HUD cyan, distinct from the traffic-light colors. */
 private val ACTIVE_COLOR = Color(0xFFCFF8FF)
 
 private fun rad(deg: Float) = deg * PI.toFloat() / 180f
 
-// ---------------------------------------------------------------- Malla
+// ---------------------------------------------------------------- Mesh
 
-/** Malla normalizada: altura 1, pies en y = 0, centrada en x/z. */
+/** Normalized mesh: height 1, feet at y = 0, centered in x/z. */
 class BodyMesh(val xyz: FloatArray, val tri: IntArray, val edges: IntArray) {
     val vertexCount get() = xyz.size / 3
     val triCount get() = tri.size / 3
@@ -184,7 +184,7 @@ class BodyMesh(val xyz: FloatArray, val tri: IntArray, val edges: IntArray) {
             val nt = buf.int
             val xyz = FloatArray(nv * 3) { buf.float }
             val tri = IntArray(nt * 3) { buf.short.toInt() and 0xFFFF }
-            // Aristas con sus dos caras vecinas: a, b, cara 1, cara 2 (−1 si es borde).
+            // Edges with their two neighboring faces: a, b, face 1, face 2 (−1 if it is a border).
             val faces = HashMap<Long, IntArray>(nt * 2)
             for (t in 0 until nt) for (k in 0 until 3) {
                 val a = tri[t * 3 + k]
@@ -201,9 +201,9 @@ class BodyMesh(val xyz: FloatArray, val tri: IntArray, val edges: IntArray) {
     }
 }
 
-// ---------------------------------------------------------------- Esqueleto aproximado
+// ---------------------------------------------------------------- Approximate skeleton
 
-/** Grupos musculares que se iluminan. */
+/** Muscle groups that light up. */
 private object Muscle {
     const val NONE: Byte = 0
     const val QUADS: Byte = 1
@@ -213,23 +213,23 @@ private object Muscle {
 }
 
 /**
- * Asigna cada vértice a pierna (izquierda/derecha), tronco o brazo según su posición en la malla
- * en reposo (proporciones humanas normalizadas a altura 1) y calcula pivotes de cadera y rodilla.
+ * Assigns each vertex to a leg (left/right), trunk or arm according to its position in the rest mesh
+ * (human proportions normalized to height 1) and computes hip and knee pivots.
  */
 class BodyRig(val mesh: BodyMesh) {
     private val n = mesh.vertexCount
     private val rest = mesh.xyz
-    /** −1 izquierda, +1 derecha (por el signo de x); solo cuenta en las piernas. */
+    /** −1 left, +1 right (by the sign of x); only counts for the legs. */
     val side = IntArray(n)
     val wHip = FloatArray(n)
     val wKnee = FloatArray(n)
     val wTorso = FloatArray(n)
     val muscle = ByteArray(n)
-    /** Sentido de «delante» en z: hacia donde apuntan los dedos de los pies. */
+    /** Direction of "front" in z: where the toes point. */
     val front: Float
     val hipZ: Float
     val kneeZ: Float
-    /** Posición del corazón en reposo: pecho, algo a la izquierda del esternón. */
+    /** Heart position at rest: chest, slightly left of the sternum. */
     val heartRest: FloatArray
 
     init {
@@ -245,11 +245,11 @@ class BodyRig(val mesh: BodyMesh) {
         front = if (foot >= ankle) 1f else -1f
         hipZ = meanZ { y(it) in HIP_Y - 0.03f..HIP_Y + 0.01f && abs(x(it)) < ARM_X }
         kneeZ = meanZ { y(it) in KNEE_Y - 0.015f..KNEE_Y + 0.015f }
-        // Mirando hacia +z con y hacia arriba, la izquierda del cuerpo es +x: el lado izquierdo es `front`.
+        // Facing +z with y up, the body's left is +x: the left side is `front`.
         val chestZ = meanZ { y(it) in HEART_Y - 0.02f..HEART_Y + 0.02f && abs(x(it)) < 0.1f }
         heartRest = floatArrayOf(0.014f * front, HEART_Y, chestZ + 0.012f * front)
 
-        // Centro en z de cada pierna por franjas de altura, para saber qué es la cara delantera del muslo.
+        // Z center of each leg by height bands, to know which is the front face of the thigh.
         val bins = 40
         val sum = Array(2) { FloatArray(bins) }
         val cnt = Array(2) { IntArray(bins) }
@@ -286,30 +286,30 @@ class BodyRig(val mesh: BodyMesh) {
         }
     }
 
-    /** Corazón en la postura actual: va con el tronco. */
+    /** Heart in the current pose: it moves with the trunk. */
     fun heart(p: Pose): FloatArray {
         val r = rotate(heartRest[1], heartRest[2], HIP_Y, hipZ, front * p.lean)
         return floatArrayOf(heartRest[0], r.first - p.drop, r.second + front * p.shift)
     }
 
-    /** Postura en reposo deformada: rodilla, cadera y tronco (ángulos en radianes, adelante positivo). */
+    /** Deformed rest pose: knee, hip and trunk (angles in radians, forward positive). */
     fun deform(p: Pose, out: FloatArray) {
         for (i in 0 until n) {
             var y = rest[i * 3 + 1]
             var z = rest[i * 3 + 2]
             val s = if (side[i] < 0) 0 else 1
             if (wKnee[i] > 0f) {
-                // Flexión de rodilla: el pie va hacia atrás.
+                // Knee flexion: the foot goes backward.
                 val r = rotate(y, z, KNEE_Y, kneeZ, front * p.knee[s])
                 y += (r.first - y) * wKnee[i]; z += (r.second - z) * wKnee[i]
             }
             if (wHip[i] > 0f) {
-                // Flexión de cadera: el muslo va hacia delante.
+                // Hip flexion: the thigh goes forward.
                 val r = rotate(y, z, HIP_Y, hipZ, -front * p.hip[s])
                 y += (r.first - y) * wHip[i]; z += (r.second - z) * wHip[i]
             }
             if (wTorso[i] > 0f) {
-                // Inclinación del tronco hacia delante.
+                // Forward trunk lean.
                 val r = rotate(y, z, HIP_Y, hipZ, front * p.lean)
                 y += (r.first - y) * wTorso[i]; z += (r.second - z) * wTorso[i]
             }
@@ -329,13 +329,13 @@ class BodyRig(val mesh: BodyMesh) {
         const val HIP_BLEND_TOP = 0.54f
         const val HIP_BLEND_BOTTOM = 0.47f
 
-        /** 0 en `from`, 1 en `to`, suave entre medias (funciona en ambos sentidos). */
+        /** 0 at `from`, 1 at `to`, smooth in between (works in both directions). */
         fun smooth(from: Float, to: Float, v: Float): Float {
             val t = ((v - from) / (to - from)).coerceIn(0f, 1f)
             return t * t * (3 - 2 * t)
         }
 
-        /** Gira (y, z) alrededor de (py, pz) en el plano sagital. */
+        /** Rotates (y, z) around (py, pz) in the sagittal plane. */
         fun rotate(y: Float, z: Float, py: Float, pz: Float, a: Float): Pair<Float, Float> {
             val dy = y - py; val dz = z - pz
             val c = cos(a); val s = sin(a)
@@ -352,18 +352,18 @@ class Pose {
     var shift = 0f
 }
 
-// ---------------------------------------------------------------- Animación
+// ---------------------------------------------------------------- Animation
 
-/** Integra el movimiento detectado en una postura suave y decide qué músculos se iluminan. */
+/** Integrates the detected movement into a smooth pose and decides which muscles light up. */
 class SilhouetteAnimator {
     var angle = 0f; private set
     private var walkPhase = 0f
     private var walkAmp = 0f
     private var squat = 0f
     val pose = Pose()
-    /** Fase del latido [0, 1): 0 = latido. null si no hay FC reciente. */
+    /** Heartbeat phase [0, 1): 0 = beat. null if there is no recent HR. */
     var beatPhase: Float? = null; private set
-    /** Frecuencia con la que late ahora; null sin dato reciente. */
+    /** Rate at which it beats now; null with no recent data. */
     var bpm: Int? = null; private set
 
     fun heartbeat(currentBpm: Int?, dt: Float) {
@@ -375,7 +375,7 @@ class SilhouetteAnimator {
         beatPhase = ((beatPhase ?: 0f) + dt * currentBpm / 60f) % 1f
     }
 
-    /** Activación [0, 1] por grupo muscular y lado (índice: grupo * 2 + lado). */
+    /** Activation [0, 1] per muscle group and side (index: group * 2 + side). */
     private val activation = FloatArray(10)
 
     fun step(m: MotionInput, dt: Float) {
@@ -383,7 +383,7 @@ class SilhouetteAnimator {
         squat = ease(squat, if (m.squatting) 1f else 0f, dt, 0.45f)
         walkPhase = (walkPhase + 2 * PI.toFloat() * (m.cadence / 2f) * dt) % (2 * PI.toFloat())
 
-        // Giro continuo; mientras hay movimiento se orienta de perfil, donde se ve mejor.
+        // Continuous rotation; while there is movement it turns to profile, where it is seen best.
         val active = max(walkAmp, squat)
         angle = (angle + 2 * PI.toFloat() / ROTATION_PERIOD_S * dt * (1f - active)) % (2 * PI.toFloat())
         if (active > 0.01f) {
@@ -391,11 +391,11 @@ class SilhouetteAnimator {
             angle += (target - angle) * min(1f, dt * 3f) * active
         }
 
-        // Caminar: caderas en oposición y rodilla flexionada durante el balanceo de cada pierna.
+        // Walking: hips in opposition and knee flexed during each leg's swing.
         val s = sin(walkPhase); val c = cos(walkPhase)
         val hipWalk = rad(24f) * walkAmp
         val kneeWalk = rad(45f) * walkAmp
-        // Sentadilla: muslos adelante, tibias inclinadas y tronco inclinado; se baja el cuerpo para que los pies sigan en el suelo.
+        // Squat: thighs forward, shins and trunk leaning; the body is lowered so the feet stay on the floor.
         val a = rad(68f) * squat
         val g = rad(28f) * squat
         val lt = BodyRig.HIP_Y - BodyRig.KNEE_Y
@@ -408,7 +408,7 @@ class SilhouetteAnimator {
         pose.drop = (lt + ls) - (lt * cos(a) + ls * cos(g))
         pose.shift = -(lt * sin(a) - ls * sin(g))
 
-        // Activación muscular (lo que registraría la prenda): caminar alterna lados; agacharse carga ambos.
+        // Muscle activation (what the garment would record): walking alternates sides; squatting loads both.
         for (side in 0..1) {
             val swing = max(0f, if (side == 0) c else -c)
             val stance = max(0f, if (side == 0) -c else c)
@@ -421,7 +421,7 @@ class SilhouetteAnimator {
 
     fun level(muscle: Byte, side: Int): Float = if (muscle == Muscle.NONE) 0f else activation[muscle * 2 + side]
 
-    /** Texto de la etiqueta SIM: qué movimiento y qué grupos trabajan; null en reposo. */
+    /** Text of the SIM label: which movement and which groups are working; null at rest. */
     fun label(): String? = when {
         squat > 0.3f -> str(R.string.motion_squat)
         walkAmp > 0.3f -> str(R.string.motion_walk)
@@ -442,7 +442,7 @@ class SilhouetteAnimator {
     }
 }
 
-// ---------------------------------------------------------------- Dibujo
+// ---------------------------------------------------------------- Drawing
 
 private fun DrawScope.drawHologram(rig: BodyRig, anim: SilhouetteAnimator) {
     val m = rig.mesh
@@ -450,7 +450,7 @@ private fun DrawScope.drawHologram(rig: BodyRig, anim: SilhouetteAnimator) {
     val pos = FloatArray(n * 3)
     rig.deform(anim.pose, pos)
 
-    // Tamaño máximo fijo: la silueta no crece cuando desaparece el aviso de transición de encima.
+    // Fixed maximum size: the silhouette does not grow when the transition notice above disappears.
     val scale = minOf(size.height * 0.94f, size.width * 0.9f / 0.42f, MAX_BODY_HEIGHT.toPx()) * SIZE_FACTOR
     val originX = size.width * CENTER_X
     val groundY = size.height * 0.98f
@@ -468,7 +468,7 @@ private fun DrawScope.drawHologram(rig: BodyRig, anim: SilhouetteAnimator) {
         sx[i] = originX + xr * scale * p
         sy[i] = groundY - (y - 0.5f) * scale * p - 0.5f * scale
     }
-    // Orientación de cada cara respecto a la cámara (normal tras deformar y girar).
+    // Orientation of each face relative to the camera (normal after deforming and rotating).
     val facing = FloatArray(m.triCount)
     for (t in 0 until m.triCount) {
         val a = m.tri[t * 3]; val b = m.tri[t * 3 + 1]; val c = m.tri[t * 3 + 2]
@@ -491,7 +491,7 @@ private fun DrawScope.drawHologram(rig: BodyRig, anim: SilhouetteAnimator) {
         val d2 = if (f2 >= 0) facing[f2] else -d1
         val silhouette = (d1 > 0f) != (d2 > 0f)
         if (!silhouette && d1 <= 0f) continue
-        // Músculo activo: la arista se ilumina si sus dos extremos están en el mismo grupo trabajando.
+        // Active muscle: the edge lights up if both ends are in the same working group.
         val ma = rig.muscle[a]
         val act = if (ma != 0.toByte() && ma == rig.muscle[b]) anim.level(ma, if (rig.side[a] < 0) 0 else 1) else 0f
         val path = when {
@@ -506,7 +506,7 @@ private fun DrawScope.drawHologram(rig: BodyRig, anim: SilhouetteAnimator) {
         path.lineTo(sx[b], sy[b])
     }
 
-    // Corazón y aura: detrás de la malla, que queda por encima como la piel de un holograma.
+    // Heart and aura: behind the mesh, which stays on top like the skin of a hologram.
     anim.beatPhase?.let { phase ->
         val h = rig.heart(anim.pose)
         val hx = h[0] * ca + h[2] * sa
@@ -519,7 +519,7 @@ private fun DrawScope.drawHologram(rig: BodyRig, anim: SilhouetteAnimator) {
     val base = HudColors.Cyan
     inner.forEachIndexed { i, p -> if (INNER_ALPHAS[i] > 0f) drawPath(p, base.copy(alpha = INNER_ALPHAS[i]), style = Stroke(stroke)) }
     drawPath(outline, base.copy(alpha = 0.6f), style = Stroke(stroke * 1.2f))
-    // Músculos activos: halo ancho y tenue debajo y trazo claro encima, más intenso cuanto más trabajan.
+    // Active muscles: wide faint halo underneath and a light stroke on top, brighter the harder they work.
     glow.forEachIndexed { i, p ->
         val level = (i + 1) / 3f
         drawPath(p, ACTIVE_COLOR.copy(alpha = 0.10f * level), style = Stroke(stroke * 5f, cap = StrokeCap.Round))
@@ -535,8 +535,8 @@ private fun DrawScope.drawHologram(rig: BodyRig, anim: SilhouetteAnimator) {
 }
 
 /**
- * Aura del corazón: un núcleo que se contrae en cada latido y dos anillos de luz que salen del pecho
- * y se desvanecen. La forma del pulso imita el doble golpe del latido (sístole y su rebote).
+ * Heart aura: a core that contracts on every beat and two rings of light leaving the chest
+ * and fading out. The pulse shape imitates the double beat of the heartbeat (systole and its rebound).
  */
 private fun DrawScope.drawAura(center: Offset, scale: Float, phase: Float) {
     val beat = exp(-phase * 9f) + 0.45f * exp(-((phase - 0.18f) * (phase - 0.18f)) / 0.002f)
@@ -558,7 +558,7 @@ private fun DrawScope.drawAura(center: Offset, scale: Float, phase: Float) {
             center = center,
         )
     }
-    // Resplandor y núcleo
+    // Glow and core
     drawCircle(
         Brush.radialGradient(
             0f to HEART_COLOR.copy(alpha = 0.55f + 0.35f * beat),

@@ -20,14 +20,14 @@ import com.aura.astronaut.ui.gravityText
 import com.aura.astronaut.ui.label
 
 /**
- * Un mensaje que el HUD muestra y que la voz puede leer. La voz no tiene textos propios:
- * siempre lee el [text] de un anuncio que también está en pantalla.
+ * A message the HUD shows and the voice may read. The voice has no texts of its own:
+ * it always reads the [text] of an announcement that is also on screen.
  */
 data class Announcement(val id: String, val text: String, val priority: Int)
 
 /**
- * Único sitio donde se redactan los mensajes del HUD que también se dicen en voz alta.
- * Las prioridades deciden qué mensaje puede interrumpir a otro.
+ * The only place where the HUD messages that are also spoken aloud are written.
+ * Priorities decide which message may interrupt another.
  */
 object HudTexts {
     const val PRIORITY_RED = 35
@@ -36,9 +36,9 @@ object HudTexts {
     const val PRIORITY_NEXT_ACTION = 20
     const val PRIORITY_REVIEW = 15
 
-    // ---------- Transición gravitatoria ----------
+    // ---------- Gravity transition ----------
 
-    /** «Amerizaje en 1 d 6 h» o, si el paquete no da el instante, «Transición antes del fin de FD10, en 6 h». */
+    /** "Splashdown in 1 d 6 h" or, if the package does not give the instant, "Transition before the end of FD10, in 6 h". */
     fun transitionTitle(t: TransitionAlert): String =
         if (t.exact && t.eventName != null) {
             str(R.string.transition_title_exact, t.eventName, formatDuration(t.secondsLeft))
@@ -46,11 +46,11 @@ object HudTexts {
             str(R.string.transition_title_day, t.day.label, formatDuration(t.secondsLeft))
         }
 
-    /** «De microgravedad a Tierra · 1 g». */
+    /** "From microgravity to Earth · 1 g". */
     fun transitionChange(t: TransitionAlert, reference: Map<Gravity, Double>): String =
         str(R.string.transition_change, t.from.label.lowercase(), gravityText(reference, t.to))
 
-    /** Cuándo, en MET: «MET 09/01:42:48 · T− 02/08:42:39». */
+    /** When, in MET: "MET 09/01:42:48 · T− 02/08:42:39". */
     fun transitionWhen(t: TransitionAlert): String =
         (if (t.exact) "MET ${Met.format(t.met)}" else str(R.string.transition_end_of_day, t.day.label, Met.format(t.met))) +
             " · T− ${Met.formatClock(t.secondsLeft)}"
@@ -61,19 +61,19 @@ object HudTexts {
         priority = PRIORITY_TRANSITION,
     )
 
-    // ---------- Siguiente acción ----------
+    // ---------- Next action ----------
 
-    /** Cuándo: «Toca ahora» o «Siguiente acción, en 2 h 15 min». */
+    /** When: "Due now" or "Next action, in 2 h 15 min". */
     fun nextActionWhen(n: NextAction): String =
         if (n.secondsUntil <= 0) str(R.string.next_now) else str(R.string.next_in, formatDuration(n.secondsUntil))
 
-    /** Qué: «F · Cuestionario de fatiga, descanso y síntomas». */
+    /** What: "F · Fatigue, rest and symptoms questionnaire". */
     fun nextActionName(n: NextAction): String = "${n.plan.item.code} · ${n.plan.item.name}"
 
-    /** Frase completa que se muestra (en dos líneas) y que dice la voz. */
+    /** Full sentence shown (on two lines) and spoken by the voice. */
     fun nextActionTitle(n: NextAction): String = "${nextActionWhen(n)}: ${nextActionName(n)}"
 
-    /** Justificación: de dónde sale la recomendación y qué condiciones tiene. */
+    /** Rationale: where the recommendation comes from and what conditions it has. */
     fun nextActionReason(n: NextAction): String {
         val a = n.plan.activity
         val parts = mutableListOf<String>()
@@ -95,13 +95,13 @@ object HudTexts {
         )
     }
 
-    /** Lo que la voz debe anunciar en este momento: la transición (si la hay) y la siguiente acción. */
+    /** What the voice must announce right now: the transition (if any) and the next action. */
     fun announcementsFor(s: MissionSnapshot, reference: Map<Gravity, Double>): List<Announcement> = buildList {
         s.transition?.let { add(transitionAnnouncement(it, reference)) }
         s.nextAction?.let { add(nextActionAnnouncement(it)) }
     }
 
-    // ---------- Semáforo y adaptaciones (paso 5) ----------
+    // ---------- Traffic light and adaptations (step 5) ----------
 
     fun levelWord(l: CapacityLevel): String = when (l) {
         CapacityLevel.GREEN -> str(R.string.level_green)
@@ -110,14 +110,14 @@ object HudTexts {
         CapacityLevel.GRAY -> str(R.string.level_gray)
     }
 
-    /** Motivo corto de un estado, siempre en texto: el color nunca va solo. */
+    /** Short reason for a state, always in text: color never goes alone. */
     fun capacityReason(s: CapacityState): String = when (s.level) {
         CapacityLevel.GRAY -> str(R.string.capacity_no_data)
         CapacityLevel.GREEN -> str(R.string.capacity_no_deviation)
         else -> s.drivers.first().let { d -> "${d.indicatorName}: ${valueText(d)} (${d.threshold})" }
     }
 
-    /** Valor de un dato con su unidad: «−22 %», «11 lpm», «6/7» (cuestionario, normalizado), «sí» (booleana). */
+    /** Value of a data point with its unit: "−22 %", "11 bpm", "6/7" (questionnaire, normalized), "yes" (boolean). */
     fun valueText(d: Cause): String {
         val v = CapacityEvaluator.fmt(d.value)
         return when {
@@ -135,7 +135,7 @@ object HudTexts {
         priority = PRIORITY_RED,
     )
 
-    /** «A · Acondicionamiento aeróbico → RB · Resistencia con bandas». */
+    /** "A · Aerobic conditioning → RB · Resistance bands". */
     fun adaptationSummary(a: LocalAdaptation, catalog: Map<String, CatalogItem>): String {
         val original = catalog[a.originalItemId]?.let { "${it.code} · ${it.name}" } ?: a.originalItemId
         return when (a.type) {
@@ -149,8 +149,8 @@ object HudTexts {
     }
 
     /**
-     * Motivo resumido: la primera frase de la razón, sin los datos (««Fatiga y recuperación» en ámbar»).
-     * El motor redacta la razón como «indicadores. Qué se cambia…» en cualquier idioma.
+     * Short reason: the first sentence of the rationale, without the data ("“Fatigue and recovery” in amber").
+     * The engine writes the rationale as "indicators. What is changed…" in any language.
      */
     fun adaptationShortReason(a: LocalAdaptation): String =
         a.reason.substringBefore(". ").split("; ").joinToString(", ") { it.substringBefore(":").trim() }
@@ -161,7 +161,7 @@ object HudTexts {
         priority = PRIORITY_ADAPTATION,
     )
 
-    /** Estado de envío y revisión, en texto. */
+    /** Sending and review state, in text. */
     fun adaptationStatus(a: LocalAdaptation): String = when {
         a.reviewStatus == ReviewStatus.VALIDATED -> str(R.string.adaptation_validated)
         a.reviewStatus == ReviewStatus.OBJECTED ->
@@ -185,8 +185,8 @@ object HudTexts {
     const val PRIORITY_ALERT_ACK = 16
 
     /**
-     * Estado de un aviso a control de misión, en frase completa:
-     * pendiente de envío → recibido → leído (lo saben) → respondido (han actuado, con su nota).
+     * State of a notice to mission control, as a full sentence:
+     * pending sending → received → read (they know) → answered (they acted, with their note).
      */
     fun alertStatus(a: LocalAlert): String = alertStatusText(a.ackStatus, a.sendStatus == SendStatus.SENT, a.ackNote)
 
@@ -197,7 +197,7 @@ object HudTexts {
         else -> str(R.string.alert_pending)
     }
 
-    /** De qué trata el aviso, para la voz: «de Fatiga y recuperación en rojo». */
+    /** What the notice is about, for the voice: "about Fatigue and recovery in red". */
     fun alertSubject(a: LocalAlert, capacityName: String?): String = when (a.kind) {
         AlertCodes.KIND_RED -> str(R.string.alert_subject_red, capacityName ?: str(R.string.alert_subject_capacity))
         AlertCodes.KIND_PREP -> str(R.string.alert_subject_prep)
@@ -216,11 +216,11 @@ object HudTexts {
         else -> null
     }
 
-    // ---------- Utilidades ----------
+    // ---------- Utilities ----------
 
     private fun noteSuffix(note: String?): String = note?.let { " " + str(R.string.note_suffix, it) }.orEmpty()
 
-    /** Duración legible con las dos unidades más significativas: «1 d 6 h», «2 h 15 min», «menos de 1 min». */
+    /** Readable duration with the two most significant units: "1 d 6 h", "2 h 15 min", "less than 1 min". */
     fun formatDuration(seconds: Long): String {
         if (seconds < 60) return str(R.string.duration_under_minute)
         val d = seconds / Met.DAY

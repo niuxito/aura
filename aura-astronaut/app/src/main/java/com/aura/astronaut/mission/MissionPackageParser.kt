@@ -12,22 +12,22 @@ import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.jsonObject
 import java.security.MessageDigest
 
-/** Resultado de comprobar el checksum. No verificarlo no impide usar el paquete. */
+/** Result of checking the checksum. Not verifying it does not prevent using the package. */
 enum class ChecksumStatus { VERIFIED, MISMATCH, MISSING }
 
 data class LoadedPackage(val pkg: MissionPackage, val checksum: ChecksumStatus)
 
-/** El paquete no se puede usar; [message] se muestra al astronauta tal cual. */
+/** The package cannot be used; [message] is shown to the astronaut as is. */
 class PackageException(message: String, cause: Throwable? = null) : Exception(message, cause)
 
 object MissionPackageParser {
 
-    /** Campos que el Manager añada en el futuro no rompen la lectura; los que faltan, sí. */
+    /** Fields the Manager adds in the future do not break parsing; missing ones do. */
     private val json = Json { ignoreUnknownKeys = true }
 
     /**
-     * Lee y comprueba un paquete. Lanza [PackageException] si no es un paquete v5 utilizable;
-     * un checksum que no coincide se informa en [LoadedPackage.checksum] pero no bloquea.
+     * Parses and checks a package. Throws [PackageException] if it is not a usable v5 package;
+     * a checksum mismatch is reported in [LoadedPackage.checksum] but does not block.
      */
     fun parse(text: String): LoadedPackage {
         val tree = try {
@@ -53,7 +53,7 @@ object MissionPackageParser {
         return LoadedPackage(pkg, checksumStatus(tree, pkg.checksum))
     }
 
-    /** Comprobaciones de coherencia interna que el resto de la app da por hechas. */
+    /** Internal consistency checks the rest of the app takes for granted. */
     fun integrityProblems(pkg: MissionPackage): List<String> = buildList {
         if (pkg.crew.isEmpty()) add(str(R.string.pkg_no_crew))
         if (pkg.days.isEmpty()) add(str(R.string.pkg_no_days))
@@ -80,7 +80,7 @@ object MissionPackageParser {
             }
         }
 
-        // Autoevaluación: todas las referencias cruzadas deben existir.
+        // Self-assessment: every cross-reference must exist.
         val q = pkg.questionnaire
         if (pkg.capacities.isEmpty()) add(str(R.string.pkg_no_capacities))
         if (pkg.defaultLanguage !in pkg.languages) add(str(R.string.pkg_default_language, pkg.defaultLanguage))
@@ -118,8 +118,8 @@ object MissionPackageParser {
 }
 
 /**
- * JSON canónico idéntico al `canonicalJson` del Manager (claves ordenadas, sin espacios),
- * con las cadenas escapadas como `JSON.stringify` de JavaScript.
+ * Canonical JSON identical to the Manager's `canonicalJson` (sorted keys, no whitespace),
+ * with strings escaped like JavaScript's `JSON.stringify`.
  */
 object CanonicalJson {
     fun write(element: JsonElement): String = StringBuilder().also { append(it, element) }.toString()
@@ -128,7 +128,7 @@ object CanonicalJson {
         when (e) {
             is JsonObject -> {
                 out.append('{')
-                // Orden por unidades UTF-16, como Array.prototype.sort() en JavaScript.
+                // Order by UTF-16 code units, like Array.prototype.sort() in JavaScript.
                 e.keys.sorted().forEachIndexed { i, key ->
                     if (i > 0) out.append(',')
                     quote(out, key)
@@ -168,7 +168,7 @@ object CanonicalJson {
                     out.append(c).append(s[i + 1])
                     i++
                 }
-                // JSON.stringify escapa los sustitutos sueltos.
+                // JSON.stringify escapes lone surrogates.
                 c.isSurrogate() -> out.append("\\u%04x".format(c.code))
                 else -> out.append(c)
             }

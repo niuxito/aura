@@ -8,7 +8,7 @@ import com.aura.astronaut.mission.MissionPackage
 import com.aura.astronaut.mission.TimelineBlock
 import com.aura.astronaut.mission.ValidationIssue
 
-/** Una línea del plan completo de un día, ordenada por MET. */
+/** A line of a day's full plan, sorted by MET. */
 sealed interface DayEntry {
     val met: Long
 
@@ -24,16 +24,16 @@ sealed interface DayEntry {
         override val met get() = plan.activity.met
     }
 
-    /** Posición del MET actual dentro del día. */
+    /** Position of the current MET within the day. */
     data class Now(override val met: Long) : DayEntry
 }
 
 data class DayTimeline(
     val day: FlightDay,
     val entries: List<DayEntry>,
-    /** Avisos e informaciones de control de misión de este día para este tripulante. */
+    /** Mission control warnings and information for this day and crew member. */
     val dayNotices: List<ValidationIssue>,
-    /** Los que afectan a toda la misión. */
+    /** Those that affect the whole mission. */
     val missionNotices: List<ValidationIssue>,
 ) {
     companion object {
@@ -46,7 +46,7 @@ data class DayTimeline(
             adaptations: Map<String, LocalAdaptation> = emptyMap(),
         ): DayTimeline {
             val catalog = pkg.catalog.associateBy { it.id }
-            // Los bloques pueden cruzar el límite entre días: entra todo bloque que se solape con el día.
+            // Blocks may cross the boundary between days: every block overlapping the day is included.
             val blocks = pkg.blocks
                 .filter { it.startMet < day.endMet && it.endMet > day.startMet }
                 .map { DayEntry.Block(it) }
@@ -59,7 +59,7 @@ data class DayTimeline(
                 }
             val inDay = met >= day.startMet && met < day.endMet
             val now = if (inDay) listOf(DayEntry.Now(met)) else emptyList()
-            // A igual MET: bloque, evento, actividad y, al final, la marca de «ahora».
+            // At the same MET: block, event, activity and, last, the "now" mark.
             val order = { e: DayEntry ->
                 when (e) {
                     is DayEntry.Block -> 0

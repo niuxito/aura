@@ -12,18 +12,18 @@ import kotlin.math.acos
 import kotlin.math.sqrt
 
 /*
- * Actividad muscular SIMULADA para la silueta del HUD (AGENTS.md, «Silueta y actividad simulada»).
- * Imita lo que registraría la ropa inteligente usando el acelerómetro de la tablet. Es solo visual:
- * no se guarda como observación, no alimenta el semáforo y no dice nada de la salud del astronauta.
+ * SIMULATED muscle activity for the HUD silhouette (AGENTS.md, "Silhouette and simulated activity").
+ * It imitates what smart clothing would record using the tablet's accelerometer. It is visual only:
+ * it is not stored as an observation, does not feed the traffic light and says nothing about the astronaut's health.
  */
 
-/** De dónde sale el movimiento de la silueta. */
+/** Where the silhouette's movement comes from. */
 enum class MotionSource { SENSOR, WALK, SQUAT, STILL }
 
-/** Movimiento detectado: caminando (con su cadencia) o agachado. */
+/** Detected movement: walking (with its cadence) or squatting. */
 data class MotionInput(
     val walking: Boolean = false,
-    /** Pasos por segundo. */
+    /** Steps per second. */
     val cadence: Float = MotionRules.DEFAULT_CADENCE,
     val squatting: Boolean = false,
     val source: MotionSource = MotionSource.SENSOR,
@@ -37,58 +37,58 @@ data class MotionInput(
     }
 }
 
-/** Umbrales de demostración para detectar pasos y sentadillas con la tablet en la mano. No son clínicos. */
+/** Demonstration thresholds to detect steps and squats with the tablet in hand. They are not clinical. */
 object MotionRules {
-    /** Pico de aceleración vertical (m/s²) que cuenta como paso: el balanceo de caminar con la tablet. */
+    /** Vertical acceleration peak (m/s²) that counts as a step: the sway of walking with the tablet. */
     const val STEP_PEAK = 1.1f
-    /** Separación mínima entre pasos (s): por debajo sería ruido o un golpe. */
+    /** Minimum spacing between steps (s): below it, it would be noise or a knock. */
     const val STEP_MIN_INTERVAL = 0.28f
-    /** Se considera que camina si ha habido al menos 2 pasos y el último hace menos de esto (s). */
+    /** Walking is assumed if there have been at least 2 steps and the last one was less than this ago (s). */
     const val WALK_TIMEOUT = 1.3f
     const val DEFAULT_CADENCE = 1.8f
-    /** Bajada (m) de la tablet que cuenta como agacharse y subida que cuenta como levantarse. */
+    /** Drop (m) of the tablet that counts as squatting, and rise that counts as standing up. */
     const val SQUAT_DROP = 0.22f
     const val SQUAT_RISE = 0.16f
-    /** Bajada (m) a partir de la cual empieza a contar un descenso (para medir su duración e inclinación). */
+    /** Drop (m) from which a descent starts being counted (to measure its duration and tilt). */
     const val DESCENT_START = 0.05f
     /**
-     * Tiempo mínimo (s) entre empezar a bajar ([DESCENT_START]) y llegar a [SQUAT_DROP]: agacharse lleva
-     * su tiempo (unos 0,3 s en ese tramo); un tirón del brazo o un golpe, menos de 0,1 s.
+     * Minimum time (s) between starting to go down ([DESCENT_START]) and reaching [SQUAT_DROP]: squatting takes
+     * some time (about 0.3 s over that stretch); an arm jerk or a knock, less than 0.1 s.
      */
     const val SQUAT_MIN_DESCENT = 0.2f
     /**
-     * Giro máximo de la tablet (grados) durante el descenso. Al agacharse con la tablet delante se mantiene
-     * su orientación; al bajarla con los brazos o dejarla en la mesa, se inclina.
+     * Maximum rotation of the tablet (degrees) during the descent. When squatting with the tablet in front, its
+     * orientation is kept; when lowering it with the arms or putting it on the table, it tilts.
      */
     const val SQUAT_MAX_TILT_DEG = 25f
     /**
-     * Giro medio máximo de la tablet durante el descenso (grados/s). Agacharse con la tablet delante apenas
-     * la gira; bajarla con los brazos la gira decenas de grados por segundo.
+     * Maximum mean rotation of the tablet during the descent (degrees/s). Squatting with the tablet in front barely
+     * rotates it; lowering it with the arms rotates it by tens of degrees per second.
      */
     const val SQUAT_MAX_TILT_RATE_DEG_S = 20f
-    /** Giro rápido de la tablet (grados/s): se descarta lo integrado hasta ahora, porque no es un movimiento del cuerpo. */
+    /** Fast tablet rotation (degrees/s): what has been integrated so far is discarded, because it is not a body movement. */
     const val TILT_RATE_RESET_DEG_S = 60f
-    /** Tras un paso, no se buscan sentadillas durante este tiempo (s): el balanceo de caminar deriva la integración. */
+    /** After a step, squats are not looked for during this time (s): the walking sway makes the integration drift. */
     const val STEP_GUARD = 1.0f
-    /** Si sigue agachado más de esto (s), se da por levantado (la integración deriva). */
+    /** If still squatting after this long (s), it is assumed to have stood up (the integration drifts). */
     const val SQUAT_TIMEOUT = 15f
-    /** Constantes de fuga de la integración (s): evitan que la deriva del sensor acumule desplazamiento. */
+    /** Leak time constants of the integration (s): they prevent sensor drift from accumulating displacement. */
     const val VELOCITY_LEAK = 1.2f
     const val DISPLACEMENT_LEAK = 3f
 }
 
 /**
- * Detección de pasos y sentadillas a partir de la gravedad y la aceleración lineal del dispositivo.
- * Sin dependencias de Android, para poder probarla con señales sintéticas.
+ * Step and squat detection from the device's gravity and linear acceleration.
+ * No Android dependencies, so it can be tested with synthetic signals.
  */
 class MotionDetector {
     private val gravity = floatArrayOf(0f, 0f, 9.81f)
     private var lastGravityT = -1f
     private var t = -1f
-    // Pasos
+    // Steps
     private var above = false
     private val steps = ArrayDeque<Float>()
-    // Sentadilla
+    // Squat
     private var velocity = 0f
     private var displacement = 0f
     private var descentStart: Float? = null
@@ -100,27 +100,27 @@ class MotionDetector {
     var state = MotionInput()
         private set
 
-    /** Vector de gravedad del sensor, en m/s². [time] en segundos. */
+    /** Sensor gravity vector, in m/s². [time] in seconds. */
     fun onGravity(time: Float, x: Float, y: Float, z: Float) {
         val previous = gravity.copyOf()
         gravity[0] = x; gravity[1] = y; gravity[2] = z
         val dt = time - lastGravityT
         if (lastGravityT >= 0f && dt in 0.001f..0.5f) {
-            // Giro rápido de la tablet: no es el cuerpo bajando, sino la tablet girando en la mano.
+            // Fast tablet rotation: it is not the body going down, but the tablet turning in the hand.
             if (angleDeg(previous, gravity) / dt > MotionRules.TILT_RATE_RESET_DEG_S && !squatting) resetIntegration()
         }
         lastGravityT = time
     }
 
-    /** Aceleración lineal (sin gravedad), en m/s². [time] en segundos. Devuelve el estado actualizado. */
+    /** Linear acceleration (without gravity), in m/s². [time] in seconds. Returns the updated state. */
     fun onLinear(time: Float, x: Float, y: Float, z: Float): MotionInput {
         val dt = if (t < 0f) 0f else (time - t).coerceIn(0f, 0.1f)
         t = time
         val g = norm(gravity).takeIf { it > 1f } ?: return state
-        // Aceleración vertical: positiva hacia arriba (la gravedad del sensor apunta hacia arriba en reposo).
+        // Vertical acceleration: positive upward (the sensor's gravity points upward at rest).
         val vertical = (x * gravity[0] + y * gravity[1] + z * gravity[2]) / g
 
-        // Pasos: cada cruce por encima del pico, separado del anterior.
+        // Steps: each crossing above the peak, spaced from the previous one.
         if (!above && vertical > MotionRules.STEP_PEAK) {
             above = true
             if (steps.isEmpty() || t - steps.last() > MotionRules.STEP_MIN_INTERVAL) steps.addLast(t)
@@ -135,7 +135,7 @@ class MotionDetector {
             MotionRules.DEFAULT_CADENCE
         }
 
-        // Sentadilla: desplazamiento vertical con integración con fuga.
+        // Squat: vertical displacement with leaky integration.
         if (dt > 0f) {
             velocity = (velocity + vertical * dt) * (1f - dt / MotionRules.VELOCITY_LEAK)
             displacement = (displacement + velocity * dt) * (1f - dt / MotionRules.DISPLACEMENT_LEAK)
@@ -149,10 +149,10 @@ class MotionDetector {
                 descentGravity = null
             }
             val start = descentStart
-            // Se decide una sola vez por descenso, al cruzar el umbral: o es una sentadilla o se descarta lo integrado.
+            // Decided only once per descent, when crossing the threshold: either it is a squat or the integration is discarded.
             if (start != null && displacement < -MotionRules.SQUAT_DROP) {
                 val afterStep = steps.isNotEmpty() && t - steps.last() < MotionRules.STEP_GUARD
-                // Si la tablet se ha inclinado al bajar, se ha movido con los brazos, no con el cuerpo.
+                // If the tablet tilted while going down, it was moved with the arms, not with the body.
                 val elapsed = t - start
                 val tilt = descentGravity?.let { angleDeg(it, gravity) } ?: Float.MAX_VALUE
                 val steady = tilt <= MotionRules.SQUAT_MAX_TILT_DEG && tilt / elapsed.coerceAtLeast(dt) <= MotionRules.SQUAT_MAX_TILT_RATE_DEG_S
@@ -198,8 +198,8 @@ class MotionDetector {
 }
 
 /**
- * Lee aceleración lineal y gravedad del dispositivo y se las pasa a [MotionDetector].
- * Registrar solo mientras la silueta está en pantalla.
+ * Reads the device's linear acceleration and gravity and passes them to [MotionDetector].
+ * Register only while the silhouette is on screen.
  */
 class BodyMotionSensor(context: Context) : SensorEventListener {
     private val manager = context.getSystemService(SensorManager::class.java)

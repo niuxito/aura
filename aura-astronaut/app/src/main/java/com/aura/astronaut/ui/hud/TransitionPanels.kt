@@ -58,11 +58,11 @@ fun measureText(s: MeasureStatus): String = when (s) {
     MeasureStatus.UPCOMING -> str(R.string.measure_upcoming)
 }
 
-/** Línea de resumen de la preparación: «Preparación: 2 hechas · 1 perdida · 5 por hacer». */
+/** Preparation summary line: "Preparation: 2 done · 1 lost · 5 to do". */
 fun prepSummary(r: TransitionReadiness): String =
     str(R.string.prep_summary, r.done, r.lost, r.ahead)
 
-/** Detalle de la preparación para la transición: capacidades críticas día a día, medidas y ejercicio. */
+/** Transition preparation detail: critical capacities day by day, measures and exercise. */
 @Composable
 fun TransitionReadinessPanel(
     t: TransitionAlert,

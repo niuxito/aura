@@ -3,9 +3,9 @@ package com.aura.astronaut.mission
 import kotlin.math.abs
 
 /*
- * MET (Mission Elapsed Time): tiempo desde el despegue, en segundos.
- * Se escribe DD/HH:MM o DD/HH:MM:SS, como en los cronogramas de NASA (TLI en 01/01:08:42).
- * Réplica de ../aura-manager/lib/met.ts: las etiquetas deben coincidir con las del Manager.
+ * MET (Mission Elapsed Time): time since launch, in seconds.
+ * Written DD/HH:MM or DD/HH:MM:SS, as in NASA timelines (TLI at 01/01:08:42).
+ * Replica of ../aura-manager/lib/met.ts: labels must match the Manager's.
  */
 object Met {
     const val MINUTE = 60L
@@ -14,10 +14,10 @@ object Met {
 
     private val PATTERN = Regex("""^(-)?(\d{1,3})/(\d{1,2}):(\d{2})(?::(\d{2}))?$""")
 
-    /** Formato del Manager: los segundos solo aparecen si no son cero. */
+    /** Manager format: seconds only appear when they are not zero. */
     fun format(seconds: Long): String = format(seconds, alwaysSeconds = false)
 
-    /** Para el reloj del HUD, que siempre muestra segundos: DD/HH:MM:SS. */
+    /** For the HUD clock, which always shows seconds: DD/HH:MM:SS. */
     fun formatClock(seconds: Long): String = format(seconds, alwaysSeconds = true)
 
     private fun format(seconds: Long, alwaysSeconds: Boolean): String {
@@ -31,7 +31,7 @@ object Met {
         return if (alwaysSeconds || s != 0L) "$base:${pad(s)}" else base
     }
 
-    /** Acepta D/HH:MM y D/HH:MM:SS con signo opcional; null si el texto no es un MET válido. */
+    /** Accepts D/HH:MM and D/HH:MM:SS with an optional sign; null if the text is not a valid MET. */
     fun parse(text: String): Long? {
         val match = PATTERN.matchEntire(text.trim()) ?: return null
         val (sign, d, h, m, s) = match.destructured
@@ -49,20 +49,20 @@ object Met {
 }
 
 /**
- * Día de vuelo al que pertenece un MET: el que cumple `startMet <= met < endMet`.
- * El último día incluye su `endMet` (el amerizaje cae justo ahí), igual que `flightDayOf` del Manager.
+ * Flight day a MET belongs to: the one satisfying `startMet <= met < endMet`.
+ * The last day includes its `endMet` (splashdown falls right there), like the Manager's `flightDayOf`.
  */
 fun List<FlightDay>.dayAt(met: Long): FlightDay? {
     val last = lastOrNull()
     return firstOrNull { d -> met >= d.startMet && (met < d.endMet || (d === last && met == d.endMet)) }
 }
 
-/** Dónde está la misión en un MET dado. */
+/** Where the mission is at a given MET. */
 sealed interface MissionPhase {
     data object BeforeLaunch : MissionPhase
     data class InFlight(val day: FlightDay) : MissionPhase
     data object AfterEnd : MissionPhase
-    /** El MET cae en un hueco entre días de vuelo (no debería ocurrir con un paquete coherente). */
+    /** The MET falls in a gap between flight days (should not happen with a consistent package). */
     data object Unscheduled : MissionPhase
 }
 
@@ -76,5 +76,5 @@ fun MissionPackage.phaseAt(met: Long): MissionPhase {
     }
 }
 
-/** Fin de la misión según el paquete (MET del último instante del último día de vuelo). */
+/** End of the mission according to the package (MET of the last instant of the last flight day). */
 val MissionPackage.endMet: Long get() = days.last().endMet

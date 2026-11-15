@@ -31,7 +31,7 @@ class AlertRulesTest {
     )
 
     @Test
-    fun `una capacidad en rojo genera una alerta roja con su evidencia`() {
+    fun `a capacity in red raises a red alert with its evidence`() {
         val a = CapacityEvaluator.evaluate(pkg, 7, signals(7, DemoScenario.COORDINATION))
         val c = AlertRules.candidates(a, emptyList(), catalog).single()
         assertEquals(AlertRules.KIND_RED, c.kind)
@@ -44,13 +44,13 @@ class AlertRulesTest {
     }
 
     @Test
-    fun `lo que solo esta en ambar no genera alerta`() {
+    fun `what is only amber raises no alert`() {
         val a = CapacityEvaluator.evaluate(pkg, 8, signals(8, DemoScenario.FATIGUE))
         assertTrue(AlertRules.candidates(a, emptyList(), catalog).isEmpty())
     }
 
     @Test
-    fun `incoherencia entre autoinforme y sensor`() {
+    fun `inconsistency between self-report and sensor`() {
         val a = CapacityEvaluator.evaluate(pkg, 8, signals(8, DemoScenario.FATIGUE) + answer(8, "Q1_FATIGUE", 2.0))
         val c = AlertRules.candidates(a, emptyList(), catalog).single()
         assertEquals(AlertRules.KIND_CONSISTENCY, c.kind)
@@ -59,7 +59,7 @@ class AlertRulesTest {
     }
 
     @Test
-    fun `adaptacion que quita una medida de preparacion`() {
+    fun `adaptation that removes a preparation measure`() {
         val removes = adaptation("cdr-A-710100", AdaptationEngine.RULE_CRITICAL_NEXT_DAY + AdaptationEngine.REMOVES_PREP)
         val keeps = adaptation("cdr-R-591300", AdaptationEngine.RULE_CAPACITY)
         val c = AlertRules.candidates(null, listOf(removes, keeps), catalog).single()

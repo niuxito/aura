@@ -10,7 +10,7 @@ import org.junit.Test
 import java.io.File
 import javax.xml.parsers.DocumentBuilderFactory
 
-/** Los textos de la interfaz existen en inglés y en español, con los mismos argumentos de formato. */
+/** Interface texts exist in English and Spanish, with the same format arguments. */
 class StringsXmlTest {
 
     private fun read(dir: String): Map<String, String> {
@@ -25,20 +25,20 @@ class StringsXmlTest {
     fun back() = TestStrings.install("es")
 
     @Test
-    fun `cada texto tiene su traduccion con los mismos argumentos`() {
+    fun `every text has its translation with the same arguments`() {
         val en = read("values")
         val es = read("values-es")
         val missing = en.keys - es.keys - setOf("app_name")
-        assertEquals("Faltan en español", emptySet<String>(), missing)
-        assertEquals("Sobran en español", emptySet<String>(), es.keys - en.keys)
+        assertEquals("Missing in Spanish", emptySet<String>(), missing)
+        assertEquals("Extra in Spanish", emptySet<String>(), es.keys - en.keys)
         es.forEach { (name, text) ->
-            assertEquals("Argumentos de $name", args.findAll(en.getValue(name)).map { it.value }.toSet(), args.findAll(text).map { it.value }.toSet())
-            assertTrue("$name vacío", text.isNotBlank())
+            assertEquals("Arguments of $name", args.findAll(en.getValue(name)).map { it.value }.toSet(), args.findAll(text).map { it.value }.toSet())
+            assertTrue("$name is empty", text.isNotBlank())
         }
     }
 
     @Test
-    fun `la interfaz funciona en ingles`() {
+    fun `the interface works in English`() {
         TestStrings.install("en")
         assertEquals("AMBER", HudTexts.levelWord(CapacityLevel.AMBER))
         assertEquals("less than 1 min", HudTexts.formatDuration(30))

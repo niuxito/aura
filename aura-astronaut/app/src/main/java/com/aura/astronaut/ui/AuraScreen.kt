@@ -86,16 +86,16 @@ import com.aura.astronaut.ui.theme.HudPanel
 import com.aura.astronaut.ui.theme.HudText
 import com.aura.astronaut.voice.VoiceStatus
 
-/* Disposición del HUD en horizontal: contexto arriba a la izquierda, identidad y transición arriba
- * a la derecha, y abajo una barra con «Ahora / Siguiente» y los controles. El centro queda para la cámara. */
+/* Landscape HUD layout: context at the top left, identity and transition at the top
+ * right, and at the bottom a bar with "Now / Next" and the controls. The center is left for the camera. */
 private val LeftColumnWidth = 340.dp
 private val RightColumnWidth = 360.dp
 private val ControlWidth = 112.dp
 private val NowAndNextMaxWidth = 780.dp
 private val ColumnGap = 12.dp
-/** Alto que se reserva abajo para la barra de «Ahora / Siguiente» y los controles. */
+/** Height reserved at the bottom for the "Now / Next" bar and the controls. */
 private val BottomBarReserve = 150.dp
-/** La silueta puede bajar algo más: a la derecha solo están los botones, más bajos que la barra. */
+/** The silhouette may go a bit lower: on the right there are only the buttons, lower than the bar. */
 private val SilhouetteBottomReserve = 100.dp
 
 @Composable
@@ -131,7 +131,7 @@ fun AuraScreen(vm: AuraViewModel = viewModel()) {
     val motionSensorAvailable = remember { BodyMotionSensor(appContext).available }
     LaunchedEffect(motion.walking, motion.squatting) { vm.reportMotion(motion.walking, motion.squatting) }
 
-    // Frecuencia cardiaca (paso 7)
+    // Heart rate (step 7)
     val heart by vm.heart.collectAsStateWithLifecycle()
     val heartSource by vm.heartSource.collectAsStateWithLifecycle()
     val watchesFound by vm.watchesFound.collectAsStateWithLifecycle()
@@ -155,7 +155,7 @@ fun AuraScreen(vm: AuraViewModel = viewModel()) {
     val catalog = remember(ready) { ready?.loaded?.pkg?.catalog.orEmpty().associateBy { it.id } }
     val redStates = assessment?.capacities.orEmpty().filter { it.level == CapacityLevel.RED }
 
-    // Recogida de datos: actividad que se va a omitir (pide motivo) o cuyo cuestionario se responde.
+    // Data collection: activity about to be omitted (asks for a reason) or whose questionnaire is being answered.
     var omitTarget by remember { mutableStateOf<PlanItem?>(null) }
     var questionnaireTarget by remember { mutableStateOf<PlanItem?>(null) }
     val questionnaireItemId = ready?.loaded?.pkg?.questionnaire?.catalogItemId
@@ -169,7 +169,7 @@ fun AuraScreen(vm: AuraViewModel = viewModel()) {
         }
     }
 
-    // Avisos por voz: los mismos textos que muestra el HUD, cada uno una sola vez.
+    // Voice notices: the same texts the HUD shows, each one only once.
     val reference = ready?.loaded?.pkg?.gravityReference.orEmpty()
     val announcements = buildList {
         snapshot?.day?.let { d -> redStates.forEach { add(HudTexts.redAnnouncement(d.day, it)) } }
@@ -184,11 +184,11 @@ fun AuraScreen(vm: AuraViewModel = viewModel()) {
     LaunchedEffect(announcements.map { it.id }) { vm.announce(announcements) }
 
     Box(Modifier.fillMaxSize()) {
-        // Capa 1: fondo. El fondo neutro queda debajo y se ve si la cámara no da imagen.
+        // Layer 1: background. The neutral background stays underneath and shows if the camera gives no image.
         NeutralBackground()
         if (granted) CameraPreview(onFeedChange = { feed = it })
 
-        // Capa 2: HUD.
+        // Layer 2: HUD.
         Box(
             Modifier
                 .fillMaxSize()
@@ -224,7 +224,7 @@ fun AuraScreen(vm: AuraViewModel = viewModel()) {
                             }
                         }
                     }
-                    // Columna derecha: aviso de transición y, en el espacio libre, la silueta. Nunca pisa la barra inferior.
+                    // Right column: transition notice and, in the free space, the silhouette. It never overlaps the bottom bar.
                     Column(
                         Modifier
                             .align(Alignment.TopEnd)
@@ -242,7 +242,7 @@ fun AuraScreen(vm: AuraViewModel = viewModel()) {
                 }
             }
 
-            // Barra inferior: «Ahora / Siguiente» centrado en el espacio libre y los controles a la derecha.
+            // Bottom bar: "Now / Next" centered in the free space and the controls on the right.
             Row(
                 Modifier
                     .align(Alignment.BottomCenter)
@@ -289,7 +289,7 @@ fun AuraScreen(vm: AuraViewModel = viewModel()) {
             }
         }
 
-        // «Atrás» de Android cierra el panel abierto de más arriba, en vez de salir de la app.
+        // Android "Back" closes the topmost open panel instead of leaving the app.
         val anyModal = omitTarget != null || questionnaireTarget != null || demoOpen || watchOpen ||
             readinessOpen || capacityDetailOpen || adaptationsOpen || dayPlanOpen
         BackHandler(enabled = anyModal) {
@@ -305,7 +305,7 @@ fun AuraScreen(vm: AuraViewModel = viewModel()) {
             }
         }
 
-        // Capa 3: paneles modales, sobre un velo que oculta el HUD de detrás.
+        // Layer 3: modal panels, over a veil that hides the HUD behind.
         if (ready != null && crewId == null && !demoOpen) {
             Scrim()
             CrewPicker(
@@ -457,8 +457,8 @@ fun AuraScreen(vm: AuraViewModel = viewModel()) {
 }
 
 /**
- * Controles siempre visibles, en fila: plan del día (con los avisos de control de misión de hoy),
- * estado de la cámara (si no hay imagen), voz y modo demo.
+ * Always-visible controls, in a row: day plan (with today's mission control notices),
+ * camera state (if there is no image), voice and demo mode.
  */
 @Composable
 private fun Controls(
@@ -478,7 +478,7 @@ private fun Controls(
     val button = Modifier.width(ControlWidth)
     Row(modifier, horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.Bottom) {
         if (planWarnings != null) {
-            // Lo más relevante del plan de hoy: cambios hechos por AURA y, si no, avisos de control de misión.
+            // The most relevant part of today's plan: changes made by AURA and, otherwise, mission control notices.
             HudButton(
                 text = when {
                     planChanges == 1 -> str(R.string.control_plan_change)
@@ -509,7 +509,7 @@ private fun Controls(
                     try {
                         context.startActivity(Intent(TextToSpeech.Engine.ACTION_INSTALL_TTS_DATA).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
                     } catch (_: ActivityNotFoundException) {
-                        // Sin instalador de voces: el HUD sigue funcionando sin voz.
+                        // No voice installer: the HUD keeps working without voice.
                     }
                 },
                 accent = HudColors.Amber,
@@ -528,8 +528,8 @@ private fun cameraNote(access: CameraAccess, feed: CameraFeed): String? = when {
 }
 
 /**
- * Movimiento de la silueta: con [MotionSource.SENSOR], el acelerómetro de la tablet (registrado solo
- * mientras la pantalla está visible); con los demás, el movimiento forzado desde el modo demo.
+ * Silhouette movement: with [MotionSource.SENSOR], the tablet's accelerometer (registered only
+ * while the screen is visible); with the others, the movement forced from demo mode.
  */
 @Composable
 private fun rememberBodyMotion(source: MotionSource): MotionInput {
@@ -555,7 +555,7 @@ private fun rememberBodyMotion(source: MotionSource): MotionInput {
     return if (source == MotionSource.SENSOR) sensed.copy(source = MotionSource.SENSOR) else MotionInput.forced(source)
 }
 
-/** Velo oscuro bajo un panel modal: el HUD de detrás no se mezcla con el texto del panel. */
+/** Dark veil under a modal panel: the HUD behind does not mix with the panel text. */
 @Composable
 private fun Scrim(onClick: (() -> Unit)? = null) {
     val interaction = remember { MutableInteractionSource() }
@@ -563,7 +563,7 @@ private fun Scrim(onClick: (() -> Unit)? = null) {
         Modifier
             .fillMaxSize()
             .background(Color.Black.copy(alpha = 0.72f))
-            // Sin onClick, absorbe igualmente los toques para que no lleguen al HUD de detrás.
+            // Without onClick, it still absorbs touches so they do not reach the HUD behind.
             .clickable(interactionSource = interaction, indication = null, onClick = onClick ?: {}),
     )
 }

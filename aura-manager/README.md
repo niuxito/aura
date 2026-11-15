@@ -1,6 +1,8 @@
 # AURA Manager
 
-Mission control console for **AURA (Astronaut Unified Readiness & Autonomous-health)**, a project for the NASA Space Apps Challenge 2026.
+Mission control console for **AURA (Astronaut Unified Readiness & Autonomous-health)**, a project for the NASA Space Apps Challenge 2026. It is one of the two parts of the [AURA repository](../README.md); the other is the astronaut interface, [AURA Astronaut](../aura-astronaut/README.md).
+
+Deployed at **https://aura-manager-rouge.vercel.app** (Vercel, root directory `aura-manager/`).
 
 Starting from the mission plan, it prepares each astronaut's prevention plan (exercise, assessments, supplements and recovery) for every day, with special attention to gravity changes, and publishes a versioned mission package consumed by the astronaut interface (`../aura-astronaut`).
 
@@ -80,6 +82,11 @@ It is mission-agnostic: triggers use gravity environments and flight days, so it
 | Activity scheduled within a sleep period or outside the mission | Warning |
 | Crew member with no plan on a flight day | Warning |
 | Text with no English version | Warning |
+| Conditional activity that does not say what it depends on (no `note`) | Warning |
+| Gravity transition whose `transitionMet` falls outside its flight day; crew resting HR baseline outside 30–120 bpm | Warning |
+| Gravity transition with no exact `transitionMet` | Information |
+| Amber action (`onAmberActions`) on a non-adaptable category, a missing item or another category | Blocker |
+| Amber action pointing to a demanding item (the interface will never apply it) | Warning |
 | Day with no fatigue questionnaire, supplements with no dose, conditional activities, texts with no Spanish version | Information |
 | Inconsistent questionnaire (non-existent capacity, signal or action, thresholds off the scale) | Blocker |
 | Bank question with no available triggers | Information |
@@ -93,6 +100,16 @@ They are design rules for the demonstrator, not clinical criteria. Their message
 - `GET /api/package?list=1`: summary of versions.
 
 The format (`aura.mission-package/v5`) is defined in `lib/package.ts`. v5 changed every code to English and every text to a `LocalizedText`, and adds `languages` and `defaultLanguage`; the v4 → v5 mapping is in `../aura-astronaut/contract/v4-to-v5.md`. During the migration, the adaptation and alert endpoints still accept v4 (Spanish) codes and convert them (`lib/legacy.ts`), and records stored with v4 codes are converted when read. A saved state from an older schema is replaced by the demo mission.
+
+Optional v5 fields (a package without them is still valid and the interface falls back to a provisional behavior):
+
+- `days[].transitionMet`: exact MET of each gravity transition, for the countdown.
+- `catalog[].durationMin` and `plans[…].activities[].endMet`: planned end of each activity.
+- `capacities[].onAmberActions`: concrete substitutions the interface applies in amber (e.g. the hydration menu).
+- `capacities[].criticalFor`: arrival environments where a capacity is critical for leaving the vehicle.
+- `crew[].restingHrBpm`: demonstration resting heart rate baseline.
+
+The contract example consumed by the Android app is `../aura-astronaut/contract/mission-package.example.json`; pending contract changes are tracked in `../aura-astronaut/contract/pending-changes.md`.
 
 ## Data
 

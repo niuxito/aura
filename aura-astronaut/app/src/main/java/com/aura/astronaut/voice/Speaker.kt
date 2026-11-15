@@ -14,25 +14,25 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
-/** Estado de la voz, para que el HUD pueda explicarlo. */
+/** Voice state, so the HUD can explain it. */
 enum class VoiceStatus {
     STARTING,
     READY,
-    /** El motor no tiene una voz del idioma activo que funcione sin conexión: la app sigue solo con el HUD. */
+    /** The engine has no offline voice for the active language: the app continues with the HUD only. */
     NO_OFFLINE_VOICE,
-    /** No hay motor de texto a voz en el dispositivo. */
+    /** There is no text-to-speech engine on the device. */
     UNAVAILABLE,
 }
 
 /**
- * Avisos por voz con el `TextToSpeech` del sistema, en el idioma activo de la interfaz y sin conexión.
- * - Cada anuncio se dice una sola vez por sesión (por su id).
- * - Un anuncio solo interrumpe a otro de prioridad igual o menor.
- * - Silenciado, los anuncios se dan por dichos: al reactivar la voz no se repiten los antiguos.
+ * Voice notices with the system `TextToSpeech`, in the interface's active language and offline.
+ * - Each announcement is spoken only once per session (by its id).
+ * - An announcement only interrupts another of equal or lower priority.
+ * - When muted, announcements are marked as said: re-enabling the voice does not repeat old ones.
  */
 class Speaker(context: Context, initialLanguage: String) : TextToSpeech.OnInitListener {
 
-    /** Idioma de la voz: el de la interfaz. */
+    /** Voice language: the interface's. */
     @Volatile private var language = initialLanguage
     @Volatile private var engineReady = false
 
@@ -47,7 +47,7 @@ class Speaker(context: Context, initialLanguage: String) : TextToSpeech.OnInitLi
     private val _muted = MutableStateFlow(prefs.getBoolean(KEY_MUTED, false))
     val muted: StateFlow<Boolean> = _muted.asStateFlow()
 
-    /** Avisos ya dichos (o silenciados). Se guardan para no repetirlos al reabrir la app. */
+    /** Notices already said (or muted). Stored so they are not repeated when reopening the app. */
     private val spoken = LinkedHashSet(prefs.getString(KEY_SPOKEN, null)?.split('\n')?.filter { it.isNotBlank() }.orEmpty())
     private val pending = mutableListOf<Announcement>()
     @Volatile private var speakingPriority: Int? = null
@@ -63,7 +63,7 @@ class Speaker(context: Context, initialLanguage: String) : TextToSpeech.OnInitLi
 
     override fun onInit(result: Int) {
         if (result != TextToSpeech.SUCCESS) {
-            Log.w(TAG, "Motor de voz no disponible ($result)")
+            Log.w(TAG, "Voice engine not available ($result)")
             _status.value = VoiceStatus.UNAVAILABLE
             return
         }
@@ -94,7 +94,7 @@ class Speaker(context: Context, initialLanguage: String) : TextToSpeech.OnInitLi
         }
     }
 
-    /** Cambia el idioma de la voz (al cambiar el de la interfaz). */
+    /** Changes the voice language (when the interface language changes). */
     fun setLanguage(lang: String) {
         if (lang == language) return
         language = lang
@@ -104,17 +104,17 @@ class Speaker(context: Context, initialLanguage: String) : TextToSpeech.OnInitLi
         }
     }
 
-    /** Elige una voz instalada del idioma activo que no necesite red; sin ella, la app sigue solo con el HUD. */
+    /** Picks an installed voice for the active language that needs no network; without one, the app continues with the HUD only. */
     private fun chooseVoice(): Boolean {
         val voice = offlineVoice(language)
         if (voice == null) {
             val same = runCatching { tts.voices }.getOrNull().orEmpty().filter { it.locale.language == language }
             Log.w(
                 TAG,
-                "Sin voz sin conexión para «$language». Voces de ese idioma: " + same.joinToString { v ->
-                    "${v.name}(red=${v.isNetworkConnectionRequired}, " +
-                        "instalada=${TextToSpeech.Engine.KEY_FEATURE_NOT_INSTALLED !in v.features})"
-                }.ifEmpty { "ninguna" },
+                "No offline voice for \"$language\". Voices for that language: " + same.joinToString { v ->
+                    "${v.name}(network=${v.isNetworkConnectionRequired}, " +
+                        "installed=${TextToSpeech.Engine.KEY_FEATURE_NOT_INSTALLED !in v.features})"
+                }.ifEmpty { "none" },
             )
             _status.value = VoiceStatus.NO_OFFLINE_VOICE
             return false
@@ -125,7 +125,7 @@ class Speaker(context: Context, initialLanguage: String) : TextToSpeech.OnInitLi
         return true
     }
 
-    /** Anuncia lo que haya de nuevo en [announcements]; lo ya dicho se ignora. */
+    /** Announces whatever is new in [announcements]; what was already said is ignored. */
     fun announce(announcements: List<Announcement>) {
         announcements.sortedByDescending { it.priority }.forEach { a ->
             if (!spoken.add(a.id)) return@forEach
@@ -140,7 +140,7 @@ class Speaker(context: Context, initialLanguage: String) : TextToSpeech.OnInitLi
     }
 
     private fun rememberSpoken() {
-        // Solo los últimos: basta para no repetir y no crece sin límite.
+        // Only the latest ones: enough to avoid repeats and it does not grow without limit.
         while (spoken.size > MAX_REMEMBERED) spoken.remove(spoken.first())
         prefs.edit { putString(KEY_SPOKEN, spoken.joinToString("\n")) }
     }
@@ -167,7 +167,7 @@ class Speaker(context: Context, initialLanguage: String) : TextToSpeech.OnInitLi
 
     private fun speakNow(a: Announcement) {
         val current = speakingPriority
-        // Solo se interrumpe un mensaje de prioridad igual o menor; si no, el nuevo espera su turno.
+        // A message is only interrupted by one of equal or lower priority; otherwise the new one waits its turn.
         val mode = if (current == null || a.priority >= current) TextToSpeech.QUEUE_FLUSH else TextToSpeech.QUEUE_ADD
         if (mode == TextToSpeech.QUEUE_FLUSH) speakingPriority = a.priority
         audio.requestAudioFocus(focusRequest)
@@ -181,7 +181,7 @@ class Speaker(context: Context, initialLanguage: String) : TextToSpeech.OnInitLi
         }
     }
 
-    /** Voz instalada del idioma que no necesita red. Prefiere la variante habitual (España, EE. UU.) y luego cualquiera. */
+    /** Installed voice for the language that needs no network. Prefers the usual variant (Spain, US) and then any. */
     private fun offlineVoice(lang: String): Voice? {
         val voices = runCatching { tts.voices }.getOrNull().orEmpty().filter { v ->
             v.locale.language == lang &&

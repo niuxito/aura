@@ -2,7 +2,7 @@
 <resources>
     <string name="app_name" translatable="false">AURA Astronaut</string>
 
-    <!-- Textos del HUD que también dice la voz (HudTexts) -->
+    <!-- HUD texts that the voice also speaks (HudTexts) -->
     <string name="transition_title_exact">%1$s in %2$s</string>
     <string name="transition_title_day">Transition before the end of %1$s, in %2$s</string>
     <string name="transition_change">From %1$s to %2$s</string>
@@ -49,7 +49,7 @@
     <string name="alert_ack_replied">Mission control has replied to your alert %1$s.</string>
     <string name="duration_under_minute">less than 1 min</string>
 
-    <!-- Valores del contrato (Labels) -->
+    <!-- Contract values (Labels) -->
     <string name="gravity_earth">Earth</string>
     <string name="gravity_mars">Mars</string>
     <string name="gravity_moon">Moon</string>
@@ -84,7 +84,7 @@
     <string name="category_recovery">Recovery</string>
     <string name="category_preparation">Preparation</string>
 
-    <!-- Motivos de las adaptaciones (AdaptationEngine): viajan a control de misión en el idioma activo -->
+    <!-- Adaptation reasons (AdaptationEngine): they travel to mission control in the active language -->
     <string name="reason_capacity">«%1$s» in %2$s: %3$s = %4$s%5$s (demo threshold %6$s, %7$s data, MET %8$s)</string>
     <string name="reason_capacity_level">«%1$s» in %2$s</string>
     <string name="reason_critical_next_day">%1$s («%2$s») has critical operational load: no intense activities are proposed the day before</string>
@@ -104,15 +104,15 @@
     <string name="unit_scale">(scale %1$s)</string>
     <string name="threshold_true">true</string>
 
-    <!-- Avisos a control de misión (AlertRules) -->
+    <!-- Notices to mission control (AlertRules) -->
     <string name="alert_message_red">%1$s in red: %2$s. %3$s</string>
     <string name="alert_message_prep">AURA has removed a transition preparation measure (%1$s). It requires a mission control decision.</string>
 
-    <!-- Prioridades de la transición -->
+    <!-- Transition priorities -->
     <string name="short_cardiovascular">Orthostatic</string>
     <string name="short_vestibular">Balance</string>
 
-    <!-- Escenarios de demo -->
+    <!-- Demo scenarios -->
     <string name="scenario_stable">Stable profile</string>
     <string name="scenario_stable_desc">Signals within the usual range compared with the astronaut’s own baseline.</string>
     <string name="scenario_fatigue">Accumulated fatigue</string>
@@ -120,7 +120,7 @@
     <string name="scenario_coordination">Coordination worsens</string>
     <string name="scenario_coordination_desc">Other signals stable; the touch test clearly worsens compared with the astronaut’s own baseline.</string>
 
-    <!-- Lectura del paquete de misión -->
+    <!-- Mission package parsing -->
     <string name="pkg_not_json">The package is not valid JSON.</string>
     <string name="pkg_schema">Unsupported schema: «%1$s». Expected «%2$s».</string>
     <string name="pkg_no_schema">no schema</string>
@@ -148,7 +148,7 @@
     <string name="pkg_checksum_download">the checksum does not match: the download may be corrupt</string>
     <string name="pkg_embedded_unreadable">The embedded package could not be read.</string>
 
-    <!-- Pantalla principal y controles -->
+    <!-- Main screen and controls -->
     <string name="loading_package">Loading mission package…</string>
     <string name="questionnaire_title">QUESTIONNAIRE · %1$s</string>
     <string name="control_plan_change">PLAN\n1 CHANGE</string>
@@ -176,7 +176,7 @@
     <string name="crew_pick_body">The viewer will show this crew member’s plan. You can change it in demo mode.</string>
     <string name="crew_pick_demo">Demonstration crew: they are not real people.</string>
 
-    <!-- Paneles del HUD -->
+    <!-- HUD panels -->
     <string name="phase_before_launch">Before launch</string>
     <string name="phase_after_end">End of the mission timeline</string>
     <string name="phase_unscheduled">Outside the package’s flight days</string>
@@ -209,7 +209,7 @@
     <string name="now_no_block">NOW · No block in the timeline</string>
     <string name="now_then">then %1$s at %2$s</string>
 
-    <!-- Semáforo -->
+    <!-- Traffic light -->
     <string name="capacities_title">CAPACITIES · %1$s</string>
     <string name="tag_demo">DEMO</string>
     <string name="count_red">%1$d red</string>
@@ -238,7 +238,7 @@
     <string name="policy_bad">Server check: %1$s</string>
     <string name="policy_out">outside the policy</string>
 
-    <!-- Preparación para la transición -->
+    <!-- Transition preparation -->
     <string name="trend_worsening">↗ worsening</string>
     <string name="trend_stable">→ stable</string>
     <string name="trend_improving">↘ improving</string>
@@ -263,7 +263,7 @@
     <string name="measure_replaced_by">changed to %1$s · %2$s</string>
     <string name="measure_reason">reason: %1$s</string>
 
-    <!-- Recogida de datos -->
+    <!-- Data collection -->
     <string name="omit_reason_operations">No time due to operations</string>
     <string name="omit_reason_fatigue">Fatigue or discomfort</string>
     <string name="omit_reason_equipment">Equipment unavailable</string>
@@ -286,7 +286,7 @@
     <string name="omitted_reason">OMITTED: %1$s</string>
     <string name="undo">UNDO</string>
 
-    <!-- Plan del día -->
+    <!-- Day plan -->
     <string name="plan_title">PLAN %1$s · %2$s</string>
     <string name="changes">CHANGES</string>
     <string name="plan_timeline_note">Timeline: %1$s. Blocks are approximate; «~» = approximate MET.</string>
@@ -305,7 +305,7 @@
     <string name="severity_info">INFO</string>
     <string name="mission_word">Mission</string>
 
-    <!-- Silueta y frecuencia cardiaca -->
+    <!-- Silhouette and heart rate -->
     <string name="sim_label">SIM · %1$s</string>
     <string name="heart_bpm">♥︎ %1$d bpm</string>
     <string name="heart_off">HR off</string>
@@ -325,7 +325,7 @@
     <string name="motion_squat">squatting · quadriceps, glutes, abdomen</string>
     <string name="motion_walk">walking · quadriceps, glutes, calves</string>
 
-    <!-- Modo demo -->
+    <!-- Demo mode -->
     <string name="demo_mode">DEMO MODE</string>
     <string name="demo_crew">Crew member</string>
     <string name="demo_no_previous_event">◀ No earlier events</string>
@@ -387,7 +387,7 @@
     <string name="check_rejected">Published package not usable (%1$s): keeping the current one.</string>
     <string name="check_offline">No connection with mission control: keeping the current package.</string>
 
-    <!-- Reloj -->
+    <!-- Watch -->
     <string name="watch_title">HEART RATE</string>
     <string name="watch_simulated_note">SIMULATED values that rise when walking or squatting. They are stored and shown as simulated.</string>
     <string name="watch_off_note">No heart rate: the silhouette’s heart does not beat.</string>

@@ -21,32 +21,32 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 /**
- * Paleta del visor. El color nunca va solo en el HUD: siempre acompaña a un texto
- * que dice lo mismo (verde/ámbar/rojo/gris del semáforo llevan etiqueta y motivo).
+ * Viewer palette. Color never goes alone in the HUD: it always accompanies a text
+ * that says the same (green/amber/red/gray in the traffic light carry a label and a reason).
  */
 object HudColors {
-    /** Información general y contexto de misión. */
+    /** General information and mission context. */
     val Cyan = Color(0xFF5CE1F0)
-    /** Precaución y marcos del visor. */
+    /** Caution and viewer frames. */
     val Amber = Color(0xFFFFB547)
-    /** Alerta. */
+    /** Alert. */
     val Red = Color(0xFFFF5A3C)
-    /** Semáforo: sin desviación. */
+    /** Traffic light: no deviation. */
     val Green = Color(0xFF5BE38A)
-    /** Semáforo: datos insuficientes. */
+    /** Traffic light: insufficient data. */
     val Gray = Color(0xFFA7B0B5)
     val Text = Color(0xFFF2F7F8)
     val TextDim = Color(0xFFB9C6CA)
-    /** Fondo de panel semitransparente: deja ver la cámara y mantiene el contraste del texto. */
+    /** Semi-transparent panel background: lets the camera show through and keeps text contrast. */
     val Panel = Color(0x8C07141B)
-    /** Fondo de los paneles modales: casi opaco, para que no se transparente el HUD de detrás. */
+    /** Modal panel background: almost opaque, so the HUD behind does not show through. */
     val PanelModal = Color(0xF5050D12)
-    /** Fondo cuando no hay imagen de cámara. */
+    /** Background when there is no camera image. */
     val SpaceDeep = Color(0xFF02070B)
     val SpaceMid = Color(0xFF0A1E2A)
 }
 
-/** Tipografía condensada del sistema, como la de un visor; disponible sin red ni ficheros extra. */
+/** Condensed system typeface, like a viewer's; available without network or extra files. */
 val HudFontFamily: FontFamily = FontFamily(
     Typeface(android.graphics.Typeface.create("sans-serif-condensed", android.graphics.Typeface.NORMAL)),
 )
@@ -80,7 +80,7 @@ fun AuraTheme(content: @Composable () -> Unit) {
     )
 }
 
-/** Recuadro del HUD: fondo semitransparente con borde de color, como en las maquetas del visor. */
+/** HUD box: semi-transparent background with a colored border, as in the viewer mockups. */
 @Composable
 fun HudPanel(
     modifier: Modifier = Modifier,

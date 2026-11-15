@@ -13,7 +13,7 @@ import java.text.DecimalFormat
 import java.text.DecimalFormatSymbols
 import java.util.Locale
 
-/* Textos de los valores del contrato, alineados con las etiquetas de AURA Manager (lib/i18n). */
+/* Texts for the contract values, aligned with AURA Manager's labels (lib/i18n). */
 
 val Gravity.label: String
     get() = str(
@@ -28,7 +28,7 @@ val Gravity.label: String
 val Gravity.shortLabel: String
     get() = if (this == Gravity.MICRO) str(R.string.gravity_micro_short) else label
 
-/** Gravedad relativa a la Tierra tal como la publica el paquete (`gravityReference`): «1 g», «0,165 g». */
+/** Gravity relative to Earth as published by the package (`gravityReference`): "1 g", "0.165 g". */
 fun gravityValue(reference: Map<Gravity, Double>, gravity: Gravity): String? {
     val g = reference[gravity] ?: return null
     val format = DecimalFormat("0.###", DecimalFormatSymbols(Locale.forLanguageTag(Lang.active)))

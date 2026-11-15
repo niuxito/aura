@@ -26,7 +26,7 @@ import com.aura.astronaut.ui.theme.HudColors
 import com.aura.astronaut.ui.theme.HudPanel
 import com.aura.astronaut.ui.theme.HudText
 
-/** Acciones del panel del reloj. */
+/** Watch panel actions. */
 interface WatchActions {
     fun setSource(source: HeartSource)
     fun requestPermission()
@@ -37,7 +37,7 @@ interface WatchActions {
     fun forget()
 }
 
-/** Configuración de la frecuencia cardiaca: fuente, búsqueda del reloj y cómo activar la retransmisión. */
+/** Heart rate setup: source, watch search and how to enable broadcasting. */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun WatchPanel(

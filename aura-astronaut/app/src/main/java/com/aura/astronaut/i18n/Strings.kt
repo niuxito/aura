@@ -9,9 +9,9 @@ import com.aura.astronaut.mission.Lang
 import com.aura.astronaut.mission.MissionPackage
 
 /**
- * Textos de la interfaz desde los recursos de Android (AGENTS.md, «Idiomas»): `values/strings.xml` en inglés
- * y `values-es/strings.xml` en español. Los módulos sin Compose (textos del HUD y de la voz, motivos de las
- * adaptaciones, avisos) los piden aquí; las pruebas instalan un proveedor que lee los mismos XML.
+ * Interface texts from Android resources (AGENTS.md, "Languages"): `values/strings.xml` in English
+ * and `values-es/strings.xml` in Spanish. Modules without Compose (HUD and voice texts, adaptation
+ * reasons, notices) request them here; tests install a provider that reads the same XML files.
  */
 object Strings {
     fun interface Provider {
@@ -24,33 +24,33 @@ object Strings {
         provider = p
     }
 
-    /** Con el contexto de la actividad, para seguir su idioma (también el elegido para la app en Android 13+). */
+    /** With the activity's context, to follow its language (also the one chosen for the app on Android 13+). */
     fun init(context: Context) {
         val localized = context.applicationContext.createConfigurationContext(context.resources.configuration)
         install { id, args -> if (args.isEmpty()) localized.getString(id) else localized.getString(id, *args) }
     }
 
     fun get(@StringRes id: Int, vararg args: Any): String =
-        checkNotNull(provider) { "Strings sin inicializar" }.get(id, args)
+        checkNotNull(provider) { "Strings not initialized" }.get(id, args)
 }
 
-/** Atajo para los módulos sin Compose. */
+/** Shortcut for modules without Compose. */
 fun str(@StringRes id: Int, vararg args: Any): String = Strings.get(id, *args)
 
 /**
- * Idioma activo de la app: el del sistema (o el elegido para la app) si el paquete lo trae; si no, el idioma
- * por defecto del paquete. Se elige en el modo demo con las preferencias de idioma por app de Android 13+.
+ * Active app language: the system's (or the one chosen for the app) if the package carries it; otherwise the
+ * package's default language. It is chosen in demo mode with Android 13+ per-app language preferences.
  */
 object AppLanguage {
-    /** Idiomas con textos de interfaz en los recursos. */
+    /** Languages with interface texts in the resources. */
     val SUPPORTED = listOf("en", "es")
 
     fun current(context: Context): String = context.resources.configuration.locales[0].language
 
-    /** Ajusta el idioma de los textos del paquete al de la interfaz. */
+    /** Sets the language of package texts to the interface's. */
     fun applyTo(pkg: MissionPackage, context: Context) = Lang.configure(pkg, current(context))
 
-    /** Idioma elegido para la app; null = el del sistema. */
+    /** Language chosen for the app; null = the system's. */
     fun chosen(context: Context): String? =
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             context.getSystemService(LocaleManager::class.java)?.applicationLocales?.takeIf { !it.isEmpty }?.get(0)?.language
@@ -58,7 +58,7 @@ object AppLanguage {
             null
         }
 
-    /** Fija el idioma de la app (null = el del sistema). La actividad se recrea con él. */
+    /** Sets the app language (null = the system's). The activity is recreated with it. */
     fun choose(context: Context, language: String?): Boolean {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) return false
         val manager = context.getSystemService(LocaleManager::class.java) ?: return false

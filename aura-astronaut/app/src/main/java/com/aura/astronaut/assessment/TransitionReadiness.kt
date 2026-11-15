@@ -18,33 +18,33 @@ import com.aura.astronaut.mission.MissionPackage
 import com.aura.astronaut.mission.PlanActivity
 
 /**
- * Prioridades de la transición (AGENTS.md, «Objetivo final y prioridades»).
+ * Transition priorities (AGENTS.md, "Final goal and priorities").
  *
- * Qué capacidades son críticas para cada llegada lo dice el paquete (`capacities[].criticalFor`).
- * Si un paquete anterior no lo trae, se usa la solución PROVISIONAL de la misión demo (tolerancia ortostática
- * y equilibrio al llegar a un entorno con gravedad) y la interfaz la etiqueta como provisional.
+ * Which capacities are critical for each arrival is stated by the package (`capacities[].criticalFor`).
+ * If an older package does not carry it, the PROVISIONAL solution of the demo mission is used (orthostatic tolerance
+ * and balance when arriving in an environment with gravity) and the interface labels it as provisional.
  */
 object TransitionPriorities {
-    /** Provisional: capacidades críticas para salir por su pie si el paquete no declara `criticalFor`. */
+    /** Provisional: capacities critical for walking out on one's own if the package does not declare `criticalFor`. */
     val CRITICAL_CAPACITY_IDS = listOf("cardiovascular", "vestibular")
 
     /**
-     * Palabras de `catalog[].capabilities` que indican que una acción prepara esas capacidades.
-     * Con ellas, el catálogo demo da: A, V, OIG, SF y T (además de todo lo que tenga `transitionPrep`).
+     * Words in `catalog[].capabilities` (English or Spanish) indicating that an action prepares those capacities.
+     * With them, the demo catalog yields: A, V, OIG, SF and T (plus everything with `transitionPrep`).
      */
     private val CAPABILITY_KEYWORDS = listOf(
         "ortost", "orthostat", "cardiovascular", "equilibrio", "balance", "sensoriomotor", "sensorimotor", "vestibular",
     )
 
-    /** Nombre corto en el aviso de transición (los del paquete son largos para el HUD). */
+    /** Short name in the transition notice (the package names are long for the HUD). */
     private val SHORT_NAMES = mapOf("cardiovascular" to R.string.short_cardiovascular, "vestibular" to R.string.short_vestibular)
 
     fun shortName(c: Capacity): String = SHORT_NAMES[c.id]?.let { str(it) } ?: c.name.text
 
-    /** true = el paquete declara las capacidades críticas; false = se usa la lista provisional. */
+    /** true = the package declares the critical capacities; false = the provisional list is used. */
     fun fromPackage(pkg: MissionPackage): Boolean = pkg.capacities.any { it.criticalFor != null }
 
-    /** Capacidades críticas para salir de la nave al llegar a [to]. */
+    /** Capacities critical for leaving the spacecraft when arriving in [to]. */
     fun criticalCapacities(pkg: MissionPackage, to: Gravity): List<Capacity> =
         if (fromPackage(pkg)) {
             pkg.capacities.filter { to in it.criticalFor.orEmpty() }
@@ -54,23 +54,23 @@ object TransitionPriorities {
             emptyList()
         }
 
-    /** La transición tiene panel de preparación si alguna capacidad es crítica al llegar. */
+    /** The transition has a preparation panel if some capacity is critical on arrival. */
     fun appliesTo(pkg: MissionPackage, to: Gravity) = criticalCapacities(pkg, to).isNotEmpty()
 
-    /** Acción del catálogo que prepara la transición. */
+    /** Catalog action that prepares the transition. */
     fun isPrepMeasure(item: CatalogItem): Boolean =
         item.transitionPrep || item.capabilities.any { cap -> cap.all.any { v -> CAPABILITY_KEYWORDS.any { v.lowercase().contains(it) } } }
 }
 
 enum class MeasureStatus(val lost: Boolean) {
     DONE(false),
-    /** AURA la cambió por otra que también prepara la transición. */
+    /** AURA replaced it with another one that also prepares the transition. */
     REPLACED_KEEPS(false),
-    /** AURA la cambió por otra que no la prepara: se pierde el estímulo. */
+    /** AURA replaced it with one that does not prepare it: the stimulus is lost. */
     REPLACED_LOST(true),
     OMITTED_BY_ASTRONAUT(true),
     OMITTED_BY_AURA(true),
-    /** Ya pasó y nadie la confirmó. */
+    /** Already past and nobody confirmed it. */
     MISSED(true),
     NOW(false),
     UPCOMING(false),
@@ -85,7 +85,7 @@ data class PrepMeasure(
     val note: String?,
 )
 
-/** Nivel de una capacidad crítica en cada día de vuelo hasta hoy, y su tendencia. */
+/** Level of a critical capacity on each flight day up to today, and its trend. */
 data class CapacityTrend(
     val capacity: Capacity,
     val byDay: List<Pair<FlightDay, CapacityLevel>>,
@@ -94,7 +94,7 @@ data class CapacityTrend(
 
 enum class Trend { WORSENING, STABLE, IMPROVING, NO_DATA }
 
-/** Cuenta de lo planificado frente a lo hecho en una categoría, hasta ahora. */
+/** Planned versus done count in a category, so far. */
 data class Adherence(val planned: Int, val done: Int, val replaced: Int, val omitted: Int, val missed: Int)
 
 data class TransitionReadiness(
@@ -102,7 +102,7 @@ data class TransitionReadiness(
     val critical: List<CapacityTrend>,
     val measures: List<PrepMeasure>,
     val exercise: Adherence,
-    /** true = capacidades críticas provisionales (el paquete no trae `criticalFor`). */
+    /** true = provisional critical capacities (the package does not carry `criticalFor`). */
     val provisional: Boolean = false,
 ) {
     val done get() = measures.count { it.status == MeasureStatus.DONE || it.status == MeasureStatus.REPLACED_KEEPS }
@@ -111,7 +111,7 @@ data class TransitionReadiness(
 
     companion object {
         /**
-         * @return null si la transición no es hacia un entorno con gravedad (p. ej. el despegue).
+         * @return null if the transition is not into an environment with gravity (e.g. launch).
          */
         fun build(
             pkg: MissionPackage,
@@ -174,7 +174,7 @@ data class TransitionReadiness(
             return TransitionReadiness(transitionDay, critical, measures, exercise, provisional = !TransitionPriorities.fromPackage(pkg))
         }
 
-        /** Compara los dos últimos días con datos: rojo > ámbar > verde. */
+        /** Compares the last two days with data: red > amber > green. */
         fun trendOf(levels: List<CapacityLevel>): Trend {
             val withData = levels.filter { it != CapacityLevel.GRAY }
             if (withData.size < 2) return Trend.NO_DATA

@@ -23,15 +23,15 @@ import androidx.core.content.edit
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 
-/** Situación del permiso de cámara, tal como la necesita la interfaz. */
+/** Camera permission situation, as the interface needs it. */
 enum class CameraAccess {
-    /** Permiso concedido: la cámara es el fondo del HUD. */
+    /** Permission granted: the camera is the HUD background. */
     Granted,
-    /** Aún no se ha pedido nunca. */
+    /** Never requested yet. */
     NotRequested,
-    /** Denegado, pero Android deja volver a pedirlo. */
+    /** Denied, but Android allows asking again. */
     Denied,
-    /** Denegado de forma permanente: solo se puede conceder desde los ajustes del sistema. */
+    /** Permanently denied: it can only be granted from system settings. */
     PermanentlyDenied,
 }
 
@@ -45,13 +45,13 @@ class CameraPermissionController internal constructor(
 
     private val prefs = activity.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
 
-    /** Vuelve a leer el permiso; se llama al volver a la app (por ejemplo, desde los ajustes). */
+    /** Reads the permission again; called when returning to the app (for example, from settings). */
     fun refresh() {
         access = when {
             ContextCompat.checkSelfPermission(activity, Manifest.permission.CAMERA) ==
                 PackageManager.PERMISSION_GRANTED -> CameraAccess.Granted
             !prefs.getBoolean(KEY_REQUESTED, false) -> CameraAccess.NotRequested
-            // Tras una negativa, Android solo deja volver a preguntar si muestra la justificación.
+            // After a refusal, Android only allows asking again if it shows the rationale.
             activity.shouldShowRequestPermissionRationale(Manifest.permission.CAMERA) -> CameraAccess.Denied
             else -> CameraAccess.PermanentlyDenied
         }
@@ -78,8 +78,8 @@ class CameraPermissionController internal constructor(
 }
 
 /**
- * Gestiona el permiso de cámara: lo pide la primera vez, distingue la negativa simple de la
- * permanente y se actualiza al volver a la app.
+ * Manages the camera permission: requests it the first time, tells a simple refusal from a
+ * permanent one and updates when returning to the app.
  */
 @Composable
 fun rememberCameraPermission(): CameraPermissionController {
@@ -95,7 +95,7 @@ fun rememberCameraPermission(): CameraPermissionController {
 
     LifecycleEventEffect(Lifecycle.Event.ON_RESUME) { controller.refresh() }
 
-    // Primera vez: se pide sin esperar a que el astronauta toque nada.
+    // First time: it is requested without waiting for the astronaut to touch anything.
     LaunchedEffect(controller) {
         if (controller.access == CameraAccess.NotRequested) controller.request()
     }
@@ -105,5 +105,5 @@ fun rememberCameraPermission(): CameraPermissionController {
 private tailrec fun Context.findActivity(): Activity = when (this) {
     is Activity -> this
     is ContextWrapper -> baseContext.findActivity()
-    else -> error("La pantalla de cámara necesita una Activity")
+    else -> error("The camera screen needs an Activity")
 }

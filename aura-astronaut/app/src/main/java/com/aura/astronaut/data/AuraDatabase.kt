@@ -17,11 +17,11 @@ import androidx.sqlite.db.SupportSQLiteDatabase
 import kotlinx.coroutines.flow.Flow
 
 /*
- * Datos recogidos a bordo. Se quedan en el dispositivo: solo las adaptaciones (paso 5)
- * se envían a control de misión, con su evidencia.
+ * Data collected on board. It stays on the device: only adaptations (step 5) and alerts
+ * are sent to mission control, with their evidence.
  */
 
-/** Origen de una observación, con los valores literales del contrato. */
+/** Source of an observation, with the contract's literal values. */
 enum class Origin(val wire: String) {
     MANUAL("manual"),
     SENSOR("sensor"),
@@ -30,16 +30,16 @@ enum class Origin(val wire: String) {
 
 enum class ConfirmationStatus { DONE, OMITTED }
 
-/** Confirmación de una actividad del plan: hecha u omitida (siempre con motivo). */
+/** Confirmation of a plan activity: done or omitted (always with a reason). */
 @Entity(tableName = "activity_confirmations", primaryKeys = ["crewId", "entryId"])
 data class ActivityConfirmation(
     val crewId: String,
-    /** `plans[].activities[].entryId` del paquete. */
+    /** `plans[].activities[].entryId` in the package. */
     val entryId: String,
     val itemId: String,
     val packageVersion: Int,
     val status: ConfirmationStatus,
-    /** Obligatorio si se omite. */
+    /** Required when omitted. */
     val reason: String?,
     val confirmedAtMet: Long,
     val recordedAtUtcMs: Long,
@@ -47,31 +47,31 @@ data class ActivityConfirmation(
 )
 
 /**
- * Una medida: respuesta de cuestionario, señal, resultado de prueba…
- * Guarda valor, unidad, fecha, origen y calidad, como pide la especificación.
+ * A measurement: questionnaire answer, signal, test result…
+ * Stores value, unit, date, source and quality, as the specification requires.
  */
 @Entity(tableName = "observations")
 data class Observation(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
     val crewId: String,
-    /** Tipo de observación, p. ej. [KIND_QUESTIONNAIRE]. */
+    /** Observation kind, e.g. [KIND_QUESTIONNAIRE]. */
     val kind: String,
-    /** Qué se mide: id de la pregunta o de la señal. */
+    /** What is measured: question or signal id. */
     val indicator: String,
-    /** Valor usado por las reglas. En el cuestionario, el normalizado (alto = peor). */
+    /** Value used by the rules. For the questionnaire, the normalized one (high = worse). */
     val value: Double,
-    /** Valor tal como se introdujo (respuesta original), si difiere. */
+    /** Value as entered (original answer), if it differs. */
     val rawValue: Double?,
     val unit: String,
     val variantId: String?,
-    /** Actividad del plan que la originó (el cuestionario `F` de ese día). */
+    /** Plan activity that produced it (that day's `F` questionnaire). */
     val entryId: String?,
     val capacityId: String?,
     val flightDay: Int?,
     val met: Long,
     val recordedAtUtcMs: Long,
     val origin: Origin,
-    /** Calidad o naturaleza del dato, p. ej. «autoinforme». */
+    /** Quality or nature of the data point, e.g. "self-report". */
     val quality: String,
     val packageVersion: Int,
 ) {
@@ -84,8 +84,8 @@ data class Observation(
 enum class SendStatus { PENDING, SENT }
 
 /**
- * Adaptación decidida por la interfaz. Se aplica a bordo al guardarse y se envía a control
- * de misión en segundo plano; [id] se genera aquí, así que reenviarla no la duplica.
+ * Adaptation decided by the interface. It is applied on board when saved and sent to mission
+ * control in the background; [id] is generated here, so resending it does not duplicate it.
  */
 @Entity(tableName = "adaptations")
 data class LocalAdaptation(
@@ -94,58 +94,58 @@ data class LocalAdaptation(
     val entryId: String,
     val originalItemId: String,
     val packageVersion: Int,
-    /** `sustitucion`, `reprogramacion` u `omision`. */
+    /** `substitution`, `reschedule` or `omission`. */
     val type: String,
     val replacementItemId: String?,
     val newMet: Long?,
     val decidedAtMet: Long,
     val reason: String,
-    /** `evidence[]` tal como se envía, en JSON. */
+    /** `evidence[]` as sent, in JSON. */
     val evidenceJson: String,
     val rule: String,
     val createdAtUtcMs: Long,
     val sendStatus: SendStatus = SendStatus.PENDING,
     val sentAtUtcMs: Long? = null,
-    /** Comprobación del servidor contra su política; null hasta recibirla. */
+    /** Server check against its policy; null until received. */
     val withinPolicy: Boolean? = null,
     val violations: String? = null,
-    /** `pendiente`, `validada` u `objetada`. */
+    /** `pending`, `validated` or `objected`. */
     val reviewStatus: String = ReviewStatus.PENDING,
     val reviewNote: String? = null,
 )
 
 /**
- * Alerta para control de misión: lo que la interfaz no resuelve adaptando (capacidad en rojo,
- * medida de preparación perdida, incoherencia autoinforme/sensor). Su [id] es un UUID derivado
- * de tripulante + [dedupeKey]: la misma situación nunca genera dos alertas, ni al reenviarla.
+ * Alert for mission control: what the interface does not resolve by adapting (capacity in red,
+ * lost preparation measure, self-report/sensor inconsistency). Its [id] is a UUID derived from
+ * crew member + [dedupeKey]: the same situation never produces two alerts, not even when resent.
  */
 @Entity(tableName = "alerts")
 data class LocalAlert(
     @PrimaryKey val id: String,
     val crewId: String,
     val dedupeKey: String,
-    /** `capacidad-roja`, `preparacion-perdida` o `incoherencia`. */
+    /** `capacity-red`, `preparation-lost` or `inconsistency`. */
     val kind: String,
-    /** `rojo` o `aviso`. */
+    /** `red` or `warning`. */
     val level: String,
     val capacityId: String?,
     val entryId: String?,
     val met: Long,
     val flightDay: Int?,
-    /** Lo que vio el astronauta. */
+    /** What the astronaut saw. */
     val message: String,
     val evidenceJson: String,
     val packageVersion: Int,
     val createdAtUtcMs: Long,
     val sendStatus: SendStatus = SendStatus.PENDING,
-    /** `nueva`, `vista` o `atendida`, según control de misión. */
+    /** `new`, `seen` or `handled`, as set by mission control. */
     val ackStatus: String = AckStatus.NEW,
     val ackNote: String? = null,
 )
 
 class Converters {
     @TypeConverter fun originToWire(o: Origin): String = o.wire
-    // "simulado" es el código v4, por si quedara alguna fila sin migrar.
+    // "simulado" is the v4 code, in case some row was not migrated.
     @TypeConverter fun wireToOrigin(s: String): Origin = if (s == "simulado") Origin.SIMULATED else Origin.entries.first { it.wire == s }
     @TypeConverter fun statusToText(s: ConfirmationStatus): String = s.name
     @TypeConverter fun textToStatus(s: String): ConfirmationStatus = ConfirmationStatus.valueOf(s)
@@ -197,7 +197,7 @@ interface AuraDao {
     @Query("UPDATE adaptations SET reviewStatus = :status, reviewNote = :note, withinPolicy = :within, violations = :violations WHERE id = :id")
     suspend fun updateReview(id: String, status: String, note: String?, within: Boolean?, violations: String?)
 
-    /** Si ya existe (mismo id), no hace nada: una situación, una alerta. */
+    /** If it already exists (same id), does nothing: one situation, one alert. */
     @Insert(onConflict = androidx.room.OnConflictStrategy.IGNORE)
     suspend fun insertAlert(a: LocalAlert)
 
@@ -229,7 +229,7 @@ abstract class AuraDatabase : RoomDatabase() {
     companion object {
         @Volatile private var instance: AuraDatabase? = null
 
-        /** v2 añade las adaptaciones (paso 5) sin tocar confirmaciones ni observaciones. */
+        /** v2 adds adaptations (step 5) without touching confirmations or observations. */
         val MIGRATION_1_2 = object : Migration(1, 2) {
             override fun migrate(db: SupportSQLiteDatabase) {
                 db.execSQL(
@@ -244,7 +244,7 @@ abstract class AuraDatabase : RoomDatabase() {
             }
         }
 
-        /** v3 añade las alertas para control de misión. */
+        /** v3 adds alerts for mission control. */
         val MIGRATION_2_3 = object : Migration(2, 3) {
             override fun migrate(db: SupportSQLiteDatabase) {
                 db.execSQL(
@@ -257,7 +257,7 @@ abstract class AuraDatabase : RoomDatabase() {
             }
         }
 
-        /** Equivalencias v4 → v5 de lo que la app guarda (contract/v4-to-v5.md). */
+        /** v4 → v5 equivalences of what the app stores (contract/v4-to-v5.md). */
         private val V5_CODES = mapOf(
             "type" to mapOf("sustitucion" to "substitution", "reprogramacion" to "reschedule", "omision" to "omission"),
             "reviewStatus" to mapOf("pendiente" to "pending", "validada" to "validated", "objetada" to "objected"),
@@ -273,7 +273,7 @@ abstract class AuraDatabase : RoomDatabase() {
             "fatiga_emg" to "emg_fatigue", "coordinacion_delta" to "coordination_delta", "Q1_FATIGA" to "Q1_FATIGUE",
         )
 
-        /** v4: códigos e identificadores del contrato v5 (en inglés). No cambia el esquema de tablas. */
+        /** v4: codes and identifiers of the v5 contract (English). The table schema does not change. */
         val MIGRATION_3_4 = object : Migration(3, 4) {
             override fun migrate(db: SupportSQLiteDatabase) {
                 fun recode(table: String, column: String, map: Map<String, String>) =
@@ -291,7 +291,7 @@ abstract class AuraDatabase : RoomDatabase() {
                 for (table in listOf("adaptations", "alerts")) {
                     db.execSQL("UPDATE `$table` SET evidenceJson = REPLACE(evidenceJson, '\"simulado\"', '\"simulated\"')")
                 }
-                // La clave de deduplicación de las alertas cita la capacidad: «rojo:9:fatiga» → «rojo:9:fatigue».
+                // The alert dedupe key cites the capacity: "rojo:9:fatiga" → "rojo:9:fatigue".
                 V5_IDS.forEach { (old, new) ->
                     db.execSQL("UPDATE `alerts` SET dedupeKey = REPLACE(dedupeKey, ?, ?)", arrayOf(":$old", ":$new"))
                 }

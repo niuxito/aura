@@ -1,4 +1,4 @@
-# Versiones estables comprobadas el 2026-11-14 en dl.google.com/android/maven2 y Maven Central.
+# Stable versions checked on 2026-11-14 at dl.google.com/android/maven2 and Maven Central.
 [versions]
 agp = "9.5.1"
 kotlin = "2.4.21"

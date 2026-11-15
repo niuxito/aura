@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <!-- Textos del HUD que también dice la voz (HudTexts) -->
+    <!-- HUD texts that the voice also speaks (HudTexts) -->
     <string name="transition_title_exact">%1$s en %2$s</string>
     <string name="transition_title_day">Transición antes del fin de %1$s, en %2$s</string>
     <string name="transition_change">De %1$s a %2$s</string>
@@ -48,7 +48,7 @@
     <string name="alert_ack_replied">Control de misión ha respondido a tu aviso %1$s.</string>
     <string name="duration_under_minute">menos de 1 min</string>
 
-    <!-- Valores del contrato (Labels) -->
+    <!-- Contract values (Labels) -->
     <string name="gravity_earth">Tierra</string>
     <string name="gravity_mars">Marte</string>
     <string name="gravity_moon">Luna</string>
@@ -83,7 +83,7 @@
     <string name="category_recovery">Recuperación</string>
     <string name="category_preparation">Preparación</string>
 
-    <!-- Motivos de las adaptaciones (AdaptationEngine): viajan a control de misión en el idioma activo -->
+    <!-- Adaptation reasons (AdaptationEngine): they travel to mission control in the active language -->
     <string name="reason_capacity">«%1$s» en %2$s: %3$s = %4$s%5$s (umbral de demostración %6$s, dato %7$s, MET %8$s)</string>
     <string name="reason_capacity_level">«%1$s» en %2$s</string>
     <string name="reason_critical_next_day">%1$s («%2$s») tiene carga operativa crítica: no se proponen actividades intensas la víspera</string>
@@ -103,15 +103,15 @@
     <string name="unit_scale">(escala %1$s)</string>
     <string name="threshold_true">verdadero</string>
 
-    <!-- Avisos a control de misión (AlertRules) -->
+    <!-- Notices to mission control (AlertRules) -->
     <string name="alert_message_red">%1$s en rojo: %2$s. %3$s</string>
     <string name="alert_message_prep">AURA ha quitado una medida de preparación de la transición (%1$s). Requiere decisión de control de misión.</string>
 
-    <!-- Prioridades de la transición -->
+    <!-- Transition priorities -->
     <string name="short_cardiovascular">Ortostática</string>
     <string name="short_vestibular">Equilibrio</string>
 
-    <!-- Escenarios de demo -->
+    <!-- Demo scenarios -->
     <string name="scenario_stable">Perfil estable</string>
     <string name="scenario_stable_desc">Señales dentro de lo habitual respecto a la referencia propia.</string>
     <string name="scenario_fatigue">Fatiga acumulada</string>
@@ -119,7 +119,7 @@
     <string name="scenario_coordination">Empeora la coordinación</string>
     <string name="scenario_coordination_desc">Resto de señales estables; la prueba táctil empeora claramente respecto a la referencia propia.</string>
 
-    <!-- Lectura del paquete de misión -->
+    <!-- Mission package parsing -->
     <string name="pkg_not_json">El paquete no es un JSON válido.</string>
     <string name="pkg_schema">Esquema no compatible: «%1$s». Se esperaba «%2$s».</string>
     <string name="pkg_no_schema">sin esquema</string>
@@ -147,7 +147,7 @@
     <string name="pkg_checksum_download">el checksum no coincide: la descarga puede estar corrupta</string>
     <string name="pkg_embedded_unreadable">No se pudo leer el paquete embebido.</string>
 
-    <!-- Pantalla principal y controles -->
+    <!-- Main screen and controls -->
     <string name="loading_package">Cargando paquete de misión…</string>
     <string name="questionnaire_title">CUESTIONARIO · %1$s</string>
     <string name="control_plan_change">PLAN\n1 CAMBIO</string>
@@ -175,7 +175,7 @@
     <string name="crew_pick_body">El visor mostrará el plan de este tripulante. Podrás cambiarlo en el modo demo.</string>
     <string name="crew_pick_demo">Tripulación de demostración: no son personas reales.</string>
 
-    <!-- Paneles del HUD -->
+    <!-- HUD panels -->
     <string name="phase_before_launch">Antes del despegue</string>
     <string name="phase_after_end">Fin del cronograma de misión</string>
     <string name="phase_unscheduled">Fuera de los días de vuelo del paquete</string>
@@ -208,7 +208,7 @@
     <string name="now_no_block">AHORA · Sin bloque en el cronograma</string>
     <string name="now_then">luego %1$s a las %2$s</string>
 
-    <!-- Semáforo -->
+    <!-- Traffic light -->
     <string name="capacities_title">CAPACIDADES · %1$s</string>
     <string name="tag_demo">DEMO</string>
     <string name="count_red">%1$d en rojo</string>
@@ -237,7 +237,7 @@
     <string name="policy_bad">Comprobación del servidor: %1$s</string>
     <string name="policy_out">fuera de política</string>
 
-    <!-- Preparación para la transición -->
+    <!-- Transition preparation -->
     <string name="trend_worsening">↗ empeora</string>
     <string name="trend_stable">→ estable</string>
     <string name="trend_improving">↘ mejora</string>
@@ -262,7 +262,7 @@
     <string name="measure_replaced_by">cambiada por %1$s · %2$s</string>
     <string name="measure_reason">motivo: %1$s</string>
 
-    <!-- Recogida de datos -->
+    <!-- Data collection -->
     <string name="omit_reason_operations">Sin tiempo por operaciones</string>
     <string name="omit_reason_fatigue">Fatiga o malestar</string>
     <string name="omit_reason_equipment">Equipo no disponible</string>
@@ -285,7 +285,7 @@
     <string name="omitted_reason">OMITIDA: %1$s</string>
     <string name="undo">DESHACER</string>
 
-    <!-- Plan del día -->
+    <!-- Day plan -->
     <string name="plan_title">PLAN %1$s · %2$s</string>
     <string name="changes">CAMBIOS</string>
     <string name="plan_timeline_note">Cronograma: %1$s. Los bloques son aproximados; «~» = MET aproximado.</string>
@@ -304,7 +304,7 @@
     <string name="severity_info">INFO</string>
     <string name="mission_word">Misión</string>
 
-    <!-- Silueta y frecuencia cardiaca -->
+    <!-- Silhouette and heart rate -->
     <string name="sim_label">SIM · %1$s</string>
     <string name="heart_bpm">♥︎ %1$d lpm</string>
     <string name="heart_off">FC apagada</string>
@@ -324,7 +324,7 @@
     <string name="motion_squat">agachado · cuádriceps, glúteos, abdomen</string>
     <string name="motion_walk">caminando · cuádriceps, glúteos, gemelos</string>
 
-    <!-- Modo demo -->
+    <!-- Demo mode -->
     <string name="demo_mode">MODO DEMO</string>
     <string name="demo_crew">Tripulante</string>
     <string name="demo_no_previous_event">◀ Sin eventos anteriores</string>
@@ -386,7 +386,7 @@
     <string name="check_rejected">Paquete publicado no utilizable (%1$s): se mantiene el actual.</string>
     <string name="check_offline">Sin conexión con control de misión: se mantiene el paquete actual.</string>
 
-    <!-- Reloj -->
+    <!-- Watch -->
     <string name="watch_title">FRECUENCIA CARDIACA</string>
     <string name="watch_simulated_note">Valores SIMULADOS que suben al caminar o agacharse. Se guardan y se muestran como simulados.</string>
     <string name="watch_off_note">Sin frecuencia cardiaca: el corazón de la silueta no late.</string>

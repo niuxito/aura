@@ -56,12 +56,12 @@ import com.aura.astronaut.ui.theme.HudColors
 import com.aura.astronaut.ui.theme.HudPanel
 import com.aura.astronaut.ui.theme.HudText
 
-/** Una página de la rotación del panel de misión: dos líneas de altura fija. */
+/** A page of the mission panel rotation: two lines of fixed height. */
 private data class MissionPage(val first: String, val second: String, val warn: Boolean = false)
 
 /**
- * Contexto de misión. Fijo: MET, modo demo y «SIM» (la misión simulada se indica siempre).
- * Rotativo cada [HudTiming.MISSION_ROTATION_MS]: día y entorno, hito del día, misión y tripulante.
+ * Mission context. Fixed: MET, demo mode and "SIM" (a simulated mission is always flagged).
+ * Rotating every [HudTiming.MISSION_ROTATION_MS]: day and environment, day milestone, mission and crew member.
  */
 @Composable
 fun MissionContextPanel(
@@ -130,7 +130,7 @@ fun MissionContextPanel(
     }
 }
 
-/** Aviso destacado de la próxima transición gravitatoria: cuenta atrás, indicadores para la salida y preparación. */
+/** Highlighted notice of the next gravity transition: countdown, indicators for egress and preparation. */
 @Composable
 fun TransitionBanner(
     t: TransitionAlert,
@@ -170,7 +170,7 @@ fun TransitionBanner(
     }
 }
 
-/** Etiquetas de una actividad del plan, siempre en texto. */
+/** Labels of a plan activity, always in text. */
 fun tagsOf(p: PlanItem): String = buildList {
     val c = p.confirmation
     when {
@@ -190,8 +190,8 @@ fun tagsOf(p: PlanItem): String = buildList {
 }.joinToString(" · ")
 
 /**
- * Qué está pasando ahora en el cronograma y cuál es la siguiente acción recomendada, con su porqué.
- * Al tocarlo se abre el plan completo del día.
+ * What is happening now in the timeline and which is the next recommended action, with its rationale.
+ * Tapping it opens the full day plan.
  */
 @Composable
 fun NowAndNextPanel(
@@ -224,7 +224,7 @@ fun NowAndNextPanel(
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis,
             )
-            // Solo lo que cambia lo que hay que hacer: cambiada, o condicional.
+            // Only what changes what has to be done: changed, or conditional.
             val notes = listOfNotNull(
                 next.plan.originalItem?.let { str(R.string.next_changed_from, it.code, it.name.text) },
                 if (next.plan.activity.status == EntryStatus.CONDITIONAL) str(R.string.conditional_word) else null,
@@ -232,7 +232,7 @@ fun NowAndNextPanel(
             if (notes.isNotEmpty()) {
                 Text(notes.joinToString(" · "), style = HudText.Label.copy(fontSize = 14.sp), color = HudColors.Amber, maxLines = 1, overflow = TextOverflow.Ellipsis)
             }
-            // Cuando toca, se confirma aquí mismo, con un toque.
+            // When it is due, it is confirmed right here, with one tap.
             if (next.secondsUntil <= 0) ActivityActions(next.plan, actions, Modifier.padding(top = 6.dp))
         }
     }

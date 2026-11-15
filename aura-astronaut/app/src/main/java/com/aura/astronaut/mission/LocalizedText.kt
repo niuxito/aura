@@ -10,15 +10,15 @@ import kotlinx.serialization.encoding.Encoder
 import java.util.Locale
 
 /**
- * Texto del paquete en varios idiomas: `{ "en": "Sleep", "es": "Sueño" }` (AGENTS.md, «Idiomas»).
- * Se resuelve siempre con [Lang]: idioma activo → idioma por defecto del paquete → el primero que haya.
- * `toString()` devuelve el texto resuelto, así que puede usarse directamente en plantillas.
+ * Package text in several languages: `{ "en": "Sleep", "es": "Sueño" }` (AGENTS.md, "Languages").
+ * Always resolved with [Lang]: active language → package default language → the first available.
+ * `toString()` returns the resolved text, so it can be used directly in templates.
  */
 @Serializable(with = LocalizedTextSerializer::class)
 class LocalizedText(val values: Map<String, String>) {
     val text: String get() = Lang.resolve(values)
 
-    /** Todas las traducciones (para buscar palabras clave sin depender del idioma activo). */
+    /** All translations (to search keywords regardless of the active language). */
     val all: Collection<String> get() = values.values
 
     override fun toString(): String = text
@@ -30,7 +30,7 @@ class LocalizedText(val values: Map<String, String>) {
     }
 }
 
-/** Idioma activo de los textos del paquete. Única función de resolución de toda la app. */
+/** Active language of package texts. The single resolution function of the whole app. */
 object Lang {
     @Volatile var active: String = Locale.getDefault().language
     @Volatile var fallback: String = "en"
@@ -41,7 +41,7 @@ object Lang {
             ?: values.values.firstOrNull { it.isNotBlank() }
             ?: ""
 
-    /** Idioma del sistema si el paquete lo trae; si no, su idioma por defecto. */
+    /** System language if the package carries it; otherwise its default language. */
     fun configure(pkg: MissionPackage, systemLanguage: String = Locale.getDefault().language) {
         fallback = pkg.defaultLanguage
         active = if (systemLanguage in pkg.languages) systemLanguage else pkg.defaultLanguage

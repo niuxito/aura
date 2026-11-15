@@ -16,7 +16,7 @@ android {
         versionCode = 1
         versionName = "0.1.0"
 
-        // Único sitio de configuración del servidor de control de misión (se puede cambiar en el modo demo).
+        // Single place that configures the mission control server (it can be changed in demo mode).
         buildConfigField("String", "MANAGER_URL", "\"https://aura-manager-rouge.vercel.app\"")
     }
 

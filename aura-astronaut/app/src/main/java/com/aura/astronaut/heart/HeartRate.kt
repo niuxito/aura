@@ -12,27 +12,27 @@ import kotlin.math.exp
 import kotlin.random.Random
 
 /*
- * Frecuencia cardiaca del reloj (AGENTS.md, «Frecuencia cardiaca desde el reloj»).
- * Fuente real: perfil estándar Heart Rate de Bluetooth LE (Garmin con «Transmitir FC»).
- * Fuente simulada: para enseñar la demo sin reloj; sus datos se guardan y muestran como simulados.
+ * Heart rate from the watch (AGENTS.md, "Heart rate from the watch").
+ * Real source: standard Bluetooth LE Heart Rate profile (Garmin with "Broadcast Heart Rate").
+ * Simulated source: to show the demo without a watch; its data is stored and shown as simulated.
  */
 
-/** De dónde sale la frecuencia cardiaca. */
+/** Where the heart rate comes from. */
 enum class HeartSource { WATCH, SIMULATED, OFF }
 
-/** Estado de la conexión con el reloj, para explicarlo en el HUD. */
+/** State of the connection with the watch, to explain it in the HUD. */
 enum class WatchStatus {
     OFF,
-    /** El dispositivo no tiene Bluetooth LE. */
+    /** The device has no Bluetooth LE. */
     UNAVAILABLE,
     NO_PERMISSION,
     BLUETOOTH_OFF,
-    /** No hay reloj elegido: hay que buscarlo. */
+    /** No watch chosen: it has to be searched for. */
     NOT_PAIRED,
     SCANNING,
     CONNECTING,
     CONNECTED,
-    /** Se ha perdido la conexión; se reintenta sola. */
+    /** The connection was lost; it retries on its own. */
     DISCONNECTED,
 }
 
@@ -40,46 +40,46 @@ data class HeartState(
     val source: HeartSource = HeartSource.OFF,
     val status: WatchStatus = WatchStatus.OFF,
     val bpm: Int? = null,
-    /** Instante (ms) del último dato recibido. */
+    /** Instant (ms) of the last data point received. */
     val receivedAtMs: Long? = null,
     val deviceName: String? = null,
 ) {
-    /** El dato vale si es reciente; si no, el HUD muestra gris «sin datos del reloj». */
+    /** The data point is valid if recent; otherwise the HUD shows gray "no watch data". */
     fun fresh(nowMs: Long): Boolean = bpm != null && receivedAtMs != null && nowMs - receivedAtMs < HeartRules.STALE_MS
 }
 
-/** Un reloj encontrado al buscar. */
+/** A watch found while searching. */
 data class FoundWatch(val address: String, val name: String, val rssi: Int)
 
-/** Referencias, umbrales y frecuencias de la demo. No son clínicos. */
+/** Demo baselines, thresholds and rates. They are not clinical. */
 object HeartRules {
-    /** Un dato con más antigüedad que esto ya no se muestra como actual. */
+    /** A data point older than this is no longer shown as current. */
     const val STALE_MS = 6_000L
-    /** Se guarda una muestra agregada (media) cada este intervalo, no cada notificación. */
+    /** An aggregated sample (mean) is stored every interval, not every notification. */
     const val SAMPLE_INTERVAL_MS = 30_000L
-    /** Tiempo sin movimiento (pasos, sentadillas) para considerar que la FC es de reposo. */
+    /** Time without movement (steps, squats) to consider the HR a resting one. */
     const val REST_WINDOW_MS = 90_000L
     /**
-     * FC en reposo de referencia si el paquete no trae la del tripulante (`crew[].restingHrBpm`):
-     * valor de DEMOSTRACIÓN. En una misión vendría de su línea base preflight.
+     * Baseline resting HR if the package does not carry the crew member's (`crew[].restingHrBpm`):
+     * DEMONSTRATION value. In a mission it would come from their preflight baseline.
      */
     const val DEMO_RESTING_BASELINE_BPM = 62f
-    /** Indicador de las muestras de FC guardadas (no es una señal del paquete: no entra en el semáforo). */
+    /** Indicator of the stored HR samples (not a package signal: it does not enter the traffic light). */
     const val HEART_RATE_ID = "heart_rate"
-    /** Señal del paquete que se calcula con el reloj en reposo. */
+    /** Package signal computed from the watch at rest. */
     const val RESTING_DELTA_SIGNAL_ID = "resting_hr_delta"
-    /** Rango plausible: fuera de él se descarta la lectura (contacto malo, ruido). */
+    /** Plausible range: readings outside it are discarded (poor contact, noise). */
     val PLAUSIBLE = 30..220
-    /** Reintento de conexión tras perderla. */
+    /** Reconnection retry after losing the connection. */
     const val RECONNECT_DELAY_MS = 3_000L
-    /** Búsqueda: se detiene sola para no gastar batería. */
+    /** Scanning: stops on its own to save battery. */
     const val SCAN_TIMEOUT_MS = 20_000L
 }
 
 /**
- * Lectura de la característica Heart Rate Measurement (0x2A37):
- * flags; FC en uint8 o uint16 (bit 0); contacto (bits 1–2); energía (bit 3, se salta);
- * intervalos RR en 1/1024 s (bit 4, opcionales).
+ * Parsing of the Heart Rate Measurement characteristic (0x2A37):
+ * flags; HR as uint8 or uint16 (bit 0); contact (bits 1–2); energy (bit 3, skipped);
+ * RR intervals in 1/1024 s (bit 4, optional).
  */
 object HeartRateParser {
     data class Measurement(val bpm: Int, val rrMs: List<Int>, val contact: Boolean?)
@@ -109,8 +109,8 @@ object HeartRateParser {
 }
 
 /**
- * Frecuencia cardiaca SIMULADA: sube al caminar o agacharse y baja en reposo, con algo de variación.
- * La actividad la marca la silueta (movimiento simulado con la tablet).
+ * SIMULATED heart rate: rises when walking or squatting and drops at rest, with some variation.
+ * Activity is set by the silhouette (movement simulated with the tablet).
  */
 class SimulatedHeartRate(private val scope: CoroutineScope) {
     private val _state = MutableStateFlow(HeartState(source = HeartSource.SIMULATED, status = WatchStatus.CONNECTED))
@@ -155,7 +155,7 @@ class SimulatedHeartRate(private val scope: CoroutineScope) {
         const val RESTING = 66f
         const val WALK = 96f
         const val SQUAT = 104f
-        /** Constante de tiempo (s) de la subida o bajada de la FC. */
+        /** Time constant (s) of the HR rise or fall. */
         const val TAU_S = 8f
     }
 }

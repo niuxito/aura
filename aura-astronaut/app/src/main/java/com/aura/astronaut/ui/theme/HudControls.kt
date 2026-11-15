@@ -15,15 +15,15 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
-/** Altura mínima de lo que pulsa el astronauta: se usa con guantes. */
+/** Minimum height of what the astronaut taps: used with gloves. */
 val GloveTouchTarget: Dp = 64.dp
 
-/** Altura mínima de los controles del modo demo, que maneja quien presenta. */
+/** Minimum height of the demo mode controls, operated by the presenter. */
 val DemoTouchTarget: Dp = 48.dp
 
 /**
- * Botón del HUD. [selected] lo rellena con el color de acento; si no, va con borde.
- * El estado nunca se indica solo con color: el texto del botón dice lo que hace.
+ * HUD button. [selected] fills it with the accent color; otherwise it has a border.
+ * State is never shown by color alone: the button text says what it does.
  */
 @Composable
 fun HudButton(

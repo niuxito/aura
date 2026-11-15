@@ -6,15 +6,15 @@ import com.aura.astronaut.sync.PackageOrigin
 import java.io.File
 
 /**
- * Último paquete descargado de AURA Manager, guardado tal cual como JSON en el almacenamiento
- * privado de la app, con su procedencia. Sobrevive a cerrar la app y se usa sin conexión.
+ * Last package downloaded from AURA Manager, stored as is as JSON in the app's private
+ * storage, with its origin. It survives closing the app and is used offline.
  */
 class PackageStorage(context: Context) {
     private val dir = File(context.filesDir, "packages")
     private val file = File(dir, "mission-package.json")
     private val prefs = context.getSharedPreferences("package_storage", Context.MODE_PRIVATE)
 
-    /** Texto y procedencia del paquete descargado, o null si no hay ninguno. */
+    /** Text and origin of the downloaded package, or null if there is none. */
     fun load(): Pair<String, PackageOrigin.Downloaded>? {
         if (!file.exists()) return null
         val url = prefs.getString(KEY_URL, null) ?: return null
@@ -22,14 +22,14 @@ class PackageStorage(context: Context) {
         return text to PackageOrigin.Downloaded(url, prefs.getLong(KEY_AT, 0))
     }
 
-    /** Guarda de forma atómica: primero un temporal y luego se renombra. */
+    /** Saves atomically: first a temporary file, then it is renamed. */
     fun save(text: String, origin: PackageOrigin.Downloaded) {
         dir.mkdirs()
         val tmp = File(dir, "mission-package.json.tmp")
         tmp.writeText(text)
         if (!tmp.renameTo(file)) {
             file.delete()
-            check(tmp.renameTo(file)) { "No se pudo guardar el paquete descargado" }
+            check(tmp.renameTo(file)) { "Could not save the downloaded package" }
         }
         prefs.edit {
             putString(KEY_URL, origin.url)

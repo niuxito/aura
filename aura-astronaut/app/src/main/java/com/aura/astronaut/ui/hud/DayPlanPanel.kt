@@ -52,8 +52,8 @@ import com.aura.astronaut.ui.theme.HudPanel
 import com.aura.astronaut.ui.theme.HudText
 
 /**
- * Plan completo de un día de vuelo: las actividades del tripulante junto a lo que el
- * cronograma de misión tiene previsto alrededor (bloques y eventos), para entenderlas en contexto.
+ * Full plan of a flight day: the crew member's activities next to what the mission
+ * timeline has planned around them (blocks and events), to understand them in context.
  */
 @Composable
 fun DayPlanPanel(
@@ -182,7 +182,7 @@ private fun ActivityRow(e: DayEntry.Activity, met: Long, actions: ActivityAction
         } else {
             p.activity.note?.let { Text(it.text, style = HudText.Label.copy(fontSize = 13.sp), color = HudColors.TextDim) }
         }
-        // Se puede confirmar lo que ya ha empezado (o empieza dentro de la ventana de «ahora»), no lo futuro.
+        // What has already started (or starts within the "now" window) can be confirmed, not future items.
         if (!p.omittedByInterface && (p.confirmation != null || p.activity.met <= met + HudTiming.NOW_WINDOW_SECONDS)) {
             ActivityActions(p, actions, Modifier.padding(top = 6.dp))
         }

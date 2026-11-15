@@ -9,7 +9,7 @@ class HeartRateParserTest {
     private fun bytes(vararg v: Int) = ByteArray(v.size) { v[it].toByte() }
 
     @Test
-    fun `fc en uint8 sin mas campos`() {
+    fun `hr as uint8 with no other fields`() {
         val m = HeartRateParser.parse(bytes(0x00, 72))!!
         assertEquals(72, m.bpm)
         assertEquals(emptyList<Int>(), m.rrMs)
@@ -17,21 +17,21 @@ class HeartRateParserTest {
     }
 
     @Test
-    fun `fc en uint16`() {
-        // 0x012C = 300 (no plausible, pero el formato se lee igual; el filtro está aparte).
+    fun `hr as uint16`() {
+        // 0x012C = 300 (not plausible, but the format is parsed the same; filtering is separate).
         assertEquals(300, HeartRateParser.parse(bytes(0x01, 0x2C, 0x01))!!.bpm)
         assertEquals(185, HeartRateParser.parse(bytes(0x01, 185, 0))!!.bpm)
     }
 
     @Test
-    fun `contacto con la piel`() {
+    fun `skin contact`() {
         assertEquals(true, HeartRateParser.parse(bytes(0x06, 60))!!.contact)
         assertEquals(false, HeartRateParser.parse(bytes(0x04, 60))!!.contact)
     }
 
     @Test
-    fun `intervalos RR en 1 entre 1024 s, saltando la energia`() {
-        // flags: uint8 + energía (0x08) + RR (0x10). Energía 0x0102; RR 1024 → 1000 ms, 820 → 801 ms.
+    fun `RR intervals in 1 over 1024 s, skipping energy`() {
+        // flags: uint8 + energy (0x08) + RR (0x10). Energy 0x0102; RR 1024 → 1000 ms, 820 → 801 ms.
         val m = HeartRateParser.parse(bytes(0x18, 64, 0x02, 0x01, 0x00, 0x04, 0x34, 0x03))!!
         assertEquals(64, m.bpm)
         assertEquals(listOf(1000, 801), m.rrMs)

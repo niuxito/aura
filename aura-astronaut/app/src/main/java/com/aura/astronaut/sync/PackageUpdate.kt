@@ -9,34 +9,34 @@ import com.aura.astronaut.mission.MissionPackageParser
 import com.aura.astronaut.mission.PackageException
 
 /**
- * Descarga del paquete de misión desde AURA Manager (paso 8 de AGENTS.md).
- * La app nunca se queda sin paquete: si la descarga falla, sigue con el que tiene
- * (el embebido o el último descargado).
+ * Download of the mission package from AURA Manager (step 8 of AGENTS.md).
+ * The app is never left without a package: if the download fails, it keeps the one it has
+ * (the embedded one or the last downloaded).
  */
 
-/** De dónde sale el paquete cargado. */
+/** Where the loaded package comes from. */
 sealed interface PackageOrigin {
     data object Embedded : PackageOrigin
     data class Downloaded(val url: String, val atMs: Long) : PackageOrigin
 }
 
-/** Resultado de la última comprobación con el Manager. */
+/** Result of the last check with the Manager. */
 sealed interface PackageCheck {
     data object Idle : PackageCheck
     data object Checking : PackageCheck
-    /** El Manager publica el mismo paquete que ya está cargado. */
+    /** The Manager publishes the same package that is already loaded. */
     data class UpToDate(val version: Int) : PackageCheck
-    /** Se ha descargado y cargado un paquete distinto. */
+    /** A different package was downloaded and loaded. */
     data class Updated(val version: Int) : PackageCheck
-    /** El Manager aún no ha publicado ningún paquete (404). */
+    /** The Manager has not published any package yet (404). */
     data object NonePublished : PackageCheck
-    /** El Manager publica un paquete que esta app no lee (por ejemplo, un esquema antiguo). */
+    /** The Manager publishes a package this app cannot read (for example, an old schema). */
     data class Rejected(val reason: String) : PackageCheck
-    /** Sin conexión o error del servidor: se reintentará más tarde. */
+    /** Offline or server error: it will be retried later. */
     data class Offline(val reason: String) : PackageCheck
 }
 
-/** Decisión sobre un paquete descargado, sin efectos: se prueba en unitarias. */
+/** Decision about a downloaded package, with no side effects: unit-tested. */
 sealed interface PackageDecision {
     data class Replace(val loaded: LoadedPackage) : PackageDecision
     data class Keep(val version: Int) : PackageDecision
@@ -46,11 +46,11 @@ sealed interface PackageDecision {
 object PackageUpdate {
 
     /**
-     * Qué hacer con el texto descargado frente al paquete cargado:
-     * - si no es un v5 utilizable o su checksum no cuadra, se descarta y se sigue con el actual;
-     * - si es el mismo (versión y checksum), no se toca nada;
-     * - si es distinto, se carga. El Manager elegido es la fuente de verdad, aunque su número de
-     *   versión sea menor (cada servidor numera sus publicaciones por separado).
+     * What to do with the downloaded text compared with the loaded package:
+     * - if it is not a usable v5 or its checksum does not match, it is discarded and the current one is kept;
+     * - if it is the same (version and checksum), nothing is touched;
+     * - if it is different, it is loaded. The chosen Manager is the source of truth, even if its version
+     *   number is lower (each server numbers its publications separately).
      */
     fun decide(current: MissionPackage?, downloaded: String): PackageDecision {
         val loaded = try {

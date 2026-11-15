@@ -13,7 +13,7 @@ import com.aura.astronaut.mission.Met
 import com.aura.astronaut.mission.MissionPackage
 import com.aura.astronaut.mission.PlanActivity
 
-/** Dato que justifica una adaptación; viaja como `evidence[]` a control de misión. */
+/** Data point that justifies an adaptation; travels to mission control as `evidence[]`. */
 data class EvidenceItem(
     val indicator: String,
     val value: String,
@@ -25,33 +25,33 @@ data class EvidenceItem(
 data class AdaptationDecision(
     val proposal: AdaptationProposal,
     val originalItemId: String,
-    /** Regla que la ha producido, para depurar y explicar. */
+    /** Rule that produced it, for debugging and explaining. */
     val rule: String,
     val evidence: List<EvidenceItem>,
 )
 
 /**
- * Único módulo de reglas de adaptación (AGENTS.md, «Cuándo decide»). Todas las reglas solo
- * quitan carga: sustituyen una actividad intensa adaptable por una alternativa no intensa
- * de la misma categoría, o la omiten si no la hay. Nunca tocan algo fijo ni añaden actividades.
- * Cada decisión pasa por [PolicyCheck] antes de salir de aquí.
+ * The single adaptation rules module (AGENTS.md, "When it decides"). Every rule only
+ * removes load: it replaces an intense adaptable activity with a non-intense alternative
+ * of the same category, or omits it if there is none. Rules never touch anything fixed nor add activities.
+ * Every decision goes through [PolicyCheck] before leaving this module.
  */
 object AdaptationEngine {
 
-    /** Regla 3: si el siguiente día de vuelo tiene esta carga operativa, no se proponen actividades intensas. */
+    /** Rule 3: if the next flight day has this operational load, no intense activities are proposed. */
     val CRITICAL_NEXT_DAY = LoadLevel.CRITICAL
 
     const val RULE_CRITICAL_NEXT_DAY = "carga-critica-manana"
     const val RULE_CAPACITY = "capacidad-ambar-rojo"
-    /** Acción concreta que control de misión fija para una capacidad en ámbar (`capacities[].onAmberActions`). */
+    /** Concrete action mission control sets for a capacity in amber (`capacities[].onAmberActions`). */
     const val RULE_AMBER_ACTION = "accion-ambar"
 
-    /** Sufijo de la regla cuando la adaptación quita una medida que prepara la transición. */
+    /** Rule suffix when the adaptation removes a measure that prepares the transition. */
     const val REMOVES_PREP = "+quita-preparacion"
 
     /**
-     * @param assessment semáforo de hoy; null o todo en gris = sin datos: no se adapta por capacidades (regla 1).
-     * @param handledEntryIds actividades ya confirmadas o ya adaptadas: no se vuelven a decidir.
+     * @param assessment today's traffic light; null or all gray = no data: no capacity-based adaptation (rule 1).
+     * @param handledEntryIds activities already confirmed or already adapted: not decided again.
      */
     fun decide(
         pkg: MissionPackage,
@@ -61,7 +61,7 @@ object AdaptationEngine {
         assessment: Assessment?,
         handledEntryIds: Set<String>,
     ): List<AdaptationDecision> {
-        // Un semáforo de otro día (p. ej. justo al cambiar de día) no vale como evidencia: se espera al de hoy.
+        // A traffic light from another day (e.g. right at the day change) is not valid evidence: wait for today's.
         if (assessment != null && assessment.flightDay != day.day) return emptyList()
         val catalog = pkg.catalog.associateBy { it.id }
         val open = pkg.plans[crewId].orEmpty().firstOrNull { it.day == day.day }?.activities.orEmpty()
@@ -70,16 +70,16 @@ object AdaptationEngine {
                 a.adaptable &&
                     item != null &&
                     a.entryId !in handledEntryIds &&
-                    // Solo lo que no ha pasado todavía: no se adapta a posteriori.
+                    // Only what has not happened yet: nothing is adapted after the fact.
                     met < MissionSnapshot.endOf(a, item)
             }
         if (open.isEmpty()) return emptyList()
 
-        // Primero, lo que control de misión ha fijado para cada capacidad en ámbar (por ejemplo, el menú con hidratación).
+        // First, what mission control has set for each capacity in amber (for example, the hydration menu).
         val amberActions = amberActionDecisions(pkg, crewId, open, catalog, assessment)
         val taken = amberActions.map { it.proposal.entryId }.toSet()
 
-        // Después, la regla genérica: quitar carga a lo intenso.
+        // Then, the generic rule: remove load from intense activities.
         val intense = open.filter { catalog[it.itemId]?.intense == true && it.entryId !in taken }
         val trigger = if (intense.isEmpty()) null else trigger(pkg, day, assessment)
         val generic = if (trigger == null) emptyList() else intense.mapNotNull { a -> decisionFor(pkg, crewId, met, a, catalog.getValue(a.itemId), trigger) }
@@ -88,9 +88,9 @@ object AdaptationEngine {
     }
 
     /**
-     * `capacities[].onAmberActions`: con una capacidad en ámbar, la actividad adaptable de hoy de esa categoría
-     * pasa a la acción indicada. Solo si es de la misma categoría y no sube la carga; en rojo no se aplica
-     * (la interfaz remite al procedimiento de misión).
+     * `capacities[].onAmberActions`: with a capacity in amber, today's adaptable activity of that category
+     * switches to the given action. Only if it is the same category and does not raise the load; in red it does
+     * not apply (the interface refers to the mission procedure).
      */
     private fun amberActionDecisions(
         pkg: MissionPackage,
@@ -141,13 +141,13 @@ object AdaptationEngine {
     private data class Trigger(val rule: String, val why: String, val evidence: List<EvidenceItem>, val red: Boolean)
 
     private fun trigger(pkg: MissionPackage, day: FlightDay, assessment: Assessment?): Trigger? {
-        // Regla 2 y 5: alguna capacidad con datos en ámbar o rojo. Gris = sin datos: no cuenta.
+        // Rules 2 and 5: some capacity with data in amber or red. Gray = no data: does not count.
         val flagged = assessment?.capacities.orEmpty().filter { it.level == CapacityLevel.AMBER || it.level == CapacityLevel.RED }
         if (flagged.isNotEmpty()) {
             val red = flagged.any { it.level == CapacityLevel.RED }
             return Trigger(RULE_CAPACITY, whyOf(flagged), evidenceOf(flagged), red)
         }
-        // Regla 3: carga operativa crítica el siguiente día de vuelo.
+        // Rule 3: critical operational load on the next flight day.
         val next = pkg.days.firstOrNull { it.day == day.day + 1 }
         if (next != null && next.opLoad == CRITICAL_NEXT_DAY) {
             return Trigger(
@@ -171,8 +171,8 @@ object AdaptationEngine {
         val replacement = lowerLoadAlternative(pkg, item)
         val allowed = pkg.adaptationPolicy.allowed
         val red = if (t.red) " " + str(R.string.reason_red_tail) else ""
-        // Objetivo final: no perder de vista la transición. Si se quita una medida que la prepara, se dice
-        // y se deja la decisión a control de misión (la adaptación ya le llega con este motivo).
+        // Final goal: never lose sight of the transition. If a measure that prepares it is removed, say so
+        // and leave the decision to mission control (the adaptation already reaches it with this reason).
         val removesPrep = TransitionPriorities.isPrepMeasure(item) && (replacement == null || !TransitionPriorities.isPrepMeasure(replacement))
         val prep = if (removesPrep) {
             " " + str(R.string.reason_prep_tail, item.code, item.capabilities.joinToString { it.text })
@@ -196,7 +196,7 @@ object AdaptationEngine {
         return AdaptationDecision(proposal, item.id, t.rule + if (removesPrep) REMOVES_PREP else "", t.evidence)
     }
 
-    /** Primera acción del catálogo de la misma categoría, no intensa; prefiere el mismo tipo de carga. */
+    /** First non-intense catalog action of the same category; prefers the same load type. */
     fun lowerLoadAlternative(pkg: MissionPackage, item: CatalogItem): CatalogItem? {
         val options = pkg.catalog.filter { it.category == item.category && !it.intense && it.id != item.id }
         return options.firstOrNull { it.loadType == item.loadType } ?: options.firstOrNull()

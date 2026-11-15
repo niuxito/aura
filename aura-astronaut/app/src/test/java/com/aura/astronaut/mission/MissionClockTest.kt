@@ -8,26 +8,26 @@ class MissionClockTest {
     private val t0 = 1_800_000_000_000L
 
     @Test
-    fun `el MET manual corre en tiempo real`() {
+    fun `the manual MET runs in real time`() {
         val s = ClockSettings(anchorMet = 1_000, anchorWallMs = t0, rate = 1, running = true)
         assertEquals(1_000L, MissionClock.metAt(s, t0, null))
         assertEquals(1_010L, MissionClock.metAt(s, t0 + 10_000, null))
     }
 
     @Test
-    fun `el MET acelerado avanza segun la velocidad`() {
+    fun `the accelerated MET advances according to the rate`() {
         val s = ClockSettings(anchorMet = 0, anchorWallMs = t0, rate = 3_600, running = true)
         assertEquals(3_600L, MissionClock.metAt(s, t0 + 1_000, null))
     }
 
     @Test
-    fun `en pausa el MET no avanza`() {
+    fun `when paused the MET does not advance`() {
         val s = ClockSettings(anchorMet = 500, anchorWallMs = t0, rate = 60, running = false)
         assertEquals(500L, MissionClock.metAt(s, t0 + 60_000, null))
     }
 
     @Test
-    fun `cambiar la velocidad no produce saltos`() {
+    fun `changing the rate does not cause jumps`() {
         val s = ClockSettings(anchorMet = 0, anchorWallMs = t0, rate = 60, running = true)
         val now = t0 + 10_000 // MET 600
         val faster = MissionClock.setRate(s, 3_600, now, null)
@@ -36,7 +36,7 @@ class MissionClockTest {
     }
 
     @Test
-    fun `pausar y reanudar conserva el MET`() {
+    fun `pausing and resuming keeps the MET`() {
         val s = ClockSettings(anchorMet = 0, anchorWallMs = t0, rate = 1, running = true)
         val paused = MissionClock.setRunning(s, false, t0 + 5_000, null)
         assertEquals(5L, MissionClock.metAt(paused, t0 + 50_000, null))
@@ -45,7 +45,7 @@ class MissionClockTest {
     }
 
     @Test
-    fun `fijar el MET pasa a modo manual`() {
+    fun `setting the MET switches to manual mode`() {
         val s = ClockSettings(source = ClockSource.LAUNCH_UTC)
         val set = MissionClock.setMet(s, 90_522, t0)
         assertEquals(ClockSource.MANUAL, set.source)
@@ -53,19 +53,19 @@ class MissionClockTest {
     }
 
     @Test
-    fun `con launchUtc el MET sale del reloj`() {
+    fun `with launchUtc the MET comes from the clock`() {
         val launch = MissionClock.launchUtcMs("2026-04-01T22:35:00Z")!!
         val s = ClockSettings(source = ClockSource.LAUNCH_UTC)
         assertEquals(90_522L, MissionClock.metAt(s, launch + 90_522_000, launch))
-        // Antes del despegue el MET es negativo.
+        // Before launch the MET is negative.
         assertEquals(-60L, MissionClock.metAt(s, launch - 60_000, launch))
     }
 
     @Test
-    fun `sin launchUtc se usa el MET manual`() {
+    fun `without launchUtc the manual MET is used`() {
         val s = ClockSettings(source = ClockSource.LAUNCH_UTC, anchorMet = 42, anchorWallMs = t0, running = false)
         assertEquals(42L, MissionClock.metAt(s, t0 + 1_000, null))
         assertEquals(null, MissionClock.launchUtcMs(null))
-        assertEquals(null, MissionClock.launchUtcMs("no es una fecha"))
+        assertEquals(null, MissionClock.launchUtcMs("not a date"))
     }
 }

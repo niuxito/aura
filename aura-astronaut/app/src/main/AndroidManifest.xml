@@ -2,16 +2,16 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <!-- La cámara es el fondo del HUD; sin ella la app sigue funcionando sobre un fondo neutro. -->
+    <!-- The camera is the HUD background; without it the app keeps working on a neutral background. -->
     <uses-feature
         android:name="android.hardware.camera.any"
         android:required="false" />
 
     <uses-permission android:name="android.permission.CAMERA" />
-    <!-- Solo para enviar adaptaciones a control de misión y leer su revisión; la app funciona sin red. -->
+    <!-- Only to send adaptations and alerts to mission control and read their review; the app works offline. -->
     <uses-permission android:name="android.permission.INTERNET" />
 
-    <!-- Frecuencia cardiaca del reloj por Bluetooth LE. Sin BLE, la app funciona igual (fuente simulada). -->
+    <!-- Heart rate from the watch over Bluetooth LE. Without BLE the app works the same (simulated source). -->
     <uses-feature
         android:name="android.hardware.bluetooth_le"
         android:required="false" />
@@ -26,12 +26,12 @@
     <uses-permission
         android:name="android.permission.BLUETOOTH_ADMIN"
         android:maxSdkVersion="30" />
-    <!-- Solo Android 10–11: buscar dispositivos BLE exigía ubicación. -->
+    <!-- Android 10–11 only: scanning for BLE devices required location. -->
     <uses-permission
         android:name="android.permission.ACCESS_FINE_LOCATION"
         android:maxSdkVersion="30" />
 
-    <!-- Desde Android 11 hay que declarar que se usa el motor de texto a voz para poder conectarse a él. -->
+    <!-- Since Android 11 the text-to-speech engine must be declared to be able to connect to it. -->
     <queries>
         <intent>
             <action android:name="android.intent.action.TTS_SERVICE" />

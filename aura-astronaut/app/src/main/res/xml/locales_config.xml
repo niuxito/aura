@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Idiomas de la interfaz (AGENTS.md, «Idiomas»): inglés por defecto y español. -->
+<!-- Interface languages (AGENTS.md, "Languages"): English by default, and Spanish. -->
 <locale-config xmlns:android="http://schemas.android.com/apk/res/android">
     <locale android:name="en" />
     <locale android:name="es" />

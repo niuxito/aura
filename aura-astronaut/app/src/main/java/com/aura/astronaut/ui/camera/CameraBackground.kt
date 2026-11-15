@@ -20,14 +20,14 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.aura.astronaut.ui.theme.HudColors
 
-/** Estado de la imagen de fondo, para que el HUD pueda explicarlo. */
+/** State of the background image, so the HUD can explain it. */
 enum class CameraFeed { Starting, Live, NoBackCamera, Failed }
 
 private const val TAG = "AuraCamera"
 
 /**
- * Imagen de la cámara trasera a pantalla completa. Solo se usa como fondo del HUD:
- * no se analizan los fotogramas ni se infiere nada de lo que se ve.
+ * Full-screen rear camera image. Used only as the HUD background:
+ * frames are not analyzed and nothing is inferred from what is seen.
  */
 @Composable
 fun CameraPreview(onFeedChange: (CameraFeed) -> Unit, modifier: Modifier = Modifier) {
@@ -36,7 +36,7 @@ fun CameraPreview(onFeedChange: (CameraFeed) -> Unit, modifier: Modifier = Modif
     val previewView = remember {
         PreviewView(context).apply {
             scaleType = PreviewView.ScaleType.FILL_CENTER
-            // COMPATIBLE dibuja en un TextureView: la imagen respeta el orden de capas de Compose.
+            // COMPATIBLE draws into a TextureView: the image respects Compose's layer order.
             implementationMode = PreviewView.ImplementationMode.COMPATIBLE
         }
     }
@@ -56,7 +56,7 @@ fun CameraPreview(onFeedChange: (CameraFeed) -> Unit, modifier: Modifier = Modif
             provider.bindToLifecycle(lifecycleOwner, selector, preview)
             onFeedChange(CameraFeed.Live)
         } catch (e: Exception) {
-            Log.e(TAG, "No se pudo abrir la cámara trasera", e)
+            Log.e(TAG, "Could not open the rear camera", e)
             onFeedChange(CameraFeed.Failed)
         }
     }
@@ -70,7 +70,7 @@ fun CameraPreview(onFeedChange: (CameraFeed) -> Unit, modifier: Modifier = Modif
     AndroidView(factory = { previewView }, modifier = modifier.fillMaxSize())
 }
 
-/** Fondo neutro cuando no hay imagen de cámara: el HUD sigue siendo legible y útil. */
+/** Neutral background when there is no camera image: the HUD remains readable and useful. */
 @Composable
 fun NeutralBackground(modifier: Modifier = Modifier) {
     Box(

@@ -11,14 +11,14 @@ import com.aura.astronaut.mission.MissionPackage
 import com.aura.astronaut.mission.SignalKind
 import com.aura.astronaut.mission.WorseWhen
 
-/** Un dato del día que cuenta para una capacidad: una respuesta del cuestionario o una señal. */
+/** A data point of the day that counts for a capacity: a questionnaire answer or a signal. */
 data class Cause(
     val indicatorId: String,
     val indicatorName: String,
     val value: Double,
     val unit: String,
     val level: CapacityLevel,
-    /** Umbral superado («≥ 4», «≤ −15», «verdadero»); null si el dato está en verde. */
+    /** Threshold exceeded ("≥ 4", "≤ −15", "true"); null if the data point is green. */
     val threshold: String?,
     val origin: Origin,
     val met: Long,
@@ -27,15 +27,15 @@ data class Cause(
 
 data class CapacityState(
     val capacity: Capacity,
-    /** GRAY si no hay ningún dato del día: nunca verde por defecto. */
+    /** GRAY if there is no data for the day: never green by default. */
     val level: CapacityLevel,
     val causes: List<Cause>,
 ) {
-    /** Los datos que fijan el nivel (los del peor nivel). */
+    /** The data points that set the level (those of the worst level). */
     val drivers: List<Cause> get() = causes.filter { it.level == level }
 }
 
-/** Autoinforme y sensor discrepan: el astronauta dice estar bien y la señal dice lo contrario. */
+/** Self-report and sensor disagree: the astronaut says they are fine and the signal says otherwise. */
 data class ConsistencyFinding(val capacityId: String, val message: String, val answer: Cause, val signal: Cause)
 
 data class Assessment(
@@ -48,8 +48,8 @@ data class Assessment(
 }
 
 /**
- * Semáforo por capacidad (AGENTS.md, «Cuestionario diario y semáforo»). Umbrales, capacidades,
- * preguntas y señales salen del paquete; aquí solo está el algoritmo.
+ * Traffic light per capacity (AGENTS.md, "Daily questionnaire and traffic light"). Thresholds, capacities,
+ * questions and signals come from the package; only the algorithm lives here.
  */
 object CapacityEvaluator {
 
@@ -86,7 +86,7 @@ object CapacityEvaluator {
         return Assessment(flightDay, states, consistency, pkg.thresholdsAreDemo)
     }
 
-    /** Peor nivel: rojo > ámbar > verde. Sin datos, gris. */
+    /** Worst level: red > amber > green. No data, gray. */
     fun worst(levels: List<CapacityLevel>): CapacityLevel = when {
         levels.isEmpty() -> CapacityLevel.GRAY
         CapacityLevel.RED in levels -> CapacityLevel.RED
@@ -94,7 +94,7 @@ object CapacityEvaluator {
         else -> CapacityLevel.GREEN
     }
 
-    /** Última observación de cada indicador. */
+    /** Latest observation of each indicator. */
     private fun latestBy(list: List<Observation>): List<Observation> =
         list.groupBy { it.indicator }.values.map { group -> group.maxWith(compareBy<Observation> { it.met }.thenBy { it.id }) }
 
@@ -127,7 +127,7 @@ object CapacityEvaluator {
         return Cause(s.id, s.name.text, o.value, s.unit, level, threshold, o.origin, o.met, isQuestion = false)
     }
 
-    /** «−22», «0,5»: sin decimales innecesarios y con el signo menos tipográfico. */
+    /** "−22", "0.5": no unnecessary decimals and with the typographic minus sign. */
     fun fmt(v: Double): String {
         val text = if (v == Math.floor(v)) v.toLong().toString() else v.toString().replace('.', ',')
         return text.replace('-', '−')

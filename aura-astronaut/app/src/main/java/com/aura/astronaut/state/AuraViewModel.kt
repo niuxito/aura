@@ -82,7 +82,7 @@ sealed interface PackageState {
     data class Failed(val message: String) : PackageState
 }
 
-/** Estado de misión que necesita el HUD. */
+/** Mission state the HUD needs. */
 class AuraViewModel(app: Application) : AndroidViewModel(app) {
 
     private val store = DemoSettingsStore(app)
@@ -92,7 +92,7 @@ class AuraViewModel(app: Application) : AndroidViewModel(app) {
     val pkg: StateFlow<PackageState> = _pkg.asStateFlow()
 
     private val _packageCheck = MutableStateFlow<PackageCheck>(PackageCheck.Idle)
-    /** Resultado de la última comprobación de paquete nuevo en AURA Manager. */
+    /** Result of the last check for a new package in AURA Manager. */
     val packageCheck: StateFlow<PackageCheck> = _packageCheck.asStateFlow()
     private val packageLock = Mutex()
 
@@ -101,7 +101,7 @@ class AuraViewModel(app: Application) : AndroidViewModel(app) {
 
     private val _crewId = MutableStateFlow(store.loadCrewId())
 
-    /** Astronauta elegido, solo si existe en el paquete cargado; null = hay que elegirlo. */
+    /** Chosen astronaut, only if they exist in the loaded package; null = must be chosen. */
     val crewId: StateFlow<String?> = combine(_crewId, _pkg) { id, p ->
         val crew = (p as? PackageState.Ready)?.loaded?.pkg?.crew ?: return@combine null
         id?.takeIf { wanted -> crew.any { it.id == wanted } }
@@ -114,7 +114,7 @@ class AuraViewModel(app: Application) : AndroidViewModel(app) {
         }
     }
 
-    /** MET actual en segundos. */
+    /** Current MET in seconds. */
     val met: StateFlow<Long> = combine(ticker, _clock, _pkg) { now, settings, _ ->
         MissionClock.metAt(settings, now, launchUtcMs())
     }.stateIn(
@@ -123,8 +123,8 @@ class AuraViewModel(app: Application) : AndroidViewModel(app) {
         MissionClock.metAt(_clock.value, System.currentTimeMillis(), null),
     )
 
-    // El MET de demostración se detiene al llegar al final de la misión (amerizaje): pasado ese punto
-    // no hay día de vuelo y el HUD se quedaría sin capacidades ni transición.
+    // The demonstration MET stops when reaching the end of the mission (splashdown): past that point
+    // there is no flight day and the HUD would be left without capacities or transition.
     init {
         viewModelScope.launch {
             met.collect { m ->
@@ -139,7 +139,7 @@ class AuraViewModel(app: Application) : AndroidViewModel(app) {
 
     private val dao = AuraDatabase.get(app).dao()
 
-    /** Confirmaciones del tripulante elegido, por entryId. Persisten en la base local. */
+    /** Confirmations of the chosen crew member, by entryId. They persist in the local database. */
     @OptIn(ExperimentalCoroutinesApi::class)
     val confirmations: StateFlow<Map<String, ActivityConfirmation>> = crewId
         .flatMapLatest { id -> if (id == null) flowOf(emptyList()) else dao.confirmations(id) }
@@ -147,9 +147,9 @@ class AuraViewModel(app: Application) : AndroidViewModel(app) {
         .stateIn(viewModelScope, SharingStarted.Eagerly, emptyMap())
 
     /**
-     * Adaptaciones del tripulante elegido sobre el paquete en vigor (aplicadas a bordo), con su envío y revisión.
-     * Control de misión cambia el plan publicando un paquete nuevo: las decididas sobre otra versión ya no se
-     * aplican (siguen en la base y en el registro del Manager).
+     * Adaptations of the chosen crew member on the package in force (applied on board), with their sending and review.
+     * Mission control changes the plan by publishing a new package: those decided on another version are no longer
+     * applied (they remain in the database and in the Manager's record).
      */
     @OptIn(ExperimentalCoroutinesApi::class)
     val adaptations: StateFlow<List<LocalAdaptation>> = combine(
@@ -161,25 +161,25 @@ class AuraViewModel(app: Application) : AndroidViewModel(app) {
     private fun inForce(list: List<LocalAdaptation>, pkg: MissionPackage?): List<LocalAdaptation> =
         if (pkg == null) emptyList() else list.filter { it.packageVersion == pkg.packageVersion }
 
-    /** Alertas del tripulante elegido para control de misión, con su envío y acuse. */
+    /** Alerts of the chosen crew member for mission control, with their sending and acknowledgement. */
     @OptIn(ExperimentalCoroutinesApi::class)
     val alerts: StateFlow<List<LocalAlert>> = crewId
         .flatMapLatest { id -> if (id == null) flowOf(emptyList()) else dao.alerts(id) }
         .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
-    /** Todas las observaciones del tripulante elegido (cuestionario y señales). */
+    /** All observations of the chosen crew member (questionnaire and signals). */
     @OptIn(ExperimentalCoroutinesApi::class)
     private val observations: StateFlow<List<Observation>> = crewId
         .flatMapLatest { id -> if (id == null) flowOf(emptyList()) else dao.allObservations(id) }
         .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
-    /** Situación de la misión para el tripulante elegido en el MET actual; null hasta tener paquete y tripulante. */
+    /** Mission situation for the chosen crew member at the current MET; null until there is a package and crew member. */
     val snapshot: StateFlow<MissionSnapshot?> = combine(met, _pkg, crewId, confirmations, adaptations) { m, p, crew, conf, adapt ->
         val pkg = (p as? PackageState.Ready)?.loaded?.pkg
         if (pkg == null || crew == null) null else MissionSnapshot.build(pkg, crew, m, conf, adapt.associateBy { it.entryId })
     }.stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
-    /** Semáforo de hoy por capacidad, con los datos del día de vuelo actual. */
+    /** Today's traffic light per capacity, with the data of the current flight day. */
     val assessment: StateFlow<Assessment?> = combine(
         snapshot.map { it?.day?.day }.distinctUntilChanged(),
         _pkg,
@@ -189,14 +189,14 @@ class AuraViewModel(app: Application) : AndroidViewModel(app) {
         if (pkg == null || day == null) null else CapacityEvaluator.evaluate(pkg, day, obs)
     }.stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
-    /** Nombre del escenario simulado con datos hoy (para etiquetar el semáforo); null si no hay. */
+    /** Name of the simulated scenario with data today (to label the traffic light); null if none. */
     val simulatedScenario: StateFlow<DemoScenario?> = combine(snapshot.map { it?.day?.day }.distinctUntilChanged(), observations) { day, obs ->
-        // Solo las señales de un escenario de demo (no las muestras de FC simulada).
-        obs.lastOrNull { it.flightDay == day && it.origin == Origin.SIMULATED && it.quality.startsWith(SCENARIO_PREFIX) }
-            ?.quality?.removePrefix(SCENARIO_PREFIX)?.let(::scenarioOf)
+        // Only the signals of a demo scenario (not the simulated HR samples).
+        obs.lastOrNull { it.flightDay == day && it.origin == Origin.SIMULATED && scenarioName(it.quality) != null }
+            ?.quality?.let(::scenarioName)?.let(::scenarioOf)
     }.stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
-    /** Preparación para la próxima transición hacia gravedad (paso 5b); null si no hay ninguna anunciada. */
+    /** Preparation for the next transition into gravity (step 5b); null if none is announced. */
     val readiness: StateFlow<TransitionReadiness?> = combine(
         snapshot.map { s -> s?.transition?.let { Triple(s.met / 60, s.day, it.day) } }.distinctUntilChanged(),
         observations,
@@ -214,28 +214,28 @@ class AuraViewModel(app: Application) : AndroidViewModel(app) {
     val syncStatus: StateFlow<SyncStatus> = sync.status
     private val engineLock = Mutex()
 
-    /** Idioma de la interfaz (el de la actividad): decide el de los textos del paquete y el de la voz. */
+    /** Interface language (the activity's): it decides the language of package texts and of the voice. */
     @Volatile private var uiLanguage = AppLanguage.current(app)
     private val speaker = Speaker(app, uiLanguage)
     val voiceStatus: StateFlow<VoiceStatus> = speaker.status
     val voiceMuted: StateFlow<Boolean> = speaker.muted
 
     init {
-        // Se guarda ya el reloj por defecto: así el MET no vuelve a cero al reabrir la app.
+        // The default clock is stored right away: this way the MET does not go back to zero when reopening the app.
         store.saveClock(_clock.value)
         viewModelScope.launch {
             _pkg.value = loadInitialPackage()
-            // Al arrancar se mira si control de misión ha publicado otro paquete; sin red, se sigue con este.
+            // At startup, check whether mission control has published another package; offline, keep this one.
             checkPackageNow()
         }
-        // Motor de reglas: decide al cambiar el día, el semáforo, el plan pendiente o el minuto de MET.
+        // Rules engine: decides when the day, the traffic light, the pending plan or the MET minute change.
         viewModelScope.launch {
             combine(snapshot, assessment) { s, a -> s to a }
                 .map { (s, a) -> EngineKey(s, a) }
                 .distinctUntilChanged { old, new -> old.key == new.key }
                 .collect { runEngine(it.snapshot, it.assessment) }
         }
-        // Cola de envío a control de misión: no bloquea nada y reintenta sola.
+        // Send queue to mission control: blocks nothing and retries on its own.
         viewModelScope.launch {
             while (true) {
                 sync.runOnce(crewId.value)
@@ -278,12 +278,12 @@ class AuraViewModel(app: Application) : AndroidViewModel(app) {
                     createdAtUtcMs = System.currentTimeMillis(),
                 )
                 dao.insertAdaptation(local)
-                Log.i(TAG, "Adaptación aplicada: ${local.type} ${local.entryId} (${d.rule})")
+                Log.i(TAG, "Adaptation applied: ${local.type} ${local.entryId} (${d.rule})")
             }
-            // Alertas: lo que no se resuelve adaptando. Una por situación (id derivado de la clave).
+            // Alerts: what is not resolved by adapting. One per situation (id derived from the key).
             val catalog = pkg.catalog.associateBy { it.id }
             val newAlerts = AlertRules.candidates(a?.takeIf { it.flightDay == day.day }, inForce(dao.adaptationsNow(crew), pkg), catalog)
-            // Una alerta por situación: se compara por clave (los ids de alertas antiguas siguen siendo válidos).
+            // One alert per situation: compared by key (ids of old alerts remain valid).
             val known = dao.alertKeys(crew).toSet()
             newAlerts.filter { it.dedupeKey !in known }.forEach { c ->
                 dao.insertAlert(
@@ -310,9 +310,9 @@ class AuraViewModel(app: Application) : AndroidViewModel(app) {
         }
     }
 
-    // ---------- Escenarios de demo y servidor (paso 5) ----------
+    // ---------- Demo scenarios and server (step 5) ----------
 
-    /** Carga las señales simuladas de un escenario para el día de vuelo actual (sustituye las simuladas de hoy). */
+    /** Loads the simulated signals of a scenario for the current flight day (replaces today's simulated ones). */
     fun applyScenario(scenario: DemoScenario) {
         val crew = crewId.value ?: return
         val pkg = readyPackage() ?: return
@@ -345,7 +345,7 @@ class AuraViewModel(app: Application) : AndroidViewModel(app) {
         }
     }
 
-    /** Borra las señales simuladas de hoy: el semáforo vuelve a depender solo del cuestionario. */
+    /** Deletes today's simulated signals: the traffic light depends only on the questionnaire again. */
     fun clearScenario() {
         val crew = crewId.value ?: return
         val day = snapshot.value?.day ?: return
@@ -359,7 +359,7 @@ class AuraViewModel(app: Application) : AndroidViewModel(app) {
         checkPackage()
     }
 
-    /** Busca en AURA Manager un paquete publicado distinto del cargado y, si es válido, lo carga. */
+    /** Looks in AURA Manager for a published package different from the loaded one and, if valid, loads it. */
     fun checkPackage() {
         viewModelScope.launch { checkPackageNow() }
     }
@@ -370,7 +370,7 @@ class AuraViewModel(app: Application) : AndroidViewModel(app) {
         val text = try {
             withContext(Dispatchers.IO) { ManagerClient(url).fetchPackage() }
         } catch (e: java.io.IOException) {
-            Log.i(TAG, "Sin acceso al Manager para el paquete: ${e.message}")
+            Log.i(TAG, "No access to the Manager for the package: ${e.message}")
             _packageCheck.value = PackageCheck.Offline(e.message ?: e.javaClass.simpleName)
             return@withLock
         }
@@ -381,7 +381,7 @@ class AuraViewModel(app: Application) : AndroidViewModel(app) {
         _packageCheck.value = when (val d = withContext(Dispatchers.Default) { PackageUpdate.decide(readyPackage(), text) }) {
             is PackageDecision.Keep -> PackageCheck.UpToDate(d.version)
             is PackageDecision.Reject -> {
-                Log.w(TAG, "Paquete del Manager descartado: ${d.reason}")
+                Log.w(TAG, "Package from the Manager discarded: ${d.reason}")
                 PackageCheck.Rejected(d.reason)
             }
             is PackageDecision.Replace -> {
@@ -390,20 +390,20 @@ class AuraViewModel(app: Application) : AndroidViewModel(app) {
                 Lang.configure(d.loaded.pkg, uiLanguage)
                 speaker.setLanguage(Lang.active)
                 _pkg.value = PackageState.Ready(d.loaded, origin)
-                Log.i(TAG, "Paquete v${d.loaded.pkg.packageVersion} descargado de $url")
+                Log.i(TAG, "Package v${d.loaded.pkg.packageVersion} downloaded from $url")
                 PackageCheck.Updated(d.loaded.pkg.packageVersion)
             }
         }
     }
 
-    /** La actividad comunica su idioma al crearse (también tras elegir otro en el modo demo). */
+    /** The activity reports its language when created (also after choosing another one in demo mode). */
     fun setUiLanguage(language: String) {
         uiLanguage = language
         readyPackage()?.let { Lang.configure(it, language) }
         speaker.setLanguage(Lang.active)
     }
 
-    /** Vuelve al paquete embebido en la app y olvida el descargado (modo demo). */
+    /** Goes back to the package embedded in the app and forgets the downloaded one (demo mode). */
     fun useEmbeddedPackage() {
         viewModelScope.launch {
             packageLock.withLock {
@@ -414,17 +414,17 @@ class AuraViewModel(app: Application) : AndroidViewModel(app) {
         }
     }
 
-    /** Fuerza un intento de envío y de lectura de la revisión ahora. */
+    /** Forces an attempt to send and to read the review now. */
     fun syncNow() {
         viewModelScope.launch { sync.runOnce(crewId.value) }
     }
 
-    /** Pide a la voz los anuncios vigentes; los ya dichos se ignoran. */
+    /** Asks the voice for the current announcements; those already said are ignored. */
     fun announce(announcements: List<Announcement>) = speaker.announce(announcements)
 
     fun setVoiceMuted(muted: Boolean) = speaker.setMuted(muted)
 
-    // ---------- Frecuencia cardiaca del reloj (paso 7) ----------
+    // ---------- Heart rate from the watch (step 7) ----------
 
     private val ble = BleHeartRate(app) { store.saveWatchAddress(it) }
     private val simulatedHeart = SimulatedHeartRate(viewModelScope)
@@ -432,7 +432,7 @@ class AuraViewModel(app: Application) : AndroidViewModel(app) {
     val heartSource: StateFlow<HeartSource> = _heartSource.asStateFlow()
     val watchesFound: StateFlow<List<FoundWatch>> = ble.found
 
-    /** Frecuencia cardiaca vigente según la fuente elegida. */
+    /** Current heart rate according to the chosen source. */
     val heart: StateFlow<HeartState> = combine(_heartSource, ble.state, simulatedHeart.state) { src, b, s ->
         when (src) {
             HeartSource.WATCH -> b
@@ -444,9 +444,9 @@ class AuraViewModel(app: Application) : AndroidViewModel(app) {
     private val heartSamples = ArrayDeque<Pair<Long, Int>>()
     @Volatile private var lastActiveMs = System.currentTimeMillis()
 
-    // Se inicia aquí, después de declarar las propiedades de la frecuencia cardiaca (orden de inicialización).
+    // Started here, after declaring the heart rate properties (initialization order).
     init {
-        // Frecuencia cardiaca: fuente elegida, lecturas en memoria y muestra agregada periódica.
+        // Heart rate: chosen source, in-memory readings and periodic aggregated sample.
         applyHeartSource()
         viewModelScope.launch {
             heart.collect { h ->
@@ -484,18 +484,18 @@ class AuraViewModel(app: Application) : AndroidViewModel(app) {
     fun stopWatchSearch() = ble.stopScan()
     fun chooseWatch(address: String) = ble.choose(address)
     fun forgetWatch() = ble.forget()
-    /** Al volver a la app (permisos o Bluetooth cambiados desde los ajustes). */
+    /** When returning to the app (permissions or Bluetooth changed from settings). */
     fun refreshWatch() = ble.refresh()
 
-    /** La silueta informa del movimiento (simulado): sube la FC simulada y marca si hay reposo. */
+    /** The silhouette reports the (simulated) movement: raises the simulated HR and flags rest. */
     fun reportMotion(walking: Boolean, squatting: Boolean) {
         simulatedHeart.setActivity(walking, squatting)
         if (walking || squatting) lastActiveMs = System.currentTimeMillis()
     }
 
     /**
-     * Guarda una muestra agregada cada [HeartRules.SAMPLE_INTERVAL_MS] (no cada notificación) y, con el
-     * reloj real y en reposo, la diferencia con la referencia de demostración como `resting_hr_delta`.
+     * Stores an aggregated sample every [HeartRules.SAMPLE_INTERVAL_MS] (not every notification) and, with the
+     * real watch and at rest, the difference with the demonstration baseline as `resting_hr_delta`.
      */
     private suspend fun sampleHeart() {
         val crew = crewId.value ?: return
@@ -523,26 +523,26 @@ class AuraViewModel(app: Application) : AndroidViewModel(app) {
             met = met.value,
             recordedAtUtcMs = now,
             origin = origin,
-            quality = if (origin == Origin.SENSOR) "reloj BLE · ${h.deviceName ?: "reloj"} · media de ${window.size} lecturas" else "simulado",
+            quality = if (origin == Origin.SENSOR) "BLE watch · ${h.deviceName ?: "watch"} · mean of ${window.size} readings" else "simulated",
             packageVersion = pkg.packageVersion,
         )
         val list = mutableListOf(base)
         val restingSignal = pkg.signals.firstOrNull { it.id == HeartRules.RESTING_DELTA_SIGNAL_ID }
         if (origin == Origin.SENSOR && restingSignal != null && now - lastActiveMs > HeartRules.REST_WINDOW_MS) {
-            // Referencia propia del tripulante si el paquete la trae (demo); si no, la genérica de demostración.
+            // The crew member's own baseline if the package carries it (demo); otherwise the generic demonstration one.
             val baseline = pkg.crew.firstOrNull { it.id == crew }?.restingHrBpm?.toFloat() ?: HeartRules.DEMO_RESTING_BASELINE_BPM
             list += base.copy(
                 indicator = restingSignal.id,
                 value = mean - baseline,
                 unit = restingSignal.unit,
                 capacityId = restingSignal.capacityId,
-                quality = "reposo · referencia de demostración ${baseline.toInt()} bpm",
+                quality = "rest · demonstration baseline ${baseline.toInt()} bpm",
             )
         }
         dao.insertObservations(list)
     }
 
-    /** Origen del movimiento de la silueta (simulado): sensor de la tablet o forzado desde el modo demo. */
+    /** Source of the silhouette's (simulated) movement: tablet sensor or forced from demo mode. */
     private val _motionSource = MutableStateFlow(MotionSource.SENSOR)
     val motionSource: StateFlow<MotionSource> = _motionSource.asStateFlow()
 
@@ -550,14 +550,14 @@ class AuraViewModel(app: Application) : AndroidViewModel(app) {
         _motionSource.value = source
     }
 
-    /** Modo demo: olvida los avisos ya dichos para repetir la demostración. */
+    /** Demo mode: forgets the notices already said to repeat the demonstration. */
     fun resetVoice() = speaker.forgetSpoken()
 
-    // ---------- Recogida de datos (paso 4) ----------
+    // ---------- Data collection (step 4) ----------
 
     private fun readyPackage(): MissionPackage? = (pkg.value as? PackageState.Ready)?.loaded?.pkg
 
-    /** Marca una actividad como hecha u omitida. Omitir exige motivo. */
+    /** Marks an activity as done or omitted. Omitting requires a reason. */
     fun confirm(activity: PlanActivity, status: ConfirmationStatus, reason: String? = null, itemId: String = activity.itemId) {
         val crew = crewId.value ?: return
         val pkg = readyPackage() ?: return
@@ -575,13 +575,13 @@ class AuraViewModel(app: Application) : AndroidViewModel(app) {
         viewModelScope.launch { dao.upsertConfirmation(c) }
     }
 
-    /** Deshace una confirmación hecha por error. */
+    /** Undoes a confirmation made by mistake. */
     fun undoConfirmation(entryId: String) {
         val crew = crewId.value ?: return
         viewModelScope.launch { dao.deleteConfirmation(crew, entryId) }
     }
 
-    /** Preguntas del cuestionario de un día, según el paquete y la última medida de cada señal. */
+    /** Questions of a day's questionnaire, according to the package and the latest measurement of each signal. */
     fun questionsFor(day: FlightDay): List<SelectedQuestion> {
         val crew = crewId.value ?: return emptyList()
         val pkg = readyPackage() ?: return emptyList()
@@ -591,8 +591,8 @@ class AuraViewModel(app: Application) : AndroidViewModel(app) {
     }
 
     /**
-     * Guarda las respuestas (original y normalizada, variante y MET) y da por hecha la actividad
-     * del cuestionario, todo en el dispositivo.
+     * Stores the answers (original and normalized, variant and MET) and marks the questionnaire activity
+     * as done, all on the device.
      */
     fun saveQuestionnaire(activity: PlanActivity, day: FlightDay, answers: List<Pair<SelectedQuestion, Int>>) {
         val crew = crewId.value ?: return
@@ -635,7 +635,7 @@ class AuraViewModel(app: Application) : AndroidViewModel(app) {
         _crewId.value = id
     }
 
-    /** Fija el MET a mano, dentro de la misión [0, fin]. */
+    /** Sets the MET by hand, within the mission [0, end]. */
     fun setMet(met: Long) = updateClock { s, now ->
         val end = (pkg.value as? PackageState.Ready)?.loaded?.pkg?.endMet ?: Long.MAX_VALUE
         MissionClock.setMet(s, met.coerceIn(0, end), now)
@@ -657,7 +657,7 @@ class AuraViewModel(app: Application) : AndroidViewModel(app) {
         store.saveClock(_clock.value)
     }
 
-    /** El último descargado si sigue siendo válido; si no, el embebido. */
+    /** The last downloaded one if still valid; otherwise the embedded one. */
     private suspend fun loadInitialPackage(): PackageState = withContext(Dispatchers.IO) {
         val stored = packageStorage.load()
         if (stored != null) {
@@ -666,7 +666,7 @@ class AuraViewModel(app: Application) : AndroidViewModel(app) {
                 Lang.configure(loaded.pkg, uiLanguage)
                 return@withContext PackageState.Ready(loaded, stored.second)
             } catch (e: PackageException) {
-                Log.w(TAG, "El paquete descargado ya no es válido; se usa el embebido", e)
+                Log.w(TAG, "The downloaded package is no longer valid; using the embedded one", e)
                 packageStorage.clear()
             }
         }
@@ -679,15 +679,15 @@ class AuraViewModel(app: Application) : AndroidViewModel(app) {
             val text = getApplication<Application>().assets.open(EMBEDDED_PACKAGE).bufferedReader().use { it.readText() }
             val t1 = System.nanoTime()
             val loaded = MissionPackageParser.parse(text)
-            // Idioma de los textos del paquete: el del sistema si el paquete lo trae; si no, su idioma por defecto.
+            // Language of package texts: the system's if the package carries it; otherwise its default language.
             Lang.configure(loaded.pkg, uiLanguage)
-            Log.i(TAG, "Paquete v${loaded.pkg.packageVersion}: lectura ${(t1 - t0) / 1_000_000} ms, análisis ${(System.nanoTime() - t1) / 1_000_000} ms")
+            Log.i(TAG, "Package v${loaded.pkg.packageVersion}: read ${(t1 - t0) / 1_000_000} ms, parse ${(System.nanoTime() - t1) / 1_000_000} ms")
             PackageState.Ready(loaded, origin = PackageOrigin.Embedded)
         } catch (e: PackageException) {
-            Log.e(TAG, "Paquete embebido no válido", e)
+            Log.e(TAG, "Embedded package is not valid", e)
             PackageState.Failed(e.message ?: str(R.string.pkg_invalid))
         } catch (e: java.io.IOException) {
-            Log.e(TAG, "No se pudo leer el paquete embebido", e)
+            Log.e(TAG, "Could not read the embedded package", e)
             PackageState.Failed(str(R.string.pkg_embedded_unreadable))
         }
     }
@@ -695,14 +695,23 @@ class AuraViewModel(app: Application) : AndroidViewModel(app) {
     private companion object {
         const val TAG = "AuraMission"
         const val EMBEDDED_PACKAGE = "mission-package.json"
-        /** Refresco del reloj: suficiente para ver pasar los segundos sin gastar batería. */
+        /** Clock refresh: enough to see the seconds pass without draining the battery. */
         const val TICK_MS = 250L
-        /** Cada cuánto se reintenta el envío a control de misión y se lee su revisión. */
+        /** How often sending to mission control is retried and its review read. */
         const val SYNC_INTERVAL_MS = 15_000L
-        /** Prefijo de `quality` en las señales simuladas: identifica el escenario de demo. */
-        const val SCENARIO_PREFIX = "simulado · escenario "
+        /** `quality` prefix of simulated signals: identifies the demo scenario. */
+        const val SCENARIO_PREFIX = "simulated · scenario "
+        /** Prefix stored by earlier versions; still recognized. */
+        private const val LEGACY_SCENARIO_PREFIX = "simulado · escenario "
 
-        /** Primer arranque: MET 00/00:00 corriendo en tiempo real, en modo manual. */
+        /** Scenario name from a `quality` value, or null if it is not a demo scenario. */
+        fun scenarioName(quality: String): String? = when {
+            quality.startsWith(SCENARIO_PREFIX) -> quality.removePrefix(SCENARIO_PREFIX)
+            quality.startsWith(LEGACY_SCENARIO_PREFIX) -> quality.removePrefix(LEGACY_SCENARIO_PREFIX)
+            else -> null
+        }
+
+        /** First start: MET 00/00:00 running in real time, in manual mode. */
         fun defaultClock() = ClockSettings(anchorMet = 0, anchorWallMs = System.currentTimeMillis())
     }
 }

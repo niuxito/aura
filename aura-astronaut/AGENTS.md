@@ -1,251 +1,245 @@
-# AURA Astronaut — interfaz del astronauta
+# AURA Astronaut — the astronaut interface
 
-Instrucciones para el agente que desarrolle en esta carpeta. Léelas enteras antes de escribir código.
+Instructions for any agent or developer working in this folder. Read them in full before writing code.
 
-## Qué es AURA
+## What AURA is
 
-**AURA (Astronaut Unified Readiness & Autonomous-health)** es el proyecto del equipo para NASA Space Apps Challenge 2026, reto «Create Health Monitoring Software for Astronauts on Space Missions». Su objetivo es ayudar a la tripulación a conservar las capacidades físicas (fuerza, coordinación, equilibrio, tolerancia al esfuerzo) que necesita para cada día de la misión y, sobre todo, para los **cambios de gravedad**: aterrizar, salir de la nave y regresar a la Tierra.
+**AURA (Astronaut Unified Readiness & Autonomous-health)** is the team's project for the NASA Space Apps Challenge 2026, challenge "Create Health Monitoring Software for Astronauts on Space Missions". Its goal is to help the crew preserve the physical capacities (strength, coordination, balance, exercise tolerance) they need for every day of the mission and, above all, for **gravity changes**: landing, leaving the spacecraft and returning to Earth.
 
-Tiene dos piezas:
+It has two parts, in the same repository:
 
-| Pieza | Carpeta | Papel |
+| Part | Folder | Role |
 | --- | --- | --- |
-| **AURA Manager** | `../aura-manager` | Consola web de control de misión. Define el plan de misión y el plan de prevención (ejercicios, evaluaciones, suplementos, recuperación) y publica un **paquete de misión** versionado. Ya existe una primera versión. |
-| **AURA Astronaut** | esta carpeta | Interfaz del astronauta: un agente que recoge datos y le muestra, en realidad aumentada, lo que necesita saber y hacer hoy. **Por construir.** |
+| **AURA Manager** | `../aura-manager` | Mission control web console. Defines the mission plan and the prevention plan (exercise, assessments, supplements, recovery) and publishes a versioned **mission package**. |
+| **AURA Astronaut** | this folder | The astronaut interface: an agent that collects data and shows, in augmented reality, what the astronaut needs to know and do today. |
 
-**AURA no es solo para Artemis II.** Debe servir para misiones futuras a la Luna, a Marte y a estaciones espaciales. Artemis II (misión ya realizada) es el caso con el que se valida y se hace la demo. No escribas nada atado a esa misión: todo lo que dependa de ella (días de vuelo, entornos gravitatorios, transiciones, eventos, cuestionario, umbrales) viene en el paquete.
+**AURA is not only for Artemis II.** It must serve future missions to the Moon, Mars and space stations. Artemis II is the case used to validate it and to run the demo. Do not write anything tied to that mission: everything that depends on it (flight days, gravity environments, transitions, events, questionnaire, thresholds) comes in the package.
 
-### Objetivo final y prioridades
+### Final goal and priorities
 
-Todo lo que hace la interfaz sirve a una meta: que el astronauta **pueda completar la misión** y **llegue a cada cambio de gravedad en condiciones de salir de la nave por su propio pie**. La interfaz nunca afirma que lo conseguirá (no certifica aptitud): vigila los indicadores que lo hacen probable, protege las medidas que lo preparan y avisa a tiempo cuando algo se desvía.
+Everything the interface does serves one goal: that the astronaut **can complete the mission** and **reaches each gravity change able to walk out of the spacecraft on their own**. The interface never claims they will (it does not certify fitness): it watches the indicators that make it likely, protects the measures that prepare it and warns in time when something deviates.
 
-- **Riesgos críticos de cada transición.** En la misión demo (Artemis II, unos 10 días en microgravedad) los que más comprometen la salida al amerizar son la **intolerancia ortostática** (mareo o desmayo al ponerse en pie) y la **alteración del equilibrio** (agravada por el balanceo en el agua). La pérdida de fuerza y hueso es pequeña en un vuelo tan corto; en misiones largas (Marte) pasa a primer plano.
-- **Medidas de prevención del plan** para esos riesgos: carga de líquidos y sal antes de la reentrada (`SF`, sin dosis: la fija el protocolo médico), prenda contra la intolerancia ortostática (`OIG`), ejercicio aeróbico (`A`) y preparación del retorno (`V`). Las actividades con `transitionPrep: true` y las que preparan la transición no se pierden de vista.
-- **Las reglas protegen el día sin sacrificar la transición.** Quitar carga protege al astronauta hoy, pero cada sesión perdida resta preparación. Por eso:
-  - lleva la cuenta de lo planificado frente a lo hecho (incluido lo que la interfaz ha sustituido u omitido);
-  - antes que omitir, prefiere reprogramar dentro de la política;
-  - si una regla va a quitar una medida que prepara la transición (por ejemplo, el aeróbico de la víspera de la reentrada), lo señala y avisa a control de misión en vez de darlo por resuelto; nunca sube la carga por su cuenta.
-- **Preparación para la transición en el HUD.** A medida que se acerca un cambio de gravedad, un panel reúne: cuenta atrás, estado y **tendencia por días** de las capacidades críticas de esa transición frente a la referencia propia, y cumplimiento de las medidas de preparación. Habla de «indicadores para la salida», nunca de «apto».
-- **Lo que viene del paquete:** qué capacidades son críticas para cada llegada (`capacities[].criticalFor`). Si un paquete no lo trae, la interfaz usa lo indicado aquí para la misión demo y lo etiqueta como provisional. La dosis mínima de ejercicio sigue pendiente del contrato: hasta entonces solo se cuentan sesiones planificadas frente a hechas.
+- **Critical risks of each transition.** In the demo mission (Artemis II, about 10 days in microgravity) the ones that most compromise egress after splashdown are **orthostatic intolerance** (dizziness or fainting when standing up) and **balance impairment** (made worse by the rocking on the water). Loss of strength and bone is small in such a short flight; on long missions (Mars) it comes to the fore.
+- **Prevention measures in the plan** for those risks: fluid and salt loading before reentry (`SF`, with no dose: the medical protocol sets it), the orthostatic intolerance garment (`OIG`), aerobic exercise (`A`) and return preparation (`V`). Activities with `transitionPrep: true` and those that prepare the transition are never lost from sight.
+- **Rules protect the day without sacrificing the transition.** Removing load protects the astronaut today, but every lost session takes away preparation. Therefore:
+  - keep track of planned versus done (including what the interface substituted or omitted);
+  - rather than omitting, prefer rescheduling within the policy;
+  - if a rule is about to remove a measure that prepares the transition (for example, the aerobic session on the eve of reentry), flag it and alert mission control instead of treating it as resolved; never raise the load on its own.
+- **Transition preparation in the HUD.** As a gravity change approaches, a panel gathers: countdown, state and **day-by-day trend** of the capacities critical for that transition against the astronaut's own baseline, and compliance with the preparation measures. It speaks of "indicators for egress", never of "fit".
+- **What comes from the package:** which capacities are critical for each arrival (`capacities[].criticalFor`). If a package does not carry it, the interface uses what is stated here for the demo mission and labels it as provisional. The minimum exercise dose is still pending in the contract: until then only planned versus done sessions are counted.
 
-La especificación funcional completa está en Notion, en la página «Space Apps Challenge 2026» y su subpágina «Mars Ready — Requisitos funcionales y diseño del monitor» (versiones 0.3 y 0.4). Si tienes acceso a Notion, consúltala; en caso de duda entre Notion y este fichero sobre el alcance de la demo, manda este fichero.
+The full functional specification is in the team's Notion page "Space Apps Challenge 2026" and its subpage "Mars Ready — Functional requirements and monitor design" (versions 0.3 and 0.4). If in doubt between Notion and this file about the scope of the demo, this file prevails.
 
-## Qué hay que construir
+## What it is
 
-Una app **Android** para la demo del hackathon:
+An **Android** app for the hackathon demo:
 
-- La pantalla principal es la **imagen de la cámara trasera** del móvil a pantalla completa, con la información superpuesta encima (HUD). Eso es lo que llamamos «realidad aumentada» en la demo: no hace falta anclar objetos 3D al mundo ni detectar planos.
-- La app se comporta como un **agente**: carga el paquete de misión, sabe en qué MET y en qué día de vuelo está el astronauta, le presenta el plan del día, recoge sus datos y le avisa de desviaciones con explicación.
-- Todos los tiempos se expresan en **MET (Mission Elapsed Time)**, el tiempo transcurrido desde el despegue, con el formato `DD/HH:MM` o `DD/HH:MM:SS` que usan los cronogramas de NASA (por ejemplo, TLI en `01/01:08:42`). Los días son **días de vuelo** (`FD01`, `FD02`…), que no coinciden con el día natural: sus límites en MET vienen en el paquete.
-- Funciona **sin conexión**. La red solo se usa, si está disponible, para descargar un paquete nuevo.
+- The main screen is the **rear camera image** in full screen, with the information overlaid on top (HUD). That is what we call "augmented reality" in the demo: there is no need to anchor 3D objects to the world or detect planes.
+- The app behaves as an **agent**: it loads the mission package, knows the astronaut's MET and flight day, presents the day's plan, collects their data and warns them about deviations, with an explanation.
+- All times are expressed in **MET (Mission Elapsed Time)**, the time elapsed since launch, in the `DD/HH:MM` or `DD/HH:MM:SS` format used in NASA timelines (for example, TLI at `01/01:08:42`). Days are **flight days** (`FD01`, `FD02`…), which do not match calendar days: their MET boundaries come in the package.
+- It works **offline**. The network is used only, when available, to download a new package and to send adaptations and alerts.
 
-### Qué muestra el HUD
+### What the HUD shows
 
-1. **Contexto de misión:** reloj MET, día de vuelo, fase, hito del día, entorno gravitatorio y carga operativa (CO).
-2. **Transición gravitatoria:** si hoy o en los próximos días de vuelo hay un cambio de gravedad (campo `transitionFrom`), aviso destacado con la cuenta atrás en MET, por ejemplo «Amerizaje en 01/06:00 · microgravedad → 1 g».
-3. **Plan del día:** actividades asignadas al astronauta ordenadas por MET, con su código, nombre, estado (`authorized` o `conditional`) y si están hechas. Junto a ellas, lo que el cronograma de misión tiene previsto alrededor (sueño, comidas, maniobras), para que el plan se entienda en contexto.
-4. **Estado por capacidad:** semáforo verde, ámbar, rojo o **gris**, siempre con texto y motivo.
-5. **Siguiente acción recomendada** y su justificación.
+1. **Mission context:** MET clock, flight day, phase, milestone of the day, gravity environment and operational load (OL).
+2. **Gravity transition:** if there is a gravity change today or in the next flight days (field `transitionFrom`), a highlighted notice with the MET countdown, for example "Splashdown in 01/06:00 · microgravity → 1 g".
+3. **Day plan:** the astronaut's activities sorted by MET, with their code, name, status (`authorized` or `conditional`) and whether they are done. Next to them, what the mission timeline has planned around (sleep, meals, maneuvers), so the plan is understood in context.
+4. **State per capacity:** green, amber, red or **gray** traffic light, always with text and a reason.
+5. **Next recommended action** and its rationale.
 
-Mantén el HUD legible sobre cualquier fondo de cámara: paneles semitransparentes, alto contraste, texto grande, pocos elementos a la vez. Evalúa el uso con una mano y con guantes.
+Keep the HUD readable over any camera background: semi-transparent panels, high contrast, large text, few elements at a time. Evaluate use with one hand and with gloves.
 
-### Avisos por voz
+### Voice notices
 
-La interfaz comunica por voz, además de en pantalla, la información importante, para que el astronauta la reciba aunque no esté mirando el móvil.
+Besides the screen, the interface speaks the important information, so the astronaut receives it even when not looking at the device.
 
-- **Motor:** el `TextToSpeech` del propio Android, en español y **sin conexión**. Al arrancar, comprueba que hay una voz en español que no exige red; si falta, avísalo en pantalla y sigue funcionando solo con el HUD.
-- **Qué se dice:** solo los mensajes importantes, una vez cada uno. Son la transición gravitatoria próxima, la siguiente acción recomendada al cambiar, las adaptaciones aplicadas con su motivo, los avisos de control de misión del día y el resultado de la validación de una adaptación. Nunca se lee el HUD entero ni se repite un mensaje ya dicho.
-- **Nada que no esté en pantalla:** la voz lee el mismo texto que muestra el HUD en ese momento. Las reglas del HUD también valen para la voz: no diagnostica, dice el motivo y avisa de que los datos simulados son simulados.
-- **Silencio:** un control de silencio siempre visible y fácil de pulsar con guantes. La preferencia se guarda entre sesiones. Lo que se dice en voz alta lo oye quien esté cerca.
-- **Sin interferir:** pide el foco de audio mientras habla y no corta un mensaje más importante por otro menos importante.
+- **Engine:** Android's own `TextToSpeech`, in the interface's active language and **offline**. At startup it checks that there is a voice for that language that needs no network; if there is none, it says so on screen and keeps working with the HUD only.
+- **What is said:** only important messages, once each: the upcoming gravity transition, the next recommended action when it changes, adaptations applied with their reason, the day's mission control notices and the result of an adaptation's validation. The whole HUD is never read out and a message already said is never repeated.
+- **Nothing that is not on screen:** the voice reads the same text the HUD shows at that moment. The HUD rules also apply to the voice: it does not diagnose, it states the reason and says that simulated data is simulated.
+- **Mute:** a mute control, always visible and easy to press with gloves. The preference is kept between sessions. Whatever is said aloud can be heard by anyone nearby.
+- **No interference:** it requests audio focus while speaking and does not cut a more important message for a less important one.
 
-El texto de cada aviso se genera en el mismo sitio que el del HUD; la voz no tiene textos propios.
+The text of each notice is produced in the same place as the HUD's; the voice has no texts of its own.
 
-### Qué datos recoge
+### What data it collects
 
-- Confirmación de cada actividad del plan (hecha, omitida, motivo).
-- Cuestionario diario de fatiga, descanso y síntomas (código `F` del catálogo). Sus preguntas, su selección y sus umbrales vienen en el paquete (sección «Cuestionario diario y semáforo»).
-- Señales de la ropa inteligente (variabilidad cardiaca nocturna, respiración, SpO2, ECG, fatiga muscular). En la demo no hay prenda: se **simulan**, siempre etiquetadas.
-- Registro de ejercicio: tipo, carga o repeticiones, esfuerzo percibido.
-- Prueba táctil de coordinación visomotora (código `C`): aciertos, errores y latencia por intento. Es una prueba experimental del equipo, no un test validado por NASA, y debe decirlo en pantalla.
-- Confirmación de toma de suplementos.
+- Confirmation of each plan activity (done, omitted, reason).
+- Daily fatigue, rest and symptoms questionnaire (catalog code `F`). Its questions, selection and thresholds come in the package (section "Daily questionnaire and traffic light").
+- Smart clothing signals (nighttime heart rate variability, breathing, SpO2, ECG, muscle fatigue). There is no garment in the demo: they are **simulated**, always labeled.
+- Exercise log: type, load or repetitions, perceived exertion. *Not built yet: exercise and supplement activities are confirmed as done or omitted.*
+- Tactile visuomotor coordination test (code `C`): hits, errors and latency per attempt. It is an experimental team test, not a NASA-validated one, and it must say so on screen. *Not built yet: its signal (`coordination_delta`) is simulated by the demo scenarios.*
+- Confirmation of supplement intake (as a plan activity done or omitted).
+- Live heart rate from a watch over Bluetooth (section "Heart rate from the watch").
 
-- Frecuencia cardiaca en vivo desde un reloj por Bluetooth (sección «Frecuencia cardiaca desde el reloj»).
+Every observation stores value, unit, date, source (`manual`, `sensor` or `simulated`) and quality.
 
-Cada observación guarda valor, unidad, fecha, origen (`manual`, `sensor` o `simulated`) y calidad.
+### Heart rate from the watch
 
-### Frecuencia cardiaca desde el reloj
+The interface reads the heart rate from a watch that broadcasts it with the **standard Bluetooth LE profile**, like a chest strap. Tested with a **Garmin Forerunner 745**: with "Broadcast Heart Rate" enabled on the watch, it advertises the Heart Rate service. No Garmin SDK or app is used, nor ANT+.
 
-La interfaz lee la frecuencia cardiaca de un reloj que la retransmite con el **perfil estándar de Bluetooth LE**, como una banda de pecho. Comprobado con un **Garmin Forerunner 745**: con «Transmitir frecuencia cardiaca» activado en el reloj, anuncia el servicio Heart Rate. No se usa ningún SDK ni app de Garmin, ni ANT+.
+- **Protocol:** Heart Rate service `0x180D`, Heart Rate Measurement characteristic `0x2A37` via notifications. Read the flags byte: bit 0 says whether the value is `uint8` or `uint16`, and bit 4 whether RR intervals are present (in 1/1024 s). RR intervals are optional: use them if they arrive, without relying on them.
+- **Pairing:** scan only for devices advertising `0x180D`, let the astronaut pick theirs and store its address to reconnect on its own at startup and after a disconnection. If the watch does not show up, the HUD explains how to enable broadcasting on the watch.
+- **Permissions:** on Android 12 or later, `BLUETOOTH_SCAN` (with `neverForLocation`) and `BLUETOOTH_CONNECT`; on earlier versions, the location permissions scanning requires. Handle a denied permission and Bluetooth turned off without breaking the app.
+- **Offline:** it works in airplane mode with Bluetooth on. It needs neither network nor the Garmin Connect app.
+- **Observations:** stored with source `sensor`, unit `bpm` and their MET. Do not store every notification: aggregate (for example, one sample per interval) at the rate defined in the rules module.
+- **In the HUD:** live value, connection state and age of the last data point. With no watch connected or with stale data, it shows **gray** ("no watch data"), never the last value as if it were current.
+- **In the rules:** heart rate is one more indicator and may be evidence for an adaptation (`evidence[].source: "sensor"`). Any baseline (for example, the astronaut's own resting rate) and its thresholds are for demonstration and labeled as such. Nothing is diagnosed from it.
+- **Without a watch:** the demo must be shown without a watch. The heart rate source sits behind an interface, with a Bluetooth implementation and a simulated one for the demo scenarios; the simulated one stores source `simulated` and the HUD says so.
+- **Verification:** the emulator has no real Bluetooth LE. Test parsing and formatting with simulated data and unit tests of `0x2A37`, and the real connection on a device with the watch.
 
-- **Protocolo:** servicio Heart Rate `0x180D`, característica Heart Rate Measurement `0x2A37` por notificaciones. Lee el byte de flags: el bit 0 indica si el valor va en `uint8` o `uint16`, y el bit 4 si vienen intervalos RR (en 1/1024 s). Los RR son opcionales: úsalos si llegan, sin contar con ellos.
-- **Emparejamiento:** busca solo dispositivos que anuncien `0x180D`, deja que el astronauta elija el suyo y guarda su dirección para reconectar sola al arrancar y tras una desconexión. Si el reloj no aparece, el HUD explica cómo activar la retransmisión en el reloj.
-- **Permisos:** en Android 12 o superior, `BLUETOOTH_SCAN` (con `neverForLocation`) y `BLUETOOTH_CONNECT`; en versiones anteriores, los de ubicación que exija el escaneo. Gestiona el permiso denegado y el Bluetooth apagado sin romper la app.
-- **Sin conexión:** funciona en modo avión con el Bluetooth activado. No necesita red ni la app Garmin Connect.
-- **Observaciones:** se guardan con origen `sensor`, unidad `lpm` y su MET. No guardes cada notificación: agrega (por ejemplo, una muestra por intervalo) con la frecuencia definida en el módulo de reglas.
-- **En el HUD:** valor en vivo, estado de la conexión y antigüedad del último dato. Sin reloj conectado o con el dato caducado, se muestra **gris** («sin datos del reloj»), nunca el último valor como si fuera actual.
-- **En las reglas:** la frecuencia cardiaca es un indicador más y puede ir como evidencia de una adaptación (`evidence[].source: "sensor"`). Cualquier referencia (por ejemplo, la frecuencia en reposo propia del astronauta) y sus umbrales son de demostración y se etiquetan así. No se diagnostica nada a partir de ella.
-- **Sin reloj:** la demo debe poder enseñarse sin reloj. Separa la fuente de frecuencia cardiaca detrás de una interfaz, con una implementación Bluetooth y otra simulada para los escenarios de demo; la simulada guarda origen `simulated` y el HUD lo indica.
-- **Verificación:** el emulador no tiene Bluetooth LE real. Prueba la lectura y el formato con datos simulados y pruebas unitarias del parseo de `0x2A37`, y la conexión real en un móvil con el reloj.
+### Daily questionnaire and traffic light
 
-### Cuestionario diario y semáforo
+Mission control defines it in AURA Manager (Questionnaire tab) and it travels in the package: `capacities`, `signals` and `questionnaire`. The interface **has no questions, thresholds or capacities written in the code**; it reads them from the package and applies the algorithm in this section. It comes from the team document "ARTEMIS-MED — Medical logic, questionnaire and traffic light", adapted to AURA's principles.
 
-Lo define control de misión en AURA Manager (pestaña Cuestionario) y viaja en el paquete: `capacities`, `signals` y `questionnaire`. La interfaz **no lleva preguntas, umbrales ni capacidades escritos en el código**; los lee del paquete y aplica el algoritmo de esta sección. Procede del documento del equipo «ARTEMIS-MED — Lógica médica, cuestionario y semáforo», adaptado a los principios de AURA.
+**Selecting the day's questions** (every time the plan schedules the activity `questionnaire.catalogItemId`):
 
-**Selección de las preguntas del día** (cada vez que el plan programa la actividad `questionnaire.catalogItemId`):
+1. **Fixed block:** the questions with `block: "fixed"` (currently 3), in package order. For each one, the variant shown is `(flight day + crew member index in crew[] + question index) % number of variants`.
+2. **Bank:** among the questions with `block: "bank"`, collect the triggers that hold today, sort them by descending `priority` and take the first `bankPerDay` distinct questions. If there are not enough, complete with the `filler` triggers by priority. Variant: `flight day % number of variants`.
+3. Triggers (`triggers[].kind`), always by flight days:
+   - `transition`: today is between `daysBefore` flight days before and `daysAfter` after a flight day with `transitionFrom`. If `toGravity` is not empty, only transitions into those environments count (that day's `gravity`). `minDaysInMicro`: only if at least that many consecutive flight days in microgravity precede the transition.
+   - `environment`: today's flight day `gravity` is in the list.
+   - `micro-days`: consecutive flight days in microgravity up to today, inclusive, ≥ `min`.
+   - `event`: there is an event of that `kind` (for example, `eva`) in the last `withinDays` flight days.
+   - `signal`: the latest measurement of that signal satisfies `op value`; for a boolean signal, that it is true. With no measurement, it does not fire.
+4. Each question shown can explain why it is asked today with its trigger's `reason`.
 
-1. **Bloque fijo:** las preguntas con `block: "fixed"` (hoy, 3), en el orden del paquete. De cada una se muestra la variante `(día de vuelo + índice del tripulante en crew[] + índice de la pregunta) % número de variantes`.
-2. **Banco:** de las preguntas con `block: "bank"`, se reúnen los disparadores que se cumplen hoy, se ordenan por `priority` descendente y se toman las `bankPerDay` primeras preguntas distintas. Si no llegan, se completan con los disparadores `filler` por prioridad. Variante: `día de vuelo % número de variantes`.
-3. Disparadores (`triggers[].kind`), siempre por días de vuelo:
-   - `transition`: hoy está entre `daysBefore` días de vuelo antes y `daysAfter` después de un día de vuelo con `transitionFrom`. Si `toGravity` no está vacío, solo cuentan las transiciones hacia esos entornos (el `gravity` de ese día). `minDaysInMicro`: solo si antes de la transición se llevan al menos esos días de vuelo seguidos en microgravedad.
-   - `environment`: el `gravity` del día de vuelo de hoy está en la lista.
-   - `micro-days`: días de vuelo seguidos en microgravedad hasta hoy, incluido, ≥ `min`.
-   - `event`: hay un evento de ese `kind` (por ejemplo, `eva`) en los últimos `withinDays` días de vuelo.
-   - `signal`: la última medida de esa señal cumple `op value`; si la señal es booleana, que sea verdadera. Sin medida, no dispara.
-4. Cada pregunta mostrada puede explicar por qué se pregunta hoy con el `reason` de su disparador.
+**Texts:** the variant text does not include the scale. Show it with `scale.min`/`scale.max` and the variant's `minLabel`/`maxLabel` labels (and say it that way in voice notices). One-tap answers, suitable for gloves.
 
-**Textos:** el texto de la variante no incluye la escala. Muéstrala con `scale.min`/`scale.max` y los rótulos `minLabel`/`maxLabel` de la variante (y dila así en los avisos por voz). Respuesta con un toque, apta para guantes.
+**Normalization:** if the variant has `inverted: true`, the value is stored normalized as `(max + min) − answer`. Across the system, high = worse. Store the original answer, the normalized one, the variant and the MET.
 
-**Normalización:** si la variante tiene `inverted: true`, el valor se guarda normalizado como `(max + min) − respuesta`. En todo el sistema, alto = peor. Guarda la respuesta original, la normalizada, la variante y el MET.
+**Traffic light per capacity** (`capacities[]`; currently 6, including coordination, which comes from test `C`):
 
-**Semáforo por capacidad** (`capacities[]`; hoy son 6, entre ellas coordinación, que sale de la prueba `C`):
+- Each answered question gives a level: `red` if the normalized value ≥ `red`, `amber` if ≥ `amber`, `green` otherwise (`null` threshold = n/a). Each signal likewise with `amber`/`red` in the direction of `worseWhen` (`higher`: value ≥ threshold; `lower`: value ≤ threshold), or with `whenTrue` if it is boolean.
+- The capacity's level is **the worst** of its questions and signals of the day. A high value always counts on its own, even if other data is missing: it is never lowered to green for lack of the blood tests or camera the original document asked for.
+- **Gray** if the capacity has no data for the day. Never green by default.
+- `amber` → adaptation allowed by `adaptationPolicy`, guided by `capacities[].onAmber` and `onAmberActions`. `red` → `capacities[].onRed`: refers to the mission procedure and alerts; it does not decide on its own.
+- Every state says which question or signal causes it, with the value and the threshold, and that thresholds are for demonstration (`thresholdsAreDemo: true`).
 
-- Cada pregunta respondida da un nivel: `red` si el valor normalizado ≥ `red`, `amber` si ≥ `amber`, `green` si no (umbral `null` = no aplica). Cada señal, igual con `amber`/`red` en el sentido de `worseWhen` (`higher`: valor ≥ umbral; `lower`: valor ≤ umbral), o con `whenTrue` si es booleana.
-- El nivel de la capacidad es **el peor** de sus preguntas y señales del día. Un valor alto cuenta siempre por sí solo, aunque falten otros datos: nunca se rebaja a verde por no tener la analítica o la cámara que pedía el documento original.
-- **Gris** si la capacidad no tiene ningún dato del día. Nunca verde por defecto.
-- `amber` → adaptación permitida por `adaptationPolicy`, guiada por `capacities[].onAmber`. `red` → `capacities[].onRed`: remite al procedimiento de misión y avisa; no decide por su cuenta.
-- Cada estado dice qué pregunta o señal lo causa, con el valor y el umbral, y que los umbrales son de demostración (`thresholdsAreDemo: true`).
+**Consistency** (`questionnaire.consistencyChecks`): if the normalized answer to `questionId` is ≤ `answerAtMost` and the signal satisfies `op value`, show `message`. The level does not drop: the worse of the two is used.
 
-**Coherencia** (`questionnaire.consistencyChecks`): si la respuesta normalizada a `questionId` es ≤ `answerAtMost` y la señal cumple `op value`, muestra `message`. El nivel no baja: se usa el peor de los dos.
+**Simulated smart clothing:** signals with `simulated: true` have no device. They are generated from the demo scenarios with plausible values that are consistent with each other, stored with source `simulated` and shown as "simulated" in the HUD and in the adaptation evidence (`evidence[].source: "simulated"`). Signals with `source: "watch"` come from the watch over Bluetooth when connected (source `sensor`), those with `source: "test"` from the coordination test, and those with `source: "garment"` are smart clothing.
 
-**Ropa inteligente simulada:** las señales con `simulated: true` no tienen dispositivo. Genéralas desde los escenarios de demo con valores verosímiles y coherentes entre sí. Guárdalas con origen `simulated` y muéstralas como «simulado» (en inglés, «simulated») en el HUD y en la evidencia de las adaptaciones (`evidence[].source: "simulated"`). Las de `source: "watch"` salen del reloj por Bluetooth cuando esté conectado (origen `sensor`), y las de `source: "test"`, de la prueba de coordinación. Las de `source: "garment"` son la ropa inteligente.
+**What is not done**, even though it was in the original document: a collective red alert across crew members, certifying "fit" or "unfit" to leave the spacecraft, diagnosing, adding activities or doses, and reading health status from the face with the camera.
 
-**Lo que no se hace**, aunque estuviera en el documento original: la alerta roja colectiva entre tripulantes, certificar «apto» o «no apto» para salir de la nave, diagnosticar, añadir actividades o dosis, y leer el estado de salud en la cara con la cámara.
+### Silhouette and simulated activity
 
-### Silueta y actividad simulada
+In the right column of the HUD a semi-transparent 3D human silhouette rotates. It has the shape of the BodyParts3D skin (DBCLS, CC BY-SA) taken from anatomia.alexisparron.com and simplified (`assets/models/body.bin`; attribution in demo mode and in `assets/models/LICENSE-body.txt`). `docs/silueta/silueta.html` renders the same drawing in a browser.
 
-En la columna derecha del HUD gira una silueta humana en 3D, semitransparente, con la forma de la piel de BodyParts3D (DBCLS, CC BY-SA) tomada de anatomia.alexisparron.com y simplificada (`assets/models/body.bin`; atribución en el modo demo y en `assets/models/LICENSE-body.txt`).
+- **Movement:** it imitates what smart clothing would record. The tablet's accelerometer detects steps (walking) and squats, and the silhouette reproduces them in profile. Demo mode can force WALK, SQUAT or STILL in case the sensor fails live. Thresholds live in `motion/BodyMotion.kt` (`MotionRules`) and are for demonstration.
+- **Muscles:** the groups at work light up (quadriceps, glutes and hamstrings, calves and abdomen) in a color of their own, distinct from the traffic light.
+- **Heart and aura:** inside the chest a heart beats at the heart rate (watch or simulated) and on every beat a ring of light leaves it, the "aura". With no recent data it does not beat. Its color is its own, distinct from the traffic light.
+- **It is simulated and visual only:** labeled "SIM" next to the silhouette, not stored as an observation, not sent to mission control and not fed into the traffic light. The lighting shows which groups are working, never fatigue, injury or health status.
 
-- **Movimiento:** imita lo que registraría la ropa inteligente. Con el acelerómetro de la tablet se detectan pasos (caminar) y sentadillas (agacharse), y la silueta los reproduce de perfil. En el modo demo se puede forzar CAMINAR, AGACHARSE o QUIETO por si el sensor falla en directo. Los umbrales están en `motion/BodyMotion.kt` (`MotionRules`) y son de demostración.
-- **Músculos:** se iluminan los grupos que trabajan (cuádriceps, glúteos e isquiotibiales, gemelos y abdomen) en un color propio, distinto del semáforo.
-- **Corazón y aura:** dentro del pecho late un corazón al ritmo de la frecuencia cardiaca (reloj o simulada) y en cada latido sale un anillo de luz, el «aura». Sin dato reciente no late. Su color es propio, distinto del semáforo.
-- **Es simulado y solo visual:** se etiqueta «SIM» junto a la silueta, no se guarda como observación, no se envía a control de misión y no alimenta el semáforo. La iluminación indica qué grupos trabajan, nunca fatiga, lesión ni estado de salud.
+## Scope of the first version
 
-## Alcance de la primera versión
+Built in this order, each step shown working before moving on. Steps 1–5b, 7 and 8 are delivered; step 6 is pending.
 
-Hazlo en este orden y enseña cada paso funcionando antes de seguir:
+1. Android project with full-screen camera view and a well-handled camera permission (including denial).
+2. Mission package loaded from `assets` (copy of `contract/mission-package.example.json`), choice of astronaut and current MET. For the demo the MET is set by hand (and may run accelerated); if the package carries `mission.launchUtc`, it can also be computed from the clock.
+3. HUD with mission context, gravity transition and day plan, with voice notices for the transition and the next action. Each later step adds its own voice notices (adaptations, validation).
+4. Data collection: confirming activities and the daily questionnaire read from the package (selection, normalization), with local persistence that survives closing the app.
+5. State per capacity (with the smart clothing signals simulated per scenario) and explained notices, and plan adaptation according to "Plan adaptation by the interface": decision, local application, send queue to mission control and reading of the validation result.
+5b. Transition preparation ("Final goal and priorities"): panel with countdown, critical capacities and their day-by-day trend, compliance with the preparation measures and planned versus done count; the rules alert when an adaptation removes a preparation measure.
+6. Tactile coordination test. *Pending: the demo simulates its signal.*
+7. Live heart rate from the watch over Bluetooth, with its simulated source, its HUD indicator and its use as evidence in the rules.
+8. Package download from AURA Manager (`https://aura-manager-rouge.vercel.app`, or the local Manager in development).
 
-1. Proyecto Android que compila, con vista de cámara a pantalla completa y permiso de cámara bien gestionado (incluido el caso de permiso denegado).
-2. Carga del paquete de misión desde `assets` (copia de `contract/mission-package.example.json`) y selección de astronauta y de MET actual. Para la demo el MET se fija a mano (y puede avanzar acelerado); si el paquete trae `mission.launchUtc`, también puede calcularse con el reloj.
-3. HUD con contexto de misión, transición gravitatoria y plan del día, con avisos por voz (sección «Avisos por voz») para la transición y la siguiente acción. Cada paso posterior añade a la voz sus propios avisos (adaptaciones, validación).
-4. Recogida de datos: confirmar actividades y cuestionario diario leído del paquete (selección, normalización), con persistencia local que sobrevive a cerrar la app.
-5. Estado por capacidad (sección «Cuestionario diario y semáforo», con las señales de la ropa simuladas por escenario) y avisos explicados, y adaptación del plan según la sección «Adaptación del plan por la interfaz»: decisión, aplicación local, cola de envío a control de misión y lectura del resultado de la validación.
-5b. Preparación para la transición (sección «Objetivo final y prioridades»): panel con cuenta atrás, capacidades críticas y su tendencia por días, cumplimiento de las medidas de preparación y cuenta de lo planificado frente a lo hecho; las reglas avisan cuando una adaptación quita una medida de preparación.
-6. Prueba táctil de coordinación.
-7. Frecuencia cardiaca en vivo desde el reloj por Bluetooth (sección «Frecuencia cardiaca desde el reloj»), con su fuente simulada, su indicador en el HUD y su uso como evidencia en las reglas.
-8. Descarga del paquete desde AURA Manager (`https://aura-manager-rouge.vercel.app`, o el Manager local en desarrollo).
+Three demo scenarios, with simulated and labeled data: stable profile, accumulated fatigue after a day of critical operational load, and worsening in the coordination test. Everything can be shown in **airplane mode**.
 
-Tres escenarios de demo, con datos simulados y etiquetados: perfil estable, fatiga acumulada tras un día de carga operativa crítica, y empeoramiento en la prueba de coordinación. Todo debe poder enseñarse en **modo avión**.
+Out of scope for this version: other real external sensors (body IMU, exercise equipment; from the watch only the heart rate over Bluetooth, and smart clothing only simulated), integration with Garmin Connect, Health Connect or Garmin SDKs, emotion recognition through the camera, speech recognition (spoken commands; voice notices are in scope) and sending raw observations to mission control (only adaptations and alerts are sent, with their evidence).
 
-Además, la silueta 3D del HUD reproduce con el acelerómetro de la tablet el movimiento que registraría la ropa inteligente (sección «Silueta y actividad simulada»).
+## Stack
 
-Queda fuera de esta versión: otros sensores externos reales (IMU corporal, equipos de ejercicio; del reloj solo entra la frecuencia cardiaca por Bluetooth, y la ropa inteligente solo simulada), la integración con Garmin Connect, Health Connect o los SDK de Garmin, reconocimiento de emociones por cámara, reconocimiento de voz (órdenes habladas; los avisos por voz sí entran) y envío de las observaciones en bruto a control de misión (solo se envían las adaptaciones, con su evidencia).
+- **Kotlin + Jetpack Compose**, a single activity.
+- **CameraX** for the camera preview, with the HUD drawn in Compose on top.
+- **Room** for observations and local state; the mission package is stored as is as a JSON file.
+- **kotlinx.serialization** to read the package.
+- **`android.speech.tts.TextToSpeech`** for voice notices, with no external libraries.
+- **Android Bluetooth LE API** (`BluetoothLeScanner`, `BluetoothGatt`) for the watch heart rate, with no external libraries.
+- No cloud services and no dependencies that require a connection to work.
 
-## Stack propuesto
+Before changing Gradle, AGP, Kotlin, Compose or CameraX versions, check which are the current stable ones and what is installed on the machine (Android Studio, SDK, JDK); do not trust remembered versions. If the team prefers another stack, ask before changing it.
 
-- **Kotlin + Jetpack Compose**, una sola actividad.
-- **CameraX** para la vista previa de cámara, con el HUD dibujado en Compose por encima.
-- **Room** para las observaciones y el estado local; el paquete de misión se guarda tal cual como fichero JSON.
-- **kotlinx.serialization** para leer el paquete.
-- **`android.speech.tts.TextToSpeech`** para los avisos por voz, sin librerías externas.
-- **API Bluetooth LE de Android** (`BluetoothLeScanner`, `BluetoothGatt`) para la frecuencia cardiaca del reloj, sin librerías externas.
-- Sin servicios en la nube y sin dependencias que exijan conexión para funcionar.
+## Contract: the mission package
 
-Antes de fijar versiones de Gradle, AGP, Kotlin, Compose y CameraX, comprueba cuáles son las estables actuales y qué hay instalado en la máquina (Android Studio, SDK, JDK); no te fíes de versiones recordadas. Si el equipo prefiere otro stack, pregunta antes de cambiarlo.
+AURA Manager publishes a JSON document with schema `aura.mission-package/v5`. v5 uses **English codes** for every enumerated value and **multilingual texts**: every human-readable text (names, descriptions, questions, scale labels, trigger reasons, `validation[]` messages, policy rules…) is a `LocalizedText` object, for example `{ "en": "Sleep", "es": "Sueño" }`. The package declares `languages` (`["en", "es"]`) and `defaultLanguage` (`"en"`). See "Languages" below. The equivalence with the previous v4 contract (Spanish codes) is in `contract/v4-to-v5.md`.
 
-## Contrato: el paquete de misión
+The app **accepts only v5** (`SUPPORTED_SCHEMA`); older packages are rejected with an explanation and the app keeps the package it already has.
 
-AURA Manager publica un JSON con esquema `aura.mission-package/v5` (desde el 2026-11-15). La v5 tiene el mismo contenido que la v4, con dos cambios que rompen la compatibilidad:
+- **Real example:** `contract/mission-package.example.json` (v5), generated by the Manager with the demo mission. It is also the package embedded in `app/src/main/assets/mission-package.json` (a test checks that both are identical). `contract/mission-package.v4.example.json` is kept only as a legacy fixture for the test that rejects old schemas.
+- **Demo mission:** the **planned** timeline of Artemis II (10 flight days, from `00/00:00` to splashdown at `09/01:42:48`), taken from NASA's "Artemis II Overview Timeline" of 2026-03-18. It is a lunar flyby with no landing: the crew is in microgravity for the whole flight and the only gravity transitions are launch and the return to Earth. Events and their METs come from the document; activity blocks are read from its chart and are approximate; the operational load, the crew (CDR, PLT, MS1, MS2, no real names) and the whole prevention plan are a team example, not NASA data.
+- **MET in the package:** every time travels twice, in seconds (`met`, `startMet`, `endMet`) to compute with and as a label (`metLabel`, `startMetLabel`, `endMetLabel`) to display. Always compute with the seconds.
+- **Type definitions:** `../aura-manager/lib/package.ts` and `../aura-manager/lib/types.ts`. They are the source of truth; if they change, update the example and the Kotlin models.
+- **Download:** `GET /api/package` returns the latest published one; `GET /api/package?version=N`, a specific version; `GET /api/package?list=1`, the summary of versions. If no package has been published yet, `GET /api/package` answers `404` and `?list=1` returns `[]`: the app keeps the package it has (the one in `assets` or the last downloaded).
+- **Server:** AURA Manager is deployed at **`https://aura-manager-rouge.vercel.app`** (HTTPS). It is the default base URL to download packages, send adaptations and alerts and read their review. It lives in a single configuration place (`BuildConfig.MANAGER_URL`) and can be changed in demo mode. For development with the local Manager (`npm run dev` in `../aura-manager`, port 3000), from the emulator the computer is `http://10.0.2.2:3000`, over USB `http://localhost:3000` with `adb reverse tcp:3000 tcp:3000`, and from a real device on the network, the computer's LAN IP. Those local URLs are unencrypted HTTP: they are allowed only for those hosts in the network security configuration and only in the debug variant.
 
-1. **Códigos en inglés.** Todos los valores enumerados y algunos campos pasan al inglés; la tabla completa de equivalencias está en `contract/v4-to-v5.md`. Los identificadores de catálogo (`R`, `A`, `M`, `N2`, `SF`, `OIG`, `V`…) no cambian; los de capacidades, señales y preguntas sí (`fatiga` → `fatigue`, `fc_reposo_delta` → `resting_hr_delta`, `Q1_FATIGA` → `Q1_FATIGUE`…).
-2. **Textos multiidioma.** Todo texto legible (nombres, descripciones, preguntas, rótulos de escala, motivos de los disparadores, mensajes de `validation[]`, reglas de la política…) es un objeto `LocalizedText`, por ejemplo `{ "en": "Sleep", "es": "Sueño" }`. El paquete declara `languages` (`["en", "es"]`) y `defaultLanguage` (`"en"`). Ver «Idiomas» más abajo.
+Main fields:
 
-**Acepta v5** (`SUPPORTED_SCHEMA`). Mientras dure la migración puedes seguir leyendo v4 y v3 (`LEGACY_SCHEMA`) si ya lo tienes hecho, pero no hace falta mantenerlo: en cuanto el Manager publique un paquete v5, es el que se descarga. Si se carga un paquete v3, no hay cuestionario: las capacidades quedan en gris y se avisa de que el paquete es antiguo.
-
-- **Ejemplo real:** `contract/mission-package.example.json` (v5), generado por el Manager con la misión demo. El ejemplo v4 anterior queda en `contract/mission-package.v4.example.json` solo como referencia. Úsalo como dato de desarrollo y como paquete embebido en `assets`.
-- **Misión demo:** el cronograma **planificado** de Artemis II (10 días de vuelo, de `00/00:00` al amerizaje en `09/01:42:48`), tomado del «Artemis II Overview Timeline» de NASA del 18/03/2026. Es un sobrevuelo lunar sin alunizaje: la tripulación está en microgravedad todo el vuelo y las únicas transiciones gravitatorias son el despegue y el regreso a la Tierra. Los eventos y sus MET son del documento; los bloques de actividad están leídos de su gráfica y son aproximados; la carga operativa, la tripulación (CDR, PLT, MS1, MS2, sin nombres reales) y todo el plan de prevención son un ejemplo del equipo, no datos de NASA.
-- **MET en el paquete:** cada tiempo viaja dos veces, en segundos (`met`, `startMet`, `endMet`) para calcular y como etiqueta (`metLabel`, `startMetLabel`, `endMetLabel`) para mostrar. Calcula siempre con los segundos.
-- **Definición de tipos:** `../aura-manager/lib/package.ts` y `../aura-manager/lib/types.ts`. Son la fuente de verdad; si cambian, actualiza el ejemplo y los modelos Kotlin.
-- **Descarga:** `GET /api/package` devuelve el último publicado; `GET /api/package?version=N`, una versión concreta; `GET /api/package?list=1`, el resumen de versiones. Si todavía no hay ningún paquete publicado, `GET /api/package` responde `404` y `?list=1` devuelve `[]`: la app sigue con el paquete que ya tenga (el de `assets` o el último descargado).
-- **Servidor:** AURA Manager está desplegado en **`https://aura-manager-rouge.vercel.app`** (HTTPS). Es la URL base por defecto para descargar paquetes, enviar adaptaciones y leer su revisión. Guárdala en un único sitio de configuración (por ejemplo, `BuildConfig`) y permite cambiarla en el modo demo. Para desarrollo con el Manager en local (`npm run dev` en `../aura-manager`, puerto 3000), desde el emulador el ordenador es `http://10.0.2.2:3000` y desde un móvil real, la IP del ordenador en la red local. Esas URLs locales son HTTP sin cifrar: permítelo solo para esos hosts en la configuración de seguridad de red y solo en la variante de depuración.
-
-Campos principales:
-
-| Campo | Contenido |
+| Field | Content |
 | --- | --- |
-| `schema`, `packageVersion`, `publishedAt`, `checksum` | Identidad y versión del paquete. Muestra siempre la versión cargada. |
-| `simulated` | `true` si la misión es ficticia. Si lo es, el HUD lo indica de forma permanente. |
-| `schema`, `languages`, `defaultLanguage` | `languages`: idiomas en los que vienen los textos; `defaultLanguage`: idioma de respaldo (`en`). |
-| `mission` | Nombre, destino, descripción (`LocalizedText`), `timelineSource` (documento del que sale el cronograma) y `launchUtc` (instante UTC de MET 0, o `null` si no está fijado). |
-| `gravityReference` | Gravedad relativa a la Tierra: `earth` 1, `mars` 0,38, `moon` 0,165, `micro` 0. |
-| `crew[]` | Tripulantes: `id`, `name`, `role` y `restingHrBpm` opcional (FC en reposo de referencia, de demostración). |
-| `days[]` | Un elemento por día de vuelo: `day`, `label` (`FD03`), `startMet`, `endMet`, `phase`, `milestone`, `gravity` (entorno al acabar el día de vuelo), `transitionFrom` (solo si ese día hay transición), `transitionMet` opcional (MET exacto de la transición) y `opLoad` (antes `co`: `low`, `medium`, `high`, `critical`). Un MET pertenece al día cuyo intervalo `[startMet, endMet)` lo contiene. |
-| `events[]` | Eventos puntuales del cronograma, ordenados por MET: `met`, `metLabel`, `day`, `name`, `kind` (`maneuver`, `milestone`, `test`, `operation`, `eva`) y `approx` (`true` si el cronograma lo da como aproximado; muéstralo con `~`). |
-| `blocks[]` | Bloques de actividad de la tripulación: `startMet`, `endMet`, `name`, `adaptable`, `adaptableCategories`, `kind` (`sleep`, `presleep`, `meal`, `exercise`, `maneuver`, `test`, `operation`, `communication`, `health`, `off-duty`). Pueden cruzar el límite entre dos días de vuelo. Son aproximados. |
-| `catalog[]` | Acciones de prevención. Claves: `id`, `code`, `name`, `category` (`exercise`, `nutrition`, `assessment`, `preparation`, `recovery`, `supplement`), `loadType` (`CL`, `RE`, `none`), `intense`, `transitionPrep`, `selfReport`, `record` (qué debe registrar el monitor), `limit` (límite de uso o interpretación, que hay que mostrar), `capabilities` (lista de `LocalizedText`), `dose` (`LocalizedText` o `null` = sin dosis prescrita), `source`, `experimental` y `durationMin` opcional (estimación del equipo). |
-| `adaptationPolicy` | Qué puede adaptar la interfaz por su cuenta: `windows` (categoría adaptable → tipo de bloque en el que puede moverse), `allowed` (tipos de adaptación), `rules` (las reglas en texto) y `report` (dónde enviar cada adaptación; `blocking` es siempre `false`). |
-| `plans` | Por `crewId`, una lista con un elemento por día de vuelo: `{ day, activities: [{ entryId, itemId, met, metLabel, status, adaptable, endMet?, endMetLabel?, note? }] }`, con las actividades ordenadas por MET. `itemId` apunta a `catalog[].id`; `entryId` es la referencia estable que citan las adaptaciones; `adaptable` dice si la interfaz puede cambiarla. |
-| `capacities[]` | Capacidades con semáforo: `id`, `name`, `description`, `onAmber` y `onRed` (qué hace la interfaz en cada nivel), y opcionales `onAmberActions` (sustituciones concretas en ámbar, `[{ category, replacementItemId }]`) y `criticalFor` (entornos de llegada en los que es crítica para salir de la nave). |
-| `signals[]` | Señales objetivas: `id`, `name`, `unit`, `source` (`watch`, `garment`, `test`), `simulated`, `capacityId`, `kind` (`number` o `boolean`) y sus umbrales (`worseWhen`: `higher`/`lower`, `amber`, `red` o `whenTrue`: `amber`/`red`). `unit` es un símbolo sin traducir (`bpm`, `%`). |
-| `questionnaire` | Cuestionario diario: `catalogItemId`, `fixedPerDay`, `bankPerDay`, `items[]` (`id`, `block`, `domain`, `capacityId`, `scale`, `inspiredBy`, `variants[]` con `text`, `minLabel`, `maxLabel` e `inverted`, umbrales `amber`/`red` y `triggers[]`) y `consistencyChecks[]`. `block` es `fixed` o `bank`; `triggers[].kind` es `transition`, `environment`, `micro-days`, `event`, `signal` o `filler`. |
-| `thresholdsAreDemo` | Siempre `true`: los umbrales de capacidades, señales y cuestionario son de demostración. |
-| `validation[]` | Avisos e informaciones que control de misión dejó vigentes al publicar: `severity` (`warning` o `info`), `day`, `crewId`, `message` (`LocalizedText`), `rule`. Muéstralos en el día que corresponda. |
+| `schema`, `packageVersion`, `publishedAt`, `checksum` | Package identity and version. Always show the loaded version. |
+| `languages`, `defaultLanguage` | `languages`: languages the texts come in; `defaultLanguage`: fallback language (`en`). |
+| `simulated` | `true` if the mission is fictitious. If so, the HUD shows it permanently. |
+| `mission` | Name, destination, description (`LocalizedText`), `timelineSource` (document the timeline comes from) and `launchUtc` (UTC instant of MET 0, or `null` if not set). |
+| `gravityReference` | Gravity relative to Earth: `earth` 1, `mars` 0.38, `moon` 0.165, `micro` 0. |
+| `crew[]` | Crew members: `id`, `name`, `role` and optional `restingHrBpm` (baseline resting HR, for demonstration). |
+| `days[]` | One element per flight day: `day`, `label` (`FD03`), `startMet`, `endMet`, `phase`, `milestone`, `gravity` (environment at the end of the flight day), `transitionFrom` (only if there is a transition that day), optional `transitionMet` (exact MET of the transition) and `opLoad` (`low`, `medium`, `high`, `critical`). A MET belongs to the day whose `[startMet, endMet)` interval contains it. |
+| `events[]` | Point events of the timeline, sorted by MET: `met`, `metLabel`, `day`, `name`, `kind` (`maneuver`, `milestone`, `test`, `operation`, `eva`) and `approx` (`true` if the timeline gives it as approximate; show it with `~`). |
+| `blocks[]` | Crew activity blocks: `startMet`, `endMet`, `name`, `adaptable`, `adaptableCategories`, `kind` (`sleep`, `presleep`, `meal`, `exercise`, `maneuver`, `test`, `operation`, `communication`, `health`, `off-duty`). They may cross the boundary between two flight days. They are approximate. |
+| `catalog[]` | Prevention actions. Keys: `id`, `code`, `name`, `category` (`exercise`, `nutrition`, `assessment`, `preparation`, `recovery`, `supplement`), `loadType` (`CL`, `RE`, `none`), `intense`, `transitionPrep`, `selfReport`, `record` (what the monitor must record), `limit` (limit of use or interpretation, which must be shown), `capabilities` (list of `LocalizedText`), `dose` (`LocalizedText` or `null` = no prescribed dose), `source`, `experimental` and optional `durationMin` (team estimate). |
+| `adaptationPolicy` | What the interface may adapt on its own: `windows` (adaptable category → block kind within which it may move), `allowed` (adaptation types), `rules` (the rules as text) and `report` (where to send each adaptation; `blocking` is always `false`). |
+| `plans` | Per `crewId`, a list with one element per flight day: `{ day, activities: [{ entryId, itemId, met, metLabel, status, adaptable, endMet?, endMetLabel?, note? }] }`, with activities sorted by MET. `itemId` points to `catalog[].id`; `entryId` is the stable reference adaptations cite; `adaptable` says whether the interface may change it. |
+| `capacities[]` | Traffic-light capacities: `id`, `name`, `description`, `onAmber` and `onRed` (what the interface does at each level), and optional `onAmberActions` (concrete substitutions in amber, `[{ category, replacementItemId }]`) and `criticalFor` (arrival environments where it is critical for leaving the spacecraft). |
+| `signals[]` | Objective signals: `id`, `name`, `unit`, `source` (`watch`, `garment`, `test`), `simulated`, `capacityId`, `kind` (`number` or `boolean`) and their thresholds (`worseWhen`: `higher`/`lower`, `amber`, `red`, or `whenTrue`: `amber`/`red`). `unit` is an untranslated symbol (`bpm`, `%`). |
+| `questionnaire` | Daily questionnaire: `catalogItemId`, `fixedPerDay`, `bankPerDay`, `items[]` (`id`, `block`, `domain`, `capacityId`, `scale`, `inspiredBy`, `variants[]` with `text`, `minLabel`, `maxLabel` and `inverted`, `amber`/`red` thresholds and `triggers[]`) and `consistencyChecks[]`. `block` is `fixed` or `bank`; `triggers[].kind` is `transition`, `environment`, `micro-days`, `event`, `signal` or `filler`. |
+| `thresholdsAreDemo` | Always `true`: capacity, signal and questionnaire thresholds are for demonstration. |
+| `validation[]` | Warnings and information mission control left in force when publishing: `severity` (`warning` or `info`), `day`, `crewId`, `message` (`LocalizedText`), `rule`. Show them on the corresponding day. |
 
-El `checksum` es el sha256 del JSON canónico (claves ordenadas, sin espacios) del paquete sin el campo `checksum`. Verificarlo en la app es deseable pero no bloquea la primera versión.
+The `checksum` is the sha256 of the package's canonical JSON (sorted keys, no whitespace) without the `checksum` field. The app verifies it; a mismatch in a downloaded package discards it.
 
-Si la app necesita algo que el paquete no trae, no lo inventes en el cliente: anótalo como cambio pendiente del contrato y avisa, porque hay que tocar también el Manager.
+If the app needs something the package does not carry, do not invent it in the client: record it as a pending contract change (`contract/pending-changes.md`) and say so, because the Manager must change too.
 
-## Adaptación del plan por la interfaz
+## Plan adaptation by the interface
 
-La interfaz toma decisiones sobre la salud del astronauta y **adapta ciertas partes del plan por sí misma**. Qué partes, lo decide control de misión y viene marcado en el paquete; la interfaz nunca lo deduce ni lo amplía.
+The interface makes decisions about the astronaut's health and **adapts certain parts of the plan on its own**. Which parts is decided by mission control and flagged in the package; the interface never infers or extends it.
 
-### Qué es fijo y qué es adaptable
+### What is fixed and what is adaptable
 
-- **Fijo:** todo bloque con `adaptable: false` (maniobras, pruebas, sueño, operaciones, conferencias) y toda actividad con `adaptable: false` (cuestionarios, evaluaciones, preparación del retorno, suplementos). No se modifica desde la interfaz bajo ninguna circunstancia: una operación crucial para la misión no se toca.
-- **Adaptable:** las actividades con `adaptable: true`. Hoy son los **ejercicios**, dentro de los bloques de ejercicio, y los **menús**, en los bloques de comida. Control de misión puede fijar una actividad concreta aunque su categoría sea adaptable; respeta siempre el campo, no la categoría.
+- **Fixed:** every block with `adaptable: false` (maneuvers, tests, sleep, operations, conferences) and every activity with `adaptable: false` (questionnaires, assessments, return preparation, supplements). It is never modified from the interface under any circumstances: an operation that is crucial for the mission is not touched.
+- **Adaptable:** activities with `adaptable: true`. Currently **exercise**, within exercise blocks, and **menus**, in meal blocks. Mission control may fix a specific activity even if its category is adaptable; always respect the field, not the category.
 
-Muestra en el HUD qué actividades son adaptables y cuáles fijas, y señala con claridad las que la interfaz ha cambiado respecto al plan original.
+The HUD shows which activities are adaptable and which are fixed, and clearly flags those the interface changed from the original plan.
 
-### Qué puede hacer la interfaz
+### What the interface may do
 
-Solo lo que permite `adaptationPolicy` (lee `rules` y `allowed` del paquete; este resumen no las sustituye):
+Only what `adaptationPolicy` allows (read `rules` and `allowed` from the package; this summary does not replace them):
 
-1. **Sustitución:** cambiar una actividad adaptable por otra acción del catálogo de la **misma categoría**. Nunca por una con `intense: true` si la original no lo era: la interfaz no aumenta la carga.
-2. **Reprogramación:** moverla a otro MET dentro de un bloque adaptable de su categoría y en el mismo día de vuelo.
-3. **Omisión:** suprimirla, siempre con motivo.
+1. **Substitution:** replace an adaptable activity with another catalog action of the **same category**. Never with one with `intense: true` if the original was not: the interface does not increase the load.
+2. **Reschedule:** move it to another MET within an adaptable block of its category and on the same flight day.
+3. **Omission:** remove it, always with a reason.
 
-No crea actividades nuevas ni cambia dosis.
+It does not create new activities or change doses.
 
-### Cuándo decide
+### When it decides
 
-Las decisiones salen de un único módulo de reglas, a partir de los datos recogidos:
+Decisions come from a single rules module, based on the data collected:
 
-1. Si faltan datos, pide el dato o la prueba y muestra **gris**; no adapta a ciegas y nunca muestra verde por defecto.
-2. Ante fatiga, mal sueño o peor rendimiento, sustituye el ejercicio por una alternativa de menor carga o lo omite, y puede cambiar el menú (por ejemplo, refuerzo de hidratación). Nunca aumenta la carga para compensar.
-3. Si el siguiente día de vuelo tiene carga operativa `critical`, no propone actividades con `intense: true`.
-4. Una actividad `conditional` no se presenta como obligatoria: se indica de qué depende.
-5. Ante una señal de riesgo que no se resuelve adaptando ejercicio o dieta, no decide por su cuenta: remite al procedimiento de misión y avisa a control de misión.
-6. Cada decisión dice qué indicador ha cambiado, respecto a qué referencia, con qué dato y en qué MET, y qué se ha cambiado.
+1. If data is missing, it asks for the data point or the test and shows **gray**; it does not adapt blindly and never shows green by default.
+2. Given fatigue, poor sleep or worse performance, it replaces exercise with a lower-load alternative or omits it, and may change the menu (for example, extra hydration). It never increases the load to compensate.
+3. If the next flight day has `critical` operational load, it does not propose activities with `intense: true`.
+4. A `conditional` activity is not presented as mandatory: it states what it depends on.
+5. Given a risk signal that adapting exercise or diet does not resolve, it does not decide on its own: it refers to the mission procedure and alerts mission control.
+6. Every decision says which indicator changed, against which baseline, with which data point and at which MET, and what was changed.
 
-Los umbrales de estas reglas son de demostración, no clínicos, y se etiquetan así.
+The thresholds of these rules are for demonstration, not clinical, and are labeled as such.
 
-### Envío a control de misión: registro y validación, sin bloquear
+### Sending to mission control: record and validation, non-blocking
 
-Toda adaptación se **aplica a bordo de inmediato** y además se envía a control de misión para que quede registrada y la validen. El envío **no es bloqueante**: la interfaz no espera respuesta para aplicar el cambio ni para seguir funcionando.
+Every adaptation is **applied on board immediately** and also sent to mission control to be recorded and validated. Sending is **non-blocking**: the interface does not wait for a reply to apply the change or to keep working.
 
-- Guarda cada adaptación en la base local con estado de envío (`pending`, `sent`) y envíala en segundo plano. Sin conexión, se queda en cola y se reintenta; la app debe funcionar igual en modo avión.
-- Genera el `id` en el dispositivo (UUID). Reenviar el mismo `id` no duplica el registro, así que reintentar es seguro.
-- `POST /api/adaptations` acepta un objeto o una lista y responde `202` con lo registrado. Solo responde `400` si el mensaje está mal formado.
+- Each adaptation is stored in the local database with a send state (`pending`, `sent`) and sent in the background. Offline, it stays queued and is retried; the app works the same in airplane mode.
+- The `id` is generated on the device (UUID). Resending the same `id` does not duplicate the record, so retrying is safe.
+- `POST /api/adaptations` accepts an object or a list and answers `202` with what was recorded. It only answers `400` if the message is malformed.
 
 ```json
 {
@@ -265,61 +259,62 @@ Toda adaptación se **aplica a bordo de inmediato** y además se envía a contro
 }
 ```
 
-`type` es `substitution` (lleva `replacementItemId`), `reschedule` (lleva `newMet`, en segundos) u `omission`. `reason` es obligatorio. `evidence[].source` es `manual`, `sensor` o `simulated`; `source` es `interface` o `simulated`. `reason`, `indicator` y `message` son texto libre: escríbelos en el idioma en que se los mostraste al astronauta. Durante la migración el servidor sigue aceptando los códigos v4 (`sustitucion`, `simulado`, `interfaz`…) y los convierte, pero responde siempre con los de v5.
+`type` is `substitution` (carries `replacementItemId`), `reschedule` (carries `newMet`, in seconds) or `omission`. `reason` is required. `evidence[].source` is `manual`, `sensor` or `simulated`; `source` is `interface` or `simulated`. `reason`, `indicator` and `message` are free text, written in the language they were shown to the astronaut in. The server still accepts the v4 codes (`sustitucion`, `simulado`, `interfaz`…) and converts them, but always answers with v5 codes.
 
-- El servidor comprueba cada adaptación contra la política y la marca como dentro o fuera de ella (`policy.withinPolicy`, `policy.violations`), pero **no la rechaza**. Una adaptación fuera de política indica un fallo de la interfaz: no debería ocurrir, y hay pruebas unitarias para garantizarlo.
-- Control de misión la valida o la objeta después. `GET /api/adaptations?crewId=cdr` devuelve el registro con `review.status` (`pending`, `validated`, `objected`) y `review.note`. `policy.violations[]` son `LocalizedText`. Muestra ese resultado al astronauta cuando llegue. Una objeción no deshace sola lo ya hecho: se muestra junto a la nota, y es control de misión quien cambia el plan publicando un paquete nuevo.
+- The server checks each adaptation against the policy and flags it as within or outside it (`policy.withinPolicy`, `policy.violations`), but **does not reject it**. An out-of-policy adaptation means an interface bug: it should not happen, and unit tests guarantee it.
+- Mission control validates or objects to it afterwards. `GET /api/adaptations?crewId=cdr` returns the record with `review.status` (`pending`, `validated`, `objected`) and `review.note`. `policy.violations[]` are `LocalizedText`. The result is shown to the astronaut when it arrives. An objection does not undo by itself what was done: it is shown with the note, and mission control changes the plan by publishing a new package.
 
-### Alertas a control de misión
+### Alerts to mission control
 
-Lo que la interfaz no resuelve adaptando se avisa a control de misión con `POST /api/alerts`, con las mismas garantías que las adaptaciones: se guarda en la base local con estado de envío, se envía en segundo plano sin bloquear, se reintenta sin conexión y el servidor responde `202` sin rechazarla por su contenido.
+What the interface does not resolve by adapting is reported to mission control with `POST /api/alerts`, with the same guarantees as adaptations: stored in the local database with a send state, sent in the background without blocking, retried offline, and the server answers `202` without rejecting it for its content.
 
-- **Cuándo** (una alerta por situación; `id` UUID derivado de tripulante y situación, así que reenviar no duplica):
-  - `capacity-red` (`level: "red"`): una capacidad en rojo, una vez por capacidad y día de vuelo. Es el «avisa a control de misión» de la regla 5 y de `capacities[].onRed`.
-  - `preparation-lost` (`level: "warning"`): una adaptación que quita una medida de preparación de la transición.
-  - `inconsistency` (`level: "warning"`): el astronauta declara estar bien y el sensor indica lo contrario (`consistencyChecks`).
-  - Lo que solo está en ámbar no se avisa aparte: la adaptación ya llega con su evidencia.
-- **Forma:** `{ id, packageVersion, crewId, kind, level, capacityId?, entryId?, met, message, evidence[], source }`. `message` es el texto que vio el astronauta; `evidence[]` como en las adaptaciones.
-- **Acuse:** `GET /api/alerts?crewId=` devuelve `ack.status` (`new`, `seen`, `handled`) y `ack.note`. El HUD lo muestra junto al aviso en rojo y la voz lo dice una vez. Control de misión lo marca en la pestaña Alertas del Manager (`PATCH /api/alerts`).
-- Adaptaciones y alertas se sincronizan por separado: si un servidor aún no tiene `/api/alerts`, las adaptaciones siguen llegando.
+- **When** (one alert per situation; `id` is a UUID derived from crew member and situation, so resending does not duplicate):
+  - `capacity-red` (`level: "red"`): a capacity in red, once per capacity and flight day. It is the "alert mission control" of rule 5 and of `capacities[].onRed`.
+  - `preparation-lost` (`level: "warning"`): an adaptation that removes a transition preparation measure.
+  - `inconsistency` (`level: "warning"`): the astronaut reports being fine and the sensor indicates otherwise (`consistencyChecks`).
+  - What is only amber is not reported separately: the adaptation already arrives with its evidence.
+- **Shape:** `{ id, packageVersion, crewId, kind, level, capacityId?, entryId?, met, message, evidence[], source }`. `message` is the text the astronaut saw; `evidence[]` as in adaptations.
+- **Acknowledgement:** `GET /api/alerts?crewId=` returns `ack.status` (`new`, `seen`, `handled`) and `ack.note`. The HUD shows it next to the red notice and the voice says it once. Mission control marks it in the Manager's Alerts tab (`PATCH /api/alerts`).
+- Adaptations and alerts are synced separately: if a server does not have `/api/alerts` yet, adaptations keep arriving.
 
-## Idiomas
+## Languages
 
-AURA es multiidioma. El **inglés** es el idioma de referencia (el de NASA) y el **español**, el segundo. La app debe funcionar entera en los dos:
+AURA is multilingual. **English** is the reference language (NASA's) and **Spanish** the second one. The app works fully in both:
 
-- **Textos de la interfaz** (rótulos del HUD, botones, avisos fijos, la voz): en recursos de Android, `res/values/strings.xml` en inglés (por defecto) y `res/values-es/strings.xml` en español. Nada de textos escritos en el código Kotlin.
-- **Idioma activo:** el del sistema si es uno de `languages` del paquete; si no, `defaultLanguage` (`en`). Permite cambiarlo en el modo demo (por ejemplo, con las preferencias de idioma por app de Android 13+, `AppCompatDelegate.setApplicationLocales`).
-- **Textos del paquete:** todo `LocalizedText` se resuelve con una única función: el idioma activo; si falta, `defaultLanguage`; si también falta, el primero que haya. Nunca muestres el objeto ni un texto vacío si existe en otro idioma.
-- **Lo que envía la app** (`reason`, `evidence[].indicator`, `message` de las alertas) es texto libre y viaja tal cual, en el idioma activo. Los códigos (`type`, `kind`, `level`, `source`…) son siempre los de v5 en inglés, sea cual sea el idioma.
-- **Formatos:** el MET (`DD/HH:MM`) no se localiza; números y fechas, con el `Locale` activo.
+- **Interface texts** (HUD labels, buttons, fixed notices, the voice): in Android resources, `res/values/strings.xml` in English (default) and `res/values-es/strings.xml` in Spanish. No texts written in Kotlin code. A unit test checks that both files have the same keys and format arguments.
+- **Active language:** the system's if it is one of the package `languages`; otherwise `defaultLanguage` (`en`). It can be changed in demo mode (Android 13+ per-app language preferences, `AppCompatDelegate.setApplicationLocales`).
+- **Package texts:** every `LocalizedText` is resolved by a single function: the active language; if missing, `defaultLanguage`; if also missing, the first available. Never show the object or an empty text if it exists in another language.
+- **What the app sends** (`reason`, `evidence[].indicator`, alert `message`) is free text and travels as is, in the active language. Codes (`type`, `kind`, `level`, `source`…) are always the English v5 ones, whatever the language.
+- **Formats:** the MET (`DD/HH:MM`) is not localized; numbers and dates use the active `Locale`.
 
-## Principios no negociables
+## Non-negotiable principles
 
-Vienen de la especificación y valen para toda la interfaz y todos los textos:
+They come from the specification and apply to the whole interface and every text:
 
-- La app **no diagnostica**, no certifica que alguien es «apto» y no muestra un porcentaje de salud ni un «100 % funcional».
-- El color nunca va solo: siempre con texto y motivo. El gris significa «datos insuficientes».
-- No se inventan umbrales clínicos ni dosis. Los umbrales del prototipo son reglas de demostración y se etiquetan así.
-- Los datos simulados se etiquetan como simulados en pantalla y en la base de datos.
-- La prueba táctil no equivale a la capacidad real de salir de una cápsula ni a destreza con guantes.
-- Lo medido en microgravedad no predice por sí solo el rendimiento en la Luna, Marte o la Tierra.
-- La cámara se usa como fondo del HUD. No se infieren emociones ni estado de salud a partir del rostro.
-- Los datos de salud se quedan en el dispositivo.
+- The app **does not diagnose**, does not certify that someone is "fit" and does not show a health percentage or a "100% functional".
+- Color never goes alone: always with text and a reason. Gray means "insufficient data".
+- No clinical thresholds or doses are invented. The prototype's thresholds are demonstration rules and labeled as such.
+- Simulated data is labeled as simulated on screen and in the database.
+- The tactile test is not equivalent to the real ability to leave a capsule or to dexterity with gloves.
+- What is measured in microgravity does not by itself predict performance on the Moon, Mars or Earth.
+- The camera is used as the HUD background. No emotions or health status are inferred from the face.
+- Health data stays on the device.
 
-## Convenciones
+## Conventions
 
-- Interfaz y textos en **español**. Identificadores de código en inglés.
-- Nada de valores mágicos repartidos por la interfaz: las reglas y sus umbrales viven en un único módulo, con nombre y comentario de por qué.
-- Pruebas unitarias para la lectura del paquete y para las reglas de adaptación, que son lo que no puede fallar en la demo. En particular: ninguna regla puede producir una adaptación sobre algo fijo ni fuera de `adaptationPolicy`.
-- Comprueba cada hito en emulador o dispositivo antes de darlo por hecho, incluido el modo avión y el reinicio de la app.
-- No hagas commits ni cambies `../aura-manager` sin que te lo pidan.
+- Code, comments, documentation and commit messages in **English**. Interface texts in English and Spanish, from the string resources.
+- No magic values spread across the interface: rules and their thresholds live in a single module, with a name and a comment saying why.
+- Unit tests for package parsing and for the adaptation rules, which are what cannot fail in the demo. In particular: no rule may produce an adaptation on something fixed or outside `adaptationPolicy`.
+- Check every milestone on an emulator or device before calling it done, including airplane mode and restarting the app.
+- Build and test with JDK 21: `./gradlew testDebugUnitTest assembleDebug` (set `JAVA_HOME` if Java is not on the path).
+- The Manager (`../aura-manager`) lives in the same repository. Do not change it as part of an app task unless asked; contract changes go through `contract/pending-changes.md`.
 
-## Preguntas abiertas para el equipo
+## Open questions for the team
 
-Pregunta cuando alguna te bloquee; mientras tanto, usa el valor por defecto indicado.
+Ask when one of them blocks you; meanwhile, use the stated default.
 
-- **Dispositivo de la demo** y versión mínima de Android. Por defecto: un móvil reciente, orientación horizontal.
-- **Orientación del HUD.** Por defecto: horizontal, como un visor.
-- **Cómo se fija el MET actual en la demo.** Por defecto: selector manual de MET visible solo en un modo demo.
-- **Qué capacidades llevan semáforo.** Resuelta: las de `capacities[]` del paquete. Si en el HUD no caben todas, muestra primero las que no están en verde.
-- **Si las observaciones en bruto deben volver a control de misión** durante el hackathon, además de las adaptaciones. Por defecto: no.
+- **Demo device** and minimum Android version. Default: a recent phone or tablet, landscape orientation.
+- **HUD orientation.** Default: landscape, like a viewer.
+- **How the current MET is set in the demo.** Default: manual MET selector visible only in demo mode.
+- **Which capacities have a traffic light.** Resolved: those in the package `capacities[]`. If they do not all fit in the HUD, show first those that are not green.
+- **Whether raw observations should go back to mission control** during the hackathon, besides adaptations and alerts. Default: no.

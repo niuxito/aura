@@ -19,7 +19,7 @@ import com.aura.astronaut.ui.theme.HudColors
 import com.aura.astronaut.ui.theme.HudPanel
 import com.aura.astronaut.ui.theme.HudText
 
-/** Primer arranque: cada visor pertenece a un tripulante, y su plan depende de ello. */
+/** First start: each viewer belongs to a crew member, and their plan depends on it. */
 @Composable
 fun CrewPicker(
     crew: List<CrewMember>,

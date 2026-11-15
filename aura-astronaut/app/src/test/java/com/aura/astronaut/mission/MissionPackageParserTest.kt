@@ -15,7 +15,7 @@ class MissionPackageParserTest {
         com.aura.astronaut.i18n.TestStrings.install("es")
     }
 
-    // Las pruebas se ejecutan desde el módulo app/.
+    // Tests run from the app/ module.
     private val contractText = File("../contract/mission-package.example.json").readText()
     private val assetText = File("src/main/assets/mission-package.json").readText()
 
@@ -23,12 +23,12 @@ class MissionPackageParserTest {
     private val pkg = loaded.pkg
 
     @Test
-    fun `el paquete embebido es la copia del contrato`() {
-        assertEquals("Copia contract/mission-package.example.json en app/src/main/assets/mission-package.json", contractText, assetText)
+    fun `the embedded package is the copy of the contract`() {
+        assertEquals("Copy contract/mission-package.example.json to app/src/main/assets/mission-package.json", contractText, assetText)
     }
 
     @Test
-    fun `lee el paquete de ejemplo`() {
+    fun `reads the example package`() {
         assertEquals(SUPPORTED_SCHEMA, pkg.schema)
         assertEquals(1, pkg.packageVersion)
         assertEquals(listOf("en", "es"), pkg.languages)
@@ -47,7 +47,7 @@ class MissionPackageParserTest {
     }
 
     @Test
-    fun `las transiciones gravitatorias son el despegue y el regreso`() {
+    fun `the gravity transitions are launch and return`() {
         val transitions = pkg.days.filter { it.transitionFrom != null }
         assertEquals(listOf(1, 10), transitions.map { it.day })
         assertEquals(Gravity.EARTH, transitions.first().transitionFrom)
@@ -57,7 +57,7 @@ class MissionPackageParserTest {
     }
 
     @Test
-    fun `cada tripulante tiene un plan por dia de vuelo con actividades del catalogo`() {
+    fun `each crew member has a plan per flight day with catalog activities`() {
         val catalog = pkg.catalog.map { it.id }.toSet()
         pkg.crew.forEach { member ->
             val plan = pkg.plans.getValue(member.id)
@@ -68,14 +68,14 @@ class MissionPackageParserTest {
     }
 
     @Test
-    fun `verifica el checksum del Manager`() {
+    fun `verifies the Manager checksum`() {
         assertEquals(ChecksumStatus.VERIFIED, loaded.checksum)
     }
 
     @Test
     fun `detecta un paquete alterado`() {
         val tampered = contractText.replaceFirst("\"packageVersion\": 1", "\"packageVersion\": 2")
-        check(tampered != contractText) { "La prueba no ha alterado el paquete" }
+        check(tampered != contractText) { "The test did not alter the package" }
         assertEquals(ChecksumStatus.MISMATCH, MissionPackageParser.parse(tampered).checksum)
     }
 
@@ -85,14 +85,14 @@ class MissionPackageParserTest {
         check(other != contractText)
         try {
             MissionPackageParser.parse(other)
-            fail("Debía rechazar el esquema v4")
+            fail("It should have rejected schema v4")
         } catch (e: PackageException) {
             assertTrue(e.message!!.contains("v4"))
         }
     }
 
     @Test
-    fun `lee la autoevaluacion v4`() {
+    fun `reads the v4 self-assessment`() {
         assertTrue(pkg.thresholdsAreDemo)
         assertEquals(
             listOf("fatigue", "musculoskeletal", "vestibular", "cardiovascular", "vision", "coordination"),
@@ -125,7 +125,7 @@ class MissionPackageParserTest {
     }
 
     @Test
-    fun `detecta referencias rotas de la autoevaluacion`() {
+    fun `detects broken self-assessment references`() {
         val broken = pkg.copy(capacities = pkg.capacities.filter { it.id != "cardiovascular" })
         assertTrue(MissionPackageParser.integrityProblems(broken).any { "cardiovascular" in it })
     }
@@ -136,29 +136,29 @@ class MissionPackageParserTest {
     }
 
     @Test
-    fun `rechaza actividades que no estan en el catalogo`() {
+    fun `rejects activities not in the catalog`() {
         val broken = pkg.copy(catalog = pkg.catalog.filter { it.id != "F" })
         assertTrue(MissionPackageParser.integrityProblems(broken).any { "«F»" in it })
     }
 
     @Test
-    fun `dia de vuelo de un MET`() {
+    fun `flight day of a MET`() {
         val fd1 = pkg.days[0]
         val fd2 = pkg.days[1]
         val last = pkg.days.last()
         assertEquals(1, pkg.days.dayAt(0)?.day)
         assertEquals(1, pkg.days.dayAt(fd1.endMet - 1)?.day)
-        // El fin de un día pertenece ya al siguiente.
+        // The end of a day already belongs to the next one.
         assertEquals(2, pkg.days.dayAt(fd1.endMet)?.day)
         assertEquals(fd2.startMet, fd1.endMet)
-        // El amerizaje (fin del último día) cuenta dentro de FD10.
+        // Splashdown (end of the last day) counts within FD10.
         assertEquals(10, pkg.days.dayAt(last.endMet)?.day)
         assertNull(pkg.days.dayAt(last.endMet + 1))
         assertNull(pkg.days.dayAt(-1))
     }
 
     @Test
-    fun `fase de la mision`() {
+    fun `mission phase`() {
         assertEquals(MissionPhase.BeforeLaunch, pkg.phaseAt(-60))
         assertEquals(MissionPhase.AfterEnd, pkg.phaseAt(pkg.endMet + 60))
         val inFlight = pkg.phaseAt(Met.parse("01/01:08:42")!!)
@@ -167,7 +167,7 @@ class MissionPackageParserTest {
     }
 
     @Test
-    fun `json canonico como JSON stringify`() {
+    fun `canonical json like JSON stringify`() {
         val tree = kotlinx.serialization.json.Json.parseToJsonElement(
             """{ "b": [1, 0.165, true, null], "a": "x\"y\\z\n→" }""",
         )

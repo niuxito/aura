@@ -12,7 +12,7 @@ import kotlinx.coroutines.withContext
 import kotlinx.serialization.SerializationException
 import java.io.IOException
 
-/** Último resultado de la conexión con control de misión, para explicarlo en el HUD. */
+/** Last result of the connection with mission control, to explain it in the HUD. */
 data class SyncStatus(
     val url: String,
     val lastOkUtcMs: Long? = null,
@@ -20,10 +20,10 @@ data class SyncStatus(
 )
 
 /**
- * Cola de envío a control de misión: adaptaciones y alertas pendientes, y lectura de su
- * revisión (adaptaciones) y acuse (alertas).
- * Nunca bloquea: la adaptación ya está aplicada a bordo. Sin conexión, falla en silencio y
- * se reintenta en la siguiente vuelta; reenviar el mismo id no duplica el registro.
+ * Send queue to mission control: pending adaptations and alerts, and reading of their
+ * review (adaptations) and acknowledgement (alerts).
+ * It never blocks: the adaptation is already applied on board. Offline, it fails silently and
+ * retries on the next round; resending the same id does not duplicate the record.
  */
 class AdaptationSync(private val dao: AuraDao, initialUrl: String) {
 
@@ -37,8 +37,8 @@ class AdaptationSync(private val dao: AuraDao, initialUrl: String) {
     suspend fun runOnce(crewId: String?) = withContext(Dispatchers.IO) {
         val url = _status.value.url
         val client = ManagerClient(url)
-        // Adaptaciones y alertas se sincronizan por separado: si un servidor aún no tiene
-        // /api/alerts (despliegue antiguo), las adaptaciones siguen llegando.
+        // Adaptations and alerts are synced separately: if a server does not have
+        // /api/alerts yet (old deployment), adaptations keep arriving.
         val adaptationsError = attempt(url) { syncAdaptations(client, url, crewId) }
         val alertsError = attempt(url) { syncAlerts(client, url, crewId) }
         _status.value = when {
@@ -86,24 +86,24 @@ class AdaptationSync(private val dao: AuraDao, initialUrl: String) {
         }
     }
 
-    /** null si ha ido bien; si no, el motivo (sin conexión, respuesta inesperada…). */
+    /** null if it went well; otherwise the reason (offline, unexpected response…). */
     private suspend fun attempt(url: String, block: suspend () -> Unit): String? = try {
         block()
         null
     } catch (e: IOException) {
-        e.message ?: "sin conexión"
+        e.message ?: "offline"
     } catch (e: SerializationException) {
-        Log.w(TAG, "Respuesta inesperada de $url", e)
-        "respuesta inesperada del servidor"
+        Log.w(TAG, "Unexpected response from $url", e)
+        "unexpected response from the server"
     }
 
     private companion object {
         const val TAG = "AuraSync"
-        // ServerCodes: ver más abajo.
+        // ServerCodes: see below.
     }
 }
 
-/** Estados que devuelve el Manager, en códigos v5. Un servidor aún en v4 responde en español: se aceptan ambos. */
+/** States returned by the Manager, as v5 codes. A server still on v4 answers in Spanish: both are accepted. */
 object ServerCodes {
     fun review(status: String?): String = when (status) {
         ReviewStatus.VALIDATED, "validada" -> ReviewStatus.VALIDATED

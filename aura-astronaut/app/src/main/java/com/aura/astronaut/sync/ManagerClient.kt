@@ -21,12 +21,12 @@ data class EvidenceDto(
     val indicator: String,
     val value: String,
     val unit: String? = null,
-    /** `manual`, `sensor` o `simulado`. */
+    /** `manual`, `sensor` or `simulated`. */
     val source: String,
     val met: Long? = null,
 )
 
-/** Lo que espera `POST /api/adaptations` (AdaptationInput del Manager). */
+/** What `POST /api/adaptations` expects (the Manager's AdaptationInput). */
 @Serializable
 data class AdaptationDto(
     val id: String,
@@ -45,10 +45,10 @@ data class AdaptationDto(
 @Serializable
 data class PolicyDto(
     val withinPolicy: Boolean,
-    /** v5: cada infracción es un LocalizedText; registros antiguos pueden traer texto plano. */
+    /** v5: each violation is a LocalizedText; old records may carry plain text. */
     val violations: List<JsonElement> = emptyList(),
 ) {
-    /** Infracciones en el idioma activo. */
+    /** Violations in the active language. */
     val violationTexts: List<String>
         get() = violations.mapNotNull { v ->
             when (v) {
@@ -62,14 +62,14 @@ data class PolicyDto(
 @Serializable
 data class ReviewDto(val status: String, val note: String = "")
 
-/** Adaptación registrada en control de misión (solo los campos que usa la interfaz). */
+/** Adaptation recorded in mission control (only the fields the interface uses). */
 @Serializable
 data class ServerAdaptation(val id: String, val policy: PolicyDto? = null, val review: ReviewDto? = null)
 
 @Serializable
 private data class AdaptationsResponse(val adaptations: List<ServerAdaptation> = emptyList())
 
-/** Lo que espera `POST /api/alerts` (AlertInput del Manager). */
+/** What `POST /api/alerts` expects (the Manager's AlertInput). */
 @Serializable
 data class AlertDto(
     val id: String,
@@ -94,12 +94,12 @@ data class ServerAlert(val id: String, val ack: AckDto? = null)
 @Serializable
 private data class AlertsResponse(val alerts: List<ServerAlert> = emptyList())
 
-/** Respuesta HTTP fuera de 2xx. */
+/** HTTP response outside 2xx. */
 class HttpException(val code: Int, body: String) : IOException("HTTP $code: $body")
 
 /**
- * Cliente HTTP mínimo de AURA Manager, sin dependencias. Cualquier fallo de red lanza
- * [IOException]: quien lo llama deja la adaptación en cola y lo reintenta más tarde.
+ * Minimal AURA Manager HTTP client, with no dependencies. Any network failure throws
+ * [IOException]: the caller leaves the adaptation queued and retries later.
  */
 class ManagerClient(private val baseUrl: String) {
 
@@ -130,8 +130,8 @@ class ManagerClient(private val baseUrl: String) {
     }
 
     /**
-     * Último paquete publicado, como texto (se guarda tal cual). Null si aún no hay ninguno (404).
-     * Cualquier otro fallo lanza [IOException].
+     * Latest published package, as text (stored as is). Null if there is none yet (404).
+     * Any other failure throws [IOException].
      */
     fun fetchPackage(version: Int? = null): String? = try {
         request("GET", "/api/package" + (version?.let { "?version=$it" } ?: ""), null)

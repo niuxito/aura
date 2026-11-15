@@ -20,11 +20,11 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        // Textos de la interfaz en el idioma de esta actividad (el del sistema o el elegido para la app).
+        // Interface texts in this activity's language (the system's or the one chosen for the app).
         Strings.init(this)
         vm.setUiLanguage(AppLanguage.current(this))
         enableEdgeToEdge()
-        // Un visor no se apaga mientras se mira.
+        // A viewer does not turn off while being looked at.
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         hideSystemBars()
         setContent {
@@ -34,11 +34,11 @@ class MainActivity : ComponentActivity() {
 
     override fun onWindowFocusChanged(hasFocus: Boolean) {
         super.onWindowFocusChanged(hasFocus)
-        // Los diálogos del sistema (como el de permisos) vuelven a mostrar las barras al cerrarse.
+        // System dialogs (such as the permission one) show the bars again when closed.
         if (hasFocus) hideSystemBars()
     }
 
-    /** Visor a pantalla completa: las barras del sistema solo aparecen al deslizar desde el borde. */
+    /** Full-screen viewer: the system bars only appear when swiping from the edge. */
     private fun hideSystemBars() {
         WindowCompat.getInsetsController(window, window.decorView).apply {
             systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE

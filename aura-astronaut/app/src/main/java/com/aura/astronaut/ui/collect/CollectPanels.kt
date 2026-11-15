@@ -33,8 +33,8 @@ import com.aura.astronaut.ui.theme.HudPanel
 import com.aura.astronaut.ui.theme.HudText
 
 /**
- * Motivos para omitir una actividad, de un toque (con guantes no se escribe).
- * Son opciones de interfaz, no criterios clínicos; el motivo viaja tal cual como evidencia.
+ * One-tap reasons to omit an activity (you cannot type with gloves).
+ * They are interface options, not clinical criteria; the reason travels as is as evidence.
  */
 val OmitReasons = listOf(
     R.string.omit_reason_operations,
@@ -44,7 +44,7 @@ val OmitReasons = listOf(
     R.string.omit_reason_other,
 )
 
-/** Pide el motivo antes de omitir una actividad: omitir siempre lleva motivo. */
+/** Asks for the reason before omitting an activity: omitting always carries a reason. */
 @Composable
 fun OmitReasonPanel(
     plan: PlanItem,
@@ -76,8 +76,8 @@ fun OmitReasonPanel(
 }
 
 /**
- * Cuestionario diario, una pregunta cada vez y una respuesta con un toque.
- * La escala y sus rótulos salen del paquete; el texto de la variante no la incluye.
+ * Daily questionnaire, one question at a time and one-tap answers.
+ * The scale and its labels come from the package; the variant text does not include it.
  */
 @Composable
 fun QuestionnairePanel(
@@ -150,9 +150,9 @@ fun QuestionnairePanel(
     }
 }
 
-/** Qué hacer al confirmar una actividad desde cualquier panel. */
+/** What to do when confirming an activity from any panel. */
 interface ActivityActionHandler {
-    /** Actividad del catálogo que es el cuestionario diario: se «hace» respondiéndolo. */
+    /** Catalog activity that is the daily questionnaire: it is "done" by answering it. */
     val questionnaireItemId: String?
     fun done(plan: PlanItem)
     fun omit(plan: PlanItem)
@@ -161,8 +161,8 @@ interface ActivityActionHandler {
 }
 
 /**
- * Botones para confirmar una actividad: hecha (o responder, si es el cuestionario) y omitir.
- * Si ya está confirmada, muestra el estado y permite deshacerlo (salvo el cuestionario, cuyas respuestas ya se guardaron).
+ * Buttons to confirm an activity: done (or answer, if it is the questionnaire) and omit.
+ * If already confirmed, shows the state and allows undoing it (except the questionnaire, whose answers are already stored).
  */
 @Composable
 fun ActivityActions(plan: PlanItem, actions: ActivityActionHandler, modifier: Modifier = Modifier) {

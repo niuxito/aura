@@ -1,0 +1,9 @@
+# Repository-wide ignores. Each project has its own .gitignore as well.
+.DS_Store
+.idea/
+.vscode/
+
+# Large renders of the HUD silhouette: only silueta.html and the light GIF are kept in git.
+aura-astronaut/docs/silueta/*
+!aura-astronaut/docs/silueta/silueta.html
+!aura-astronaut/docs/silueta/silueta-aura-ligera.gif

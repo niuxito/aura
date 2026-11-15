@@ -48,7 +48,7 @@ import com.aura.astronaut.ui.theme.HudColors
 import com.aura.astronaut.ui.theme.HudPanel
 import com.aura.astronaut.ui.theme.HudText
 
-/** Acciones del modo demo sobre el reloj y la tripulación. */
+/** Demo mode actions on the clock and the crew. */
 interface DemoActions {
     fun selectCrew(id: String)
     fun setMet(met: Long)
@@ -67,7 +67,7 @@ interface DemoActions {
     fun useEmbeddedPackage()
 }
 
-/** Servidores de AURA Manager para la demo. El local va por USB con `adb reverse tcp:3000 tcp:3000`. */
+/** AURA Manager servers for the demo. The local one goes over USB with `adb reverse tcp:3000 tcp:3000`. */
 private val ManagerPresets = listOf(
     null to BuildConfig.MANAGER_URL,
     R.string.preset_usb to "http://localhost:3000",
@@ -75,8 +75,8 @@ private val ManagerPresets = listOf(
 )
 
 /**
- * Panel lateral del modo demo. Lo usa quien presenta, no el astronauta:
- * fija el MET, su velocidad y el tripulante.
+ * Demo mode side panel. Used by the presenter, not the astronaut:
+ * sets the MET, its rate and the crew member.
  */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -369,7 +369,7 @@ private fun checkText(c: PackageCheck): String? = when (c) {
     is PackageCheck.Offline -> str(R.string.check_offline)
 }
 
-/** Idioma de la app: el del sistema o uno de los de la interfaz (Android 13+). Los nombres van en su propio idioma. */
+/** App language: the system's or one of the interface's (Android 13+). Names are written in their own language. */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun LanguagePicker() {

@@ -33,18 +33,18 @@ class TransitionReadinessTest {
     ) = TransitionReadiness.build(pkg, "cdr", met, pkg.days.firstOrNull { met >= it.startMet && met < it.endMet }, day(10), conf, adapt, obs)!!
 
     @Test
-    fun `medidas de preparacion del amerizaje en la mision demo`() {
+    fun `splashdown preparation measures in the demo mission`() {
         val r = build(day(1).startMet)
-        // A ×2, V ×4, OIG ×2, SF ×2: lo que AGENTS.md cita para la tolerancia ortostática y el retorno.
+        // A ×2, V ×4, OIG ×2, SF ×2: what AGENTS.md cites for orthostatic tolerance and the return.
         assertEquals(mapOf("A" to 2, "V" to 4, "OIG" to 2, "SF" to 2), r.measures.groupingBy { it.item.id }.eachCount())
         assertTrue(r.measures.all { it.status == MeasureStatus.UPCOMING })
-        // Las capacidades críticas las declara el paquete (criticalFor), en su orden.
+        // The critical capacities are declared by the package (criticalFor), in its order.
         assertEquals(setOf("cardiovascular", "vestibular"), r.critical.map { it.capacity.id }.toSet())
         assertEquals(false, r.provisional)
     }
 
     @Test
-    fun `sin criticalFor en el paquete se usa la lista provisional`() {
+    fun `without criticalFor in the package the provisional list is used`() {
         val legacy = pkg.copy(capacities = pkg.capacities.map { it.copy(criticalFor = null) })
         val r = TransitionReadiness.build(legacy, "cdr", 0, day(1), day(10), emptyMap(), emptyMap(), emptyList())!!
         assertEquals(TransitionPriorities.CRITICAL_CAPACITY_IDS, r.critical.map { it.capacity.id })
@@ -52,12 +52,12 @@ class TransitionReadinessTest {
     }
 
     @Test
-    fun `el despegue no es una transicion hacia gravedad`() {
+    fun `launch is not a transition into gravity`() {
         assertNull(TransitionReadiness.build(pkg, "cdr", 0, day(1), day(1), emptyMap(), emptyMap(), emptyList()))
     }
 
     @Test
-    fun `estado de cada medida`() {
+    fun `state of each measure`() {
         val met = Met.parse("08/12:00")!!
         val a7 = entry("A", 7)
         val a8 = entry("A", 8)
@@ -67,7 +67,7 @@ class TransitionReadinessTest {
             a7.entryId to confirmation(a7.entryId, ConfirmationStatus.DONE),
             v7.entryId to confirmation(v7.entryId, ConfirmationStatus.OMITTED, "Sin tiempo por operaciones"),
         )
-        // AURA cambió el aeróbico de FD08 por bandas (que no preparan la tolerancia ortostática).
+        // AURA replaced FD08's aerobic with bands (which do not prepare orthostatic tolerance).
         val adapt = mapOf(a8.entryId to adaptation(a8.entryId, "A", "RB"))
         val r = build(met, conf, adapt)
         val status = r.measures.associate { it.activity.entryId to it.status }
@@ -78,14 +78,14 @@ class TransitionReadinessTest {
         assertEquals(MeasureStatus.UPCOMING, status[entry("OIG", 10).entryId])
         assertTrue(r.lost >= 3)
         assertEquals(1, r.done)
-        // Ejercicio hasta ahora: R (FD04), A (FD07), R y A (FD08).
+        // Exercise so far: R (FD04), A (FD07), R and A (FD08).
         assertEquals(4, r.exercise.planned)
         assertEquals(1, r.exercise.done)
         assertEquals(1, r.exercise.replaced)
     }
 
     @Test
-    fun `tendencia de las capacidades criticas por dia`() {
+    fun `trend of the critical capacities by day`() {
         val obs = listOf(
             signal("resting_hr_delta", 3.0, 7),
             signal("resting_hr_delta", 11.0, 8),

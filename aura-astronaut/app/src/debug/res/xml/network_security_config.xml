@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  Solo en depuración: HTTP sin cifrar hacia el Manager local (npm run dev, puerto 3000).
-  localhost = Mac por USB con `adb reverse tcp:3000 tcp:3000`; 10.0.2.2 = Mac desde el emulador;
-  172.16.41.32 = IP del Mac en la red local el 2026-11-14 (cámbiala si cambia).
+  Debug builds only: unencrypted HTTP to the local Manager (npm run dev, port 3000).
+  localhost = Mac over USB with `adb reverse tcp:3000 tcp:3000`; 10.0.2.2 = Mac from the emulator;
+  172.16.41.32 = the Mac's LAN IP on 2026-11-14 (change it if it changes).
 -->
 <network-security-config>
     <base-config cleartextTrafficPermitted="false" />

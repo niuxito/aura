@@ -4,9 +4,9 @@ import androidx.annotation.StringRes
 import com.aura.astronaut.R
 
 /**
- * Escenarios de la demo: valores de señales **simulados**, verosímiles y coherentes entre sí.
- * No son datos de nadie ni criterios clínicos. Se guardan con origen `simulado` y el HUD lo indica.
- * Solo se usan las señales que existan en el paquete cargado; si el Manager cambia los ids, se ignoran.
+ * Demo scenarios: **simulated** signal values, plausible and consistent with each other.
+ * They are nobody's data and not clinical criteria. They are stored with source `simulated` and the HUD says so.
+ * Only signals present in the loaded package are used; if the Manager changes the ids, they are ignored.
  */
 enum class DemoScenario(@StringRes val label: Int, @StringRes val description: Int, val values: Map<String, Double>) {
     STABLE(
@@ -53,7 +53,7 @@ enum class DemoScenario(@StringRes val label: Int, @StringRes val description: I
     ),
 }
 
-/** Escenario guardado en `quality` (por su nombre; las versiones anteriores guardaban el rótulo en español). */
+/** Scenario stored in `quality` (by name; earlier versions stored the Spanish label, still accepted). */
 fun scenarioOf(stored: String): DemoScenario? =
     DemoScenario.entries.firstOrNull { it.name == stored } ?: LEGACY_SCENARIO_LABELS[stored]
 

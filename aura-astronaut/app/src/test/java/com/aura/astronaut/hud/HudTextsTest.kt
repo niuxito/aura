@@ -26,7 +26,7 @@ class HudTextsTest {
     }
 
     @Test
-    fun `aviso de amerizaje con la gravedad del paquete`() {
+    fun `splashdown notice with the package gravity`() {
         val t = MissionSnapshot.build(pkg, "cdr", Met.parse("08/00:00")!!).transition!!
         assertEquals("Amerizaje en 1 d 1 h", HudTexts.transitionTitle(t))
         assertEquals("De microgravedad a Tierra · 1 g", HudTexts.transitionChange(t, pkg.gravityReference))
@@ -36,7 +36,7 @@ class HudTextsTest {
     }
 
     @Test
-    fun `la voz dice lo mismo que el HUD`() {
+    fun `the voice says the same as the HUD`() {
         val s = MissionSnapshot.build(pkg, "cdr", Met.parse("00/05:00")!!)
         val next = s.nextAction!!
         val spoken = HudTexts.announcementsFor(s, pkg.gravityReference).single { it.id.startsWith("next-") }
@@ -46,7 +46,7 @@ class HudTextsTest {
     }
 
     @Test
-    fun `al pasar a toca ahora es un anuncio nuevo`() {
+    fun `switching to due now is a new announcement`() {
         val before = MissionSnapshot.build(pkg, "cdr", Met.parse("00/05:00")!!).nextAction!!
         val now = MissionSnapshot.build(pkg, "cdr", Met.parse("00/05:31")!!).nextAction!!
         assertNotEquals(HudTexts.nextActionAnnouncement(before).id, HudTexts.nextActionAnnouncement(now).id)
@@ -54,7 +54,7 @@ class HudTextsTest {
     }
 
     @Test
-    fun `la transicion tiene mas prioridad que la siguiente accion`() {
+    fun `the transition has more priority than the next action`() {
         assertTrue(HudTexts.PRIORITY_TRANSITION > HudTexts.PRIORITY_NEXT_ACTION)
     }
 }

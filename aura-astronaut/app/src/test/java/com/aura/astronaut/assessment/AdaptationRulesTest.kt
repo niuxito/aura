@@ -37,29 +37,29 @@ class AdaptationRulesTest {
         quality = "", packageVersion = 1,
     )
 
-    // ---------- Semáforo ----------
+    // ---------- Traffic light ----------
 
     @Test
-    fun `sin datos del dia todas las capacidades en gris, nunca verde`() {
+    fun `with no data for the day every capacity is gray, never green`() {
         val a = CapacityEvaluator.evaluate(pkg, 8, emptyList())
         assertEquals(6, a.capacities.size)
         assertTrue(a.capacities.all { it.level == CapacityLevel.GRAY })
-        // Datos de otro día no cuentan.
+        // Data from another day does not count.
         val other = CapacityEvaluator.evaluate(pkg, 8, signals(7, DemoScenario.FATIGUE))
         assertTrue(other.capacities.all { it.level == CapacityLevel.GRAY })
     }
 
     @Test
-    fun `perfil estable en verde`() {
+    fun `stable profile is green`() {
         val a = CapacityEvaluator.evaluate(pkg, 8, signals(8, DemoScenario.STABLE))
-        // Vestibular no tiene señales: sigue en gris hasta responder el cuestionario.
+        // Vestibular has no signals: it stays gray until the questionnaire is answered.
         assertEquals(CapacityLevel.GRAY, a.state("vestibular")!!.level)
         assertEquals(CapacityLevel.GREEN, a.state("fatigue")!!.level)
         assertEquals(CapacityLevel.GREEN, a.state("cardiovascular")!!.level)
     }
 
     @Test
-    fun `fatiga acumulada pone en ambar fatiga, musculo y cardiovascular con su motivo`() {
+    fun `accumulated fatigue turns fatigue, musculoskeletal and cardiovascular amber with their reason`() {
         val a = CapacityEvaluator.evaluate(pkg, 8, signals(8, DemoScenario.FATIGUE))
         val fatiga = a.state("fatigue")!!
         assertEquals(CapacityLevel.AMBER, fatiga.level)
@@ -71,65 +71,65 @@ class AdaptationRulesTest {
     }
 
     @Test
-    fun `la coordinacion empeorada pasa a rojo`() {
+    fun `worsened coordination turns red`() {
         val a = CapacityEvaluator.evaluate(pkg, 8, signals(8, DemoScenario.COORDINATION))
         assertEquals(CapacityLevel.RED, a.state("coordination")!!.level)
         assertEquals("≥ 30", a.state("coordination")!!.drivers.single().threshold)
     }
 
     @Test
-    fun `una respuesta alta cuenta por si sola y gana el peor nivel`() {
-        // Q1 en 6 (normalizado) es rojo aunque las señales estén bien.
+    fun `a high answer counts on its own and the worst level wins`() {
+        // Q1 at 6 (normalized) is red even though the signals are fine.
         val a = CapacityEvaluator.evaluate(pkg, 8, signals(8, DemoScenario.STABLE) + answer(8, "Q1_FATIGUE", 6.0))
         assertEquals(CapacityLevel.RED, a.state("fatigue")!!.level)
         assertTrue(a.state("fatigue")!!.drivers.single().isQuestion)
     }
 
     @Test
-    fun `se usa la ultima medida del dia`() {
+    fun `the latest measurement of the day is used`() {
         val early = obs(Observation.KIND_SIGNAL, "night_hrv_delta", -22.0, 8, day(8).startMet, Origin.SIMULATED)
         val late = obs(Observation.KIND_SIGNAL, "night_hrv_delta", -3.0, 8, day(8).startMet + 60, Origin.SIMULATED)
         assertEquals(CapacityLevel.GREEN, CapacityEvaluator.evaluate(pkg, 8, listOf(early, late)).state("fatigue")!!.level)
     }
 
     @Test
-    fun `incoherencia entre autoinforme y sensor`() {
+    fun `inconsistency between self-report and sensor`() {
         val a = CapacityEvaluator.evaluate(pkg, 8, signals(8, DemoScenario.FATIGUE) + answer(8, "Q1_FATIGUE", 2.0))
         val finding = a.consistency.single()
         assertEquals("fatigue", finding.capacityId)
-        // El nivel no baja: sigue en ámbar por la señal.
+        // The level does not drop: it stays amber because of the signal.
         assertEquals(CapacityLevel.AMBER, a.state("fatigue")!!.level)
     }
 
-    // ---------- Reglas de adaptación ----------
+    // ---------- Adaptation rules ----------
 
     @Test
-    fun `en gris no se adapta a ciegas`() {
-        // FD08: R es intensa y adaptable, pero sin datos y con FD09 de carga alta, no hay motivo.
+    fun `in gray nothing is adapted blindly`() {
+        // FD08: R is intense and adaptable, but with no data and FD09 of high load there is no reason.
         val met = Met.parse("06/20:00")!!
         val a = CapacityEvaluator.evaluate(pkg, 8, emptyList())
         assertTrue(AdaptationEngine.decide(pkg, "cdr", met, day(8), a, emptySet()).isEmpty())
     }
 
     @Test
-    fun `con fatiga sustituye el ejercicio intenso por uno de menor carga`() {
+    fun `with fatigue intense exercise is replaced by a lower-load one`() {
         val met = Met.parse("06/20:00")!!
         val a = CapacityEvaluator.evaluate(pkg, 8, signals(8, DemoScenario.FATIGUE))
         val all = AdaptationEngine.decide(pkg, "cdr", met, day(8), a, emptySet())
         val d = all.single { it.originalItemId == "R" }
         assertEquals(AdaptationType.SUBSTITUTION, d.proposal.type)
         assertEquals("RB", d.proposal.replacementItemId)
-        // R no prepara la transición: no hay aviso de preparación.
+        // R does not prepare the transition: there is no preparation notice.
         assertEquals(AdaptationEngine.RULE_CAPACITY, d.rule)
         assertTrue(d.proposal.reason.contains("umbral de demostración"))
         assertTrue(d.evidence.all { it.source == Origin.SIMULATED })
-        // El aeróbico de FD08 sí prepara la transición: se señala para control de misión.
+        // FD08's aerobic does prepare the transition: it is flagged for mission control.
         assertEquals(AdaptationEngine.RULE_CAPACITY + AdaptationEngine.REMOVES_PREP, all.single { it.originalItemId == "A" }.rule)
     }
 
     @Test
-    fun `con la capacidad cardiovascular en ambar aplica la accion de control de mision`() {
-        // Fatiga acumulada: cardiovascular en ámbar y su onAmberActions pide el menú con hidratación (N2).
+    fun `with the cardiovascular capacity in amber the mission control action is applied`() {
+        // Accumulated fatigue: cardiovascular in amber and its onAmberActions asks for the hydration menu (N2).
         val met = Met.parse("06/20:00")!!
         val a = CapacityEvaluator.evaluate(pkg, 8, signals(8, DemoScenario.FATIGUE))
         assertEquals(CapacityLevel.AMBER, a.state("cardiovascular")!!.level)
@@ -138,43 +138,43 @@ class AdaptationRulesTest {
         assertEquals("N2", menu.proposal.replacementItemId)
         assertTrue(menu.proposal.reason.contains("control de misión fija"))
         assertTrue(menu.evidence.isNotEmpty())
-        // Sin onAmberActions en el paquete, el menú no se toca (la interfaz no adivina cuál).
+        // Without onAmberActions in the package, the menu is not touched (the interface does not guess which).
         val legacy = pkg.copy(capacities = pkg.capacities.map { it.copy(onAmberActions = emptyList()) })
         assertTrue(AdaptationEngine.decide(legacy, "cdr", met, day(8), a, emptySet()).none { it.originalItemId == "N1" })
-        // En rojo no se aplica: se remite al procedimiento de misión.
+        // In red it does not apply: the interface refers to the mission procedure.
         val red = a.copy(capacities = a.capacities.map { if (it.capacity.id == "cardiovascular") it.copy(level = CapacityLevel.RED) else it })
         assertTrue(AdaptationEngine.decide(pkg, "cdr", met, day(8), red, emptySet()).none { it.rule == AdaptationEngine.RULE_AMBER_ACTION })
     }
 
-    /** El plan demo ya no pone ejercicio intenso la víspera de un día crítico: se fuerza FD09 crítico. */
+    /** The demo plan no longer puts intense exercise on the eve of a critical day: FD09 is forced critical. */
     private val criticalFd9 = pkg.copy(days = pkg.days.map { if (it.day == 9) it.copy(opLoad = com.aura.astronaut.mission.LoadLevel.CRITICAL) else it })
 
     @Test
-    fun `la vispera de un dia critico no hay actividades intensas`() {
-        // FD08: R y A (intensas, adaptables) con FD09 crítico. Sin datos de capacidades.
+    fun `on the eve of a critical day there are no intense activities`() {
+        // FD08: R and A (intense, adaptable) with FD09 critical. No capacity data.
         val met = Met.parse("06/20:00")!!
         val all = AdaptationEngine.decide(criticalFd9, "cdr", met, day(8), null, emptySet())
         assertEquals(setOf("R", "A"), all.map { it.originalItemId }.toSet())
         val d = all.single { it.originalItemId == "A" }
-        // A prepara la tolerancia ortostática: la regla lo señala para control de misión.
+        // A prepares orthostatic tolerance: the rule flags it for mission control.
         assertEquals(AdaptationEngine.RULE_CRITICAL_NEXT_DAY + AdaptationEngine.REMOVES_PREP, d.rule)
         assertTrue(d.proposal.reason.contains("FD09"))
         assertTrue(d.proposal.reason.contains("requiere decisión de control de misión"))
     }
 
     @Test
-    fun `el plan demo ya no tiene ejercicio intenso la vispera del amerizaje`() {
+    fun `the demo plan no longer has intense exercise on the eve of splashdown`() {
         val fd9 = pkg.plans.getValue("cdr").single { it.day == 9 }.activities
         assertTrue(fd9.none { a -> pkg.catalog.single { it.id == a.itemId }.intense })
         assertTrue(AdaptationEngine.decide(pkg, "cdr", Met.parse("07/18:00")!!, day(9), null, emptySet()).isEmpty())
     }
 
     @Test
-    fun `no decide con el semaforo de otro dia`() {
-        // Al pasar de FD07 a FD08, un semáforo de FD07 en rojo no puede justificar nada en FD08.
+    fun `it does not decide with another day's traffic light`() {
+        // When moving from FD07 to FD08, a red FD07 traffic light cannot justify anything on FD08.
         val fd7 = CapacityEvaluator.evaluate(criticalFd9, 7, signals(7, DemoScenario.COORDINATION))
         assertTrue(AdaptationEngine.decide(criticalFd9, "cdr", Met.parse("06/20:00")!!, day(8), fd7, emptySet()).isEmpty())
-        // Con el de FD08 (sin datos) decide por la víspera crítica, con su propia evidencia.
+        // With FD08's (no data) it decides because of the critical eve, with its own evidence.
         val fd8 = CapacityEvaluator.evaluate(criticalFd9, 8, emptyList())
         val all = AdaptationEngine.decide(criticalFd9, "cdr", Met.parse("06/20:00")!!, day(8), fd8, emptySet())
         assertTrue(all.isNotEmpty())
@@ -182,18 +182,18 @@ class AdaptationRulesTest {
     }
 
     @Test
-    fun `no se decide dos veces ni sobre lo pasado`() {
+    fun `it does not decide twice nor about the past`() {
         val a = CapacityEvaluator.evaluate(pkg, 8, signals(8, DemoScenario.FATIGUE))
         val met = Met.parse("06/20:00")!!
         val first = AdaptationEngine.decide(pkg, "cdr", met, day(8), a, emptySet())
         assertTrue(first.isNotEmpty())
         assertTrue(AdaptationEngine.decide(pkg, "cdr", met, day(8), a, first.map { it.proposal.entryId }.toSet()).isEmpty())
-        // R (06/20:15), A (06/22:00) y el menú (07/00:30) ya han acabado: horas después no se adapta.
+        // R (06/20:15), A (06/22:00) and the menu (07/00:30) are over: hours later nothing is adapted.
         assertTrue(AdaptationEngine.decide(pkg, "cdr", Met.parse("07/02:00")!!, day(8), a, emptySet()).isEmpty())
     }
 
     @Test
-    fun `ninguna regla produce una adaptacion fuera de politica ni sobre algo fijo`() {
+    fun `no rule produces an adaptation out of policy or on something fixed`() {
         var total = 0
         pkg.crew.forEach { member ->
             pkg.days.forEach { d ->
@@ -206,9 +206,9 @@ class AdaptationRulesTest {
                             total++
                             assertEquals(emptyList<String>(), PolicyCheck.violations(pkg, decision.proposal))
                             val act = activities.single { it.entryId == decision.proposal.entryId }
-                            assertTrue("${act.entryId} es fija", act.adaptable)
+                            assertTrue("${act.entryId} is fixed", act.adaptable)
                             val replacement = decision.proposal.replacementItemId?.let { id -> pkg.catalog.single { it.id == id } }
-                            assertFalse("no aumenta la carga", replacement?.intense == true)
+                            assertFalse("does not increase the load", replacement?.intense == true)
                             assertTrue(decision.proposal.reason.isNotBlank())
                             assertTrue(decision.evidence.isNotEmpty())
                         }
@@ -216,22 +216,22 @@ class AdaptationRulesTest {
                 }
             }
         }
-        assertTrue("las reglas deben producir alguna adaptación en la misión demo", total > 0)
+        assertTrue("the rules must produce some adaptation in the demo mission", total > 0)
     }
 
-    // ---------- Comprobación de política ----------
+    // ---------- Policy check ----------
 
     @Test
-    fun `la comprobacion local detecta lo mismo que el servidor`() {
+    fun `the local check detects the same as the server`() {
         val fixed = pkg.plans.getValue("cdr").flatMap { it.activities }.first { !it.adaptable }
-        assertTrue(PolicyCheck.violations(pkg, AdaptationProposal("cdr", fixed.entryId, AdaptationType.OMISSION, reason = "x")).any { "fija" in it })
+        assertTrue(PolicyCheck.violations(pkg, AdaptationProposal("cdr", fixed.entryId, AdaptationType.OMISSION, reason = "x")).any { "fixed" in it })
 
         val rb = pkg.plans.getValue("cdr").flatMap { it.activities }.first { it.itemId == "R" }
-        // Cambiar a A (intensa) desde R (intensa) no aumenta la carga; a N2 es otra categoría.
-        assertTrue(PolicyCheck.violations(pkg, AdaptationProposal("cdr", rb.entryId, AdaptationType.SUBSTITUTION, "N2", reason = "x")).any { "categoría" in it })
+        // Switching to A (intense) from R (intense) does not increase the load; N2 is another category.
+        assertTrue(PolicyCheck.violations(pkg, AdaptationProposal("cdr", rb.entryId, AdaptationType.SUBSTITUTION, "N2", reason = "x")).any { "category" in it })
         val menu = pkg.plans.getValue("cdr").flatMap { it.activities }.first { it.itemId == "N1" && it.adaptable }
         assertTrue(PolicyCheck.violations(pkg, AdaptationProposal("cdr", menu.entryId, AdaptationType.RESCHEDULE, newMet = 0, reason = "x")).isNotEmpty())
-        assertTrue(PolicyCheck.violations(pkg, AdaptationProposal("cdr", rb.entryId, AdaptationType.OMISSION, reason = " ")).any { "motivo" in it })
+        assertTrue(PolicyCheck.violations(pkg, AdaptationProposal("cdr", rb.entryId, AdaptationType.OMISSION, reason = " ")).any { "reason" in it })
         assertNotNull(AdaptationEngine.lowerLoadAlternative(pkg, pkg.catalog.single { it.id == "A" }))
     }
 }

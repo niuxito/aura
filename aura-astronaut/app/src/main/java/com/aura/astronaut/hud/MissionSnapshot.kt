@@ -13,7 +13,7 @@ import com.aura.astronaut.mission.TimelineBlock
 import com.aura.astronaut.mission.ValidationIssue
 import com.aura.astronaut.mission.phaseAt
 
-/** Situación de una actividad del plan respecto al MET actual (no dice si se ha hecho). */
+/** State of a plan activity relative to the current MET (it does not say whether it was done). */
 enum class TimingState { PAST, NOW, UPCOMING }
 
 data class PlanItem(
@@ -21,18 +21,18 @@ data class PlanItem(
     val item: CatalogItem,
     val day: FlightDay,
     val state: TimingState,
-    /** Lo que el astronauta ha confirmado (hecha u omitida); null = sin confirmar. */
+    /** What the astronaut confirmed (done or omitted); null = not confirmed. */
     val confirmation: ActivityConfirmation? = null,
-    /** Adaptación aplicada a bordo por la interfaz; [item] ya es la acción resultante. */
+    /** Adaptation applied on board by the interface; [item] is already the resulting action. */
     val adaptation: LocalAdaptation? = null,
-    /** Acción del plan original si la interfaz la ha sustituido. */
+    /** Original plan action if the interface replaced it. */
     val originalItem: CatalogItem? = null,
 ) {
     val omittedByInterface: Boolean get() = adaptation?.type == AdaptationTypes.OMISSION
     val pending: Boolean get() = confirmation == null && !omittedByInterface
 }
 
-/** Valores de `type` de una adaptación, tal como viajan a control de misión. */
+/** Values of an adaptation's `type`, as they travel to mission control. */
 object AdaptationTypes {
     const val SUBSTITUTION = "substitution"
     const val RESCHEDULE = "reschedule"
@@ -40,8 +40,8 @@ object AdaptationTypes {
 }
 
 /**
- * Aplica a bordo las adaptaciones de la interfaz sobre una actividad del plan:
- * sustituye la acción, mueve el MET u omite, y conserva la original para mostrarla.
+ * Applies the interface's adaptations to a plan activity on board:
+ * replaces the action, moves the MET or omits it, and keeps the original to show it.
  */
 fun planItemOf(
     a: PlanActivity,
@@ -68,9 +68,9 @@ fun planItemOf(
 }
 
 /**
- * Próxima transición gravitatoria. [exact] = el paquete la sitúa en un hito concreto
- * (el despegue al empezar el día, el amerizaje al acabarlo); si no, solo se sabe que se
- * completa antes del fin del día de vuelo.
+ * Next gravity transition. [exact] = the package places it at a specific milestone
+ * (launch at the start of the day, splashdown at its end); otherwise it is only known to
+ * be completed before the end of the flight day.
  */
 data class TransitionAlert(
     val day: FlightDay,
@@ -84,26 +84,26 @@ data class TransitionAlert(
 
 data class NextAction(
     val plan: PlanItem,
-    /** Segundos hasta su MET; cero o negativo si ya toca. */
+    /** Seconds until its MET; zero or negative if it is due. */
     val secondsUntil: Long,
-    /** true si no quedan actividades hoy y la siguiente es de otro día de vuelo. */
+    /** true if there are no activities left today and the next one is on another flight day. */
     val laterDay: Boolean,
 )
 
-/** Todo lo que el HUD necesita saber en un MET, calculado solo a partir del paquete. */
+/** Everything the HUD needs to know at a MET, computed only from the package. */
 data class MissionSnapshot(
     val met: Long,
     val phase: MissionPhase,
     val day: FlightDay?,
-    /** Entorno gravitatorio en este momento. */
+    /** Gravity environment at this moment. */
     val gravityNow: Gravity?,
-    /** Bloques del cronograma de la tripulación que contienen el MET actual. */
+    /** Crew timeline blocks containing the current MET. */
     val currentBlocks: List<TimelineBlock>,
     val nextBlock: TimelineBlock?,
     val transition: TransitionAlert?,
     val todayPlan: List<PlanItem>,
     val nextAction: NextAction?,
-    /** Avisos e informaciones de control de misión vigentes hoy para este tripulante. */
+    /** Mission control warnings and information in force today for this crew member. */
     val notices: List<ValidationIssue>,
 ) {
     companion object {
@@ -127,7 +127,7 @@ data class MissionSnapshot(
             }.sortedBy { it.activity.met }
 
             val todayPlan = if (day == null) emptyList() else allPlan.filter { it.day.day == day.day }
-            // La siguiente acción es la primera sin confirmar que aún no ha pasado.
+            // The next action is the first unconfirmed one that has not passed yet.
             val next = allPlan.firstOrNull { it.pending && it.state != TimingState.PAST }?.let {
                 NextAction(it, it.activity.met - met, laterDay = day != null && it.day.day != day.day)
             }
@@ -155,16 +155,16 @@ data class MissionSnapshot(
         }
 
         /**
-         * Fin previsto de una actividad: la duración del catálogo de la acción que se hace (la sustituta, si la hay),
-         * o el `endMet` del paquete; si no hay ninguno, la ventana de demostración [HudTiming.NOW_WINDOW_SECONDS].
+         * Planned end of an activity: the catalog duration of the action being done (the replacement, if any),
+         * or the package's `endMet`; if neither exists, the demonstration window [HudTiming.NOW_WINDOW_SECONDS].
          */
         fun endOf(a: PlanActivity, item: CatalogItem?): Long =
             item?.durationMin?.let { a.met + it * 60L } ?: a.endMet ?: (a.met + HudTiming.NOW_WINDOW_SECONDS)
 
         /**
-         * Momento de la transición de un día con `transitionFrom`: `transitionMet` si el paquete lo trae.
-         * Si no, el hito que cae justo al acabar o al empezar el día (amerizaje, despegue); y si tampoco,
-         * el fin del día, porque `gravity` es el entorno al acabar el día de vuelo.
+         * Moment of the transition on a day with `transitionFrom`: `transitionMet` if the package carries it.
+         * Otherwise, the milestone right at the end or start of the day (splashdown, launch); failing that,
+         * the end of the day, because `gravity` is the environment at the end of the flight day.
          */
         fun transitionMoment(pkg: MissionPackage, day: FlightDay): Triple<Long, String?, Boolean> {
             val milestones = pkg.events.filter { it.kind == EventKind.MILESTONE }

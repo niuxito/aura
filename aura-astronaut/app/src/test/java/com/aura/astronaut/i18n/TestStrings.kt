@@ -7,8 +7,8 @@ import java.util.Locale
 import javax.xml.parsers.DocumentBuilderFactory
 
 /**
- * Proveedor de textos para las pruebas unitarias: lee los mismos `strings.xml` que la app
- * (el idioma pedido sobre el inglés por defecto) y formatea como `Resources.getString`.
+ * Text provider for unit tests: reads the same `strings.xml` files as the app
+ * (the requested language over the default English) and formats like `Resources.getString`.
  */
 object TestStrings {
     private val names: Map<Int, String> by lazy {
@@ -38,7 +38,7 @@ object TestStrings {
         Lang.active = language
         Strings.install { id, args ->
             val name = names[id] ?: error("Recurso desconocido $id")
-            val raw = texts[name] ?: error("Falta el texto $name")
+            val raw = texts[name] ?: error("Missing text $name")
             if (args.isEmpty()) raw else String.format(locale, raw, *args)
         }
     }

@@ -8,26 +8,26 @@ import com.aura.astronaut.hud.HudTexts
 import com.aura.astronaut.mission.CapacityLevel
 import com.aura.astronaut.mission.CatalogItem
 
-/** Una alerta que debe conocer control de misión. [dedupeKey] identifica la situación: se avisa una vez. */
+/** An alert mission control must know about. [dedupeKey] identifies the situation: it is reported once. */
 data class AlertCandidate(
     val dedupeKey: String,
-    /** `capacity-red`, `preparation-lost` o `inconsistency`. */
+    /** `capacity-red`, `preparation-lost` or `inconsistency`. */
     val kind: String,
-    /** `red` o `warning`. */
+    /** `red` or `warning`. */
     val level: String,
     val capacityId: String?,
     val entryId: String?,
     val flightDay: Int?,
     val message: String,
     val evidence: List<EvidenceItem>,
-    /** Si ya viene en JSON (la de una adaptación), se envía tal cual. */
+    /** If it already comes as JSON (an adaptation's), it is sent as is. */
     val evidenceJson: String? = null,
 )
 
 /**
- * Qué se avisa a control de misión (AGENTS.md, regla 5 y «Objetivo final y prioridades»):
- * lo que la interfaz no resuelve adaptando. Lo que solo está en ámbar no se avisa aparte:
- * AURA ya lo resuelve adaptando y la adaptación llega con su evidencia.
+ * What is reported to mission control (AGENTS.md, rule 5 and "Final goal and priorities"):
+ * what the interface does not resolve by adapting. What is only amber is not reported separately:
+ * AURA already resolves it by adapting and the adaptation arrives with its evidence.
  */
 object AlertRules {
     const val KIND_RED = AlertCodes.KIND_RED
@@ -40,7 +40,7 @@ object AlertRules {
         catalog: Map<String, CatalogItem>,
     ): List<AlertCandidate> = buildList {
         assessment?.let { a ->
-            // Capacidad en rojo: una alerta por capacidad y día de vuelo.
+            // Capacity in red: one alert per capacity and flight day.
             a.capacities.filter { it.level == CapacityLevel.RED }.forEach { s ->
                 add(
                     AlertCandidate(
@@ -55,7 +55,7 @@ object AlertRules {
                     ),
                 )
             }
-            // Incoherencia: el astronauta dice estar bien y el sensor indica lo contrario.
+            // Inconsistency: the astronaut says they are fine and the sensor indicates otherwise.
             a.consistency.forEach { f ->
                 add(
                     AlertCandidate(
@@ -71,7 +71,7 @@ object AlertRules {
                 )
             }
         }
-        // Adaptación que quita una medida de preparación de la transición: decide control de misión.
+        // Adaptation that removes a transition preparation measure: mission control decides.
         adaptations.filter { it.rule.endsWith(AdaptationEngine.REMOVES_PREP) }.forEach { ad ->
             add(
                 AlertCandidate(

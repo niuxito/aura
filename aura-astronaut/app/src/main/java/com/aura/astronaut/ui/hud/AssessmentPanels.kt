@@ -64,8 +64,8 @@ fun levelColor(l: CapacityLevel): Color = when (l) {
 private val Small = HudText.Label.copy(fontSize = 13.sp, letterSpacing = 0.3.sp)
 
 /**
- * Semáforo compacto: solo las capacidades que necesitan atención (rojo y ámbar), con su dato;
- * el resto en una línea de resumen. En rojo: qué hacer y si control de misión lo ha visto.
+ * Compact traffic light: only the capacities that need attention (red and amber), with their data;
+ * the rest in a summary line. In red: what to do and whether mission control has seen it.
  */
 @Composable
 fun CapacityPanel(
@@ -89,11 +89,11 @@ fun CapacityPanel(
         Column(verticalArrangement = Arrangement.spacedBy(3.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(str(R.string.capacities_title, dayLabel), style = HudText.Label, color = HudColors.Cyan, modifier = Modifier.weight(1f))
-                // Etiquetas obligatorias: umbrales de demostración y datos simulados.
+                // Mandatory labels: demonstration thresholds and simulated data.
                 val tags = listOfNotNull(if (assessment.thresholdsAreDemo) str(R.string.tag_demo) else null, scenario?.let { str(R.string.tag_sim) }).joinToString(" · ")
                 if (tags.isNotEmpty()) Text(tags, style = Small, color = HudColors.Amber)
             }
-            // Solo las que requieren atención, de dos en dos y rotando; el recuento de abajo nunca se oculta.
+            // Only those requiring attention, two at a time and rotating; the count below is never hidden.
             val pages = flagged.chunked(HudTiming.CAPACITY_ROWS_VISIBLE)
             val tick by produceState(0, pages.size) {
                 while (true) {
@@ -136,7 +136,7 @@ fun CapacityPanel(
             }
             if (red.isNotEmpty()) {
                 val related = red.mapNotNull { s -> alerts.lastOrNull { it.kind == AlertRules.KIND_RED && it.capacityId == s.capacity.id } }
-                // El estado menos avanzado de los avisos de hoy: no se da por leído lo que no lo está.
+                // The least advanced state of today's notices: nothing is taken as read if it is not.
                 val rank = { al: LocalAlert ->
                     when {
                         al.ackStatus == AckStatus.HANDLED -> 3
@@ -169,7 +169,7 @@ private fun statusColor(a: LocalAdaptation) = when (a.reviewStatus) {
     else -> HudColors.TextDim
 }
 
-/** Detalle del semáforo: cada dato con valor, umbral y origen, y qué hace AURA en ámbar o rojo. */
+/** Traffic light detail: each data point with value, threshold and source, and what AURA does in amber or red. */
 @Composable
 fun CapacityDetailPanel(assessment: Assessment, dayLabel: String, onClose: () -> Unit, modifier: Modifier = Modifier) {
     HudPanel(modifier.widthIn(max = 980.dp).fillMaxHeight(), modal = true) {
@@ -217,7 +217,7 @@ fun CapacityDetailPanel(assessment: Assessment, dayLabel: String, onClose: () ->
     }
 }
 
-/** Todas las adaptaciones con motivo, evidencia, envío y revisión de control de misión. */
+/** All adaptations with reason, evidence, sending and mission control review. */
 @Composable
 fun AdaptationsDetailPanel(
     adaptations: List<LocalAdaptation>,

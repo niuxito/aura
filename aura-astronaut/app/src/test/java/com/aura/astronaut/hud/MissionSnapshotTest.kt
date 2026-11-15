@@ -23,7 +23,7 @@ class MissionSnapshotTest {
     private fun at(label: String, crew: String = "cdr") = MissionSnapshot.build(pkg, crew, Met.parse(label)!!)
 
     @Test
-    fun `contexto del primer dia tras el despegue`() {
+    fun `context of the first day after launch`() {
         val s = at("00/05:10")
         assertEquals(1, s.day?.day)
         assertEquals(Gravity.MICRO, s.gravityNow)
@@ -31,7 +31,7 @@ class MissionSnapshotTest {
     }
 
     @Test
-    fun `antes del despegue se esta en Tierra y se anuncia el despegue`() {
+    fun `before launch the crew is on Earth and launch is announced`() {
         val s = MissionSnapshot.build(pkg, "cdr", -600)
         assertEquals(MissionPhase.BeforeLaunch, s.phase)
         assertEquals(Gravity.EARTH, s.gravityNow)
@@ -42,10 +42,10 @@ class MissionSnapshotTest {
     }
 
     @Test
-    fun `el amerizaje se anuncia con dos dias de antelacion y no antes`() {
-        // FD07 está a tres días de FD10: todavía no se anuncia.
+    fun `splashdown is announced two days ahead and not earlier`() {
+        // FD07 is three days from FD10: not announced yet.
         assertNull(at("06/00:00").transition)
-        // FD08: FD10 entra en la ventana de los dos días siguientes.
+        // FD08: FD10 enters the window of the next two days.
         val t = at("07/00:00").transition
         assertNotNull(t)
         assertEquals(10, t!!.day.day)
@@ -57,7 +57,7 @@ class MissionSnapshotTest {
     }
 
     @Test
-    fun `en FD10 sigue en microgravedad hasta el amerizaje`() {
+    fun `on FD10 the crew stays in microgravity until splashdown`() {
         val s = at("09/01:00")
         assertEquals(10, s.day?.day)
         assertEquals(Gravity.MICRO, s.gravityNow)
@@ -65,14 +65,14 @@ class MissionSnapshotTest {
     }
 
     @Test
-    fun `una transicion pasada no se anuncia`() {
-        // FD01, ya en órbita: el despegue ha ocurrido y FD10 queda lejos.
+    fun `a past transition is not announced`() {
+        // FD01, already in orbit: launch has happened and FD10 is far away.
         assertNull(at("00/05:00").transition)
     }
 
     @Test
-    fun `siguiente accion y actividad que toca ahora`() {
-        // CDR, FD01: SD a las 00/05:30 y F a las 00/07:15.
+    fun `next action and activity due now`() {
+        // CDR, FD01: SD at 00/05:30 and F at 00/07:15.
         val before = at("00/05:00").nextAction!!
         assertEquals("SD", before.plan.item.id)
         assertEquals(30 * 60L, before.secondsUntil)
@@ -83,15 +83,15 @@ class MissionSnapshotTest {
         assertTrue(now.secondsUntil <= 0)
         assertEquals(TimingState.NOW, now.plan.state)
 
-        // Pasada la ventana de «ahora», la siguiente es F.
+        // Past the "now" window, the next one is F.
         val after = at("00/06:05").nextAction!!
         assertEquals("F", after.plan.item.id)
         assertFalse(after.laterDay)
     }
 
     @Test
-    fun `sin actividades restantes hoy se propone la del dia siguiente`() {
-        // FD01 de CDR acaba en 00/17:00; su última actividad es a las 00/07:15.
+    fun `with no activities left today the next day's is proposed`() {
+        // CDR's FD01 ends at 00/17:00; its last activity is at 00/07:15.
         val s = at("00/12:00")
         val n = s.nextAction!!
         assertEquals(2, n.plan.day.day)
@@ -100,7 +100,7 @@ class MissionSnapshotTest {
     }
 
     @Test
-    fun `el plan de hoy es el del tripulante y del dia`() {
+    fun `today's plan is the crew member's and the day's`() {
         val s = at("01/01:00", crew = "plt")
         assertEquals(2, s.day?.day)
         assertTrue(s.todayPlan.isNotEmpty())
@@ -108,8 +108,8 @@ class MissionSnapshotTest {
     }
 
     @Test
-    fun `avisos de control de mision del dia y del tripulante`() {
-        // El paquete demo ya no trae avisos por día y tripulante: se añaden a una copia.
+    fun `mission control notices for the day and the crew member`() {
+        // The demo package no longer carries notices per day and crew member: they are added to a copy.
         fun issue(day: Int?, crew: String?) = com.aura.astronaut.mission.ValidationIssue(
             id = "t-$day-$crew", rule = "t", severity = com.aura.astronaut.mission.Severity.WARNING, day = day, crewId = crew,
             message = com.aura.astronaut.mission.LocalizedText.of("es" to "aviso"),
@@ -123,39 +123,39 @@ class MissionSnapshotTest {
     }
 
     @Test
-    fun `la transicion usa el MET exacto del paquete`() {
+    fun `the transition uses the package's exact MET`() {
         val fd10 = pkg.days.last()
         assertEquals(Met.parse("09/01:42:48"), fd10.transitionMet)
         val s = at("09/00:00")
         val t = s.transition!!
         assertEquals("Amerizaje", t.eventName)
         assertEquals(Met.parse("09/01:42:48")!! - Met.parse("09/00:00")!!, t.secondsLeft)
-        // Sin transitionMet, se recurre al hito del fin del día.
+        // Without transitionMet, the end-of-day milestone is used.
         val legacy = pkg.copy(days = pkg.days.map { it.copy(transitionMet = null) })
         assertEquals(t.met, MissionSnapshot.transitionMoment(legacy, legacy.days.last()).first)
     }
 
     @Test
-    fun `una actividad esta en curso hasta su fin previsto`() {
+    fun `an activity is in progress until its planned end`() {
         val r = pkg.plans.getValue("cdr").flatMap { it.activities }.first { it.itemId == "R" }
         val item = pkg.catalog.single { it.id == "R" }
         assertEquals(45, item.durationMin)
         assertEquals(r.met + 45 * 60, r.endMet)
         assertEquals(r.met + 45 * 60, MissionSnapshot.endOf(r, item))
         assertEquals(TimingState.NOW, MissionSnapshot.timingOf(r.met, MissionSnapshot.endOf(r, item), r.met + 40 * 60))
-        // Sin duración, la ventana de demostración.
+        // Without a duration, the demonstration window.
         assertEquals(r.met + HudTiming.NOW_WINDOW_SECONDS, MissionSnapshot.endOf(r.copy(endMet = null), item.copy(durationMin = null)))
     }
 
     @Test
-    fun `las actividades condicionales dicen de que dependen`() {
+    fun `conditional activities say what they depend on`() {
         val conditional = pkg.plans.values.flatten().flatMap { it.activities }.filter { it.status == EntryStatus.CONDITIONAL }
         assertTrue(conditional.isNotEmpty())
         assertTrue(conditional.all { it.note != null && it.note!!.text.isNotBlank() })
     }
 
     @Test
-    fun `tras el amerizaje no hay transicion ni siguiente accion`() {
+    fun `after splashdown there is no transition nor next action`() {
         val s = MissionSnapshot.build(pkg, "cdr", pkg.days.last().endMet + 60)
         assertEquals(MissionPhase.AfterEnd, s.phase)
         assertNull(s.transition)
@@ -164,7 +164,7 @@ class MissionSnapshotTest {
     }
 
     @Test
-    fun `plan completo del dia ordenado con la marca de ahora`() {
+    fun `full day plan sorted with the now mark`() {
         val day = pkg.days.first()
         val t = DayTimeline.build(pkg, "cdr", day, Met.parse("00/05:40")!!)
         assertEquals(t.entries.map { it.met }, t.entries.map { it.met }.sorted())
@@ -174,7 +174,7 @@ class MissionSnapshotTest {
     }
 
     @Test
-    fun `una actividad confirmada deja de ser la siguiente accion`() {
+    fun `a confirmed activity is no longer the next action`() {
         val met = Met.parse("00/05:40")!!
         val sd = MissionSnapshot.build(pkg, "cdr", met).nextAction!!.plan
         assertEquals("SD", sd.item.id)
@@ -186,7 +186,7 @@ class MissionSnapshotTest {
         val after = MissionSnapshot.build(pkg, "cdr", met, mapOf(sd.activity.entryId to done))
         assertEquals("F", after.nextAction!!.plan.item.id)
         assertEquals(done, after.todayPlan.single { it.item.id == "SD" }.confirmation)
-        // Omitir también la saca de la siguiente acción.
+        // Omitting also removes it from the next action.
         val omitted = done.copy(status = com.aura.astronaut.data.ConfirmationStatus.OMITTED, reason = "Fatiga o malestar")
         assertEquals("F", MissionSnapshot.build(pkg, "cdr", met, mapOf(sd.activity.entryId to omitted)).nextAction!!.plan.item.id)
     }

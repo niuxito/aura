@@ -7,8 +7,8 @@ import com.aura.astronaut.heart.HeartSource
 import com.aura.astronaut.mission.ClockSource
 
 /**
- * Guarda en el dispositivo el astronauta elegido y el reloj de misión,
- * para que sobrevivan a cerrar la app. No contiene datos de salud.
+ * Stores on the device the chosen astronaut and the mission clock,
+ * so they survive closing the app. It contains no health data.
  */
 class DemoSettingsStore(context: Context) {
     private val prefs = context.getSharedPreferences("demo_settings", Context.MODE_PRIVATE)
@@ -17,18 +17,18 @@ class DemoSettingsStore(context: Context) {
 
     fun saveCrewId(id: String) = prefs.edit { putString(KEY_CREW, id) }
 
-    /** Fuente de la frecuencia cardiaca: reloj, simulada o apagada. Por defecto, simulada (demo sin reloj). */
+    /** Heart rate source: watch, simulated or off. Default: simulated (demo without a watch). */
     fun loadHeartSource(): HeartSource =
         prefs.getString(KEY_HEART_SOURCE, null)?.let { runCatching { HeartSource.valueOf(it) }.getOrNull() } ?: HeartSource.SIMULATED
 
     fun saveHeartSource(s: HeartSource) = prefs.edit { putString(KEY_HEART_SOURCE, s.name) }
 
-    /** Dirección Bluetooth del reloj elegido. */
+    /** Bluetooth address of the chosen watch. */
     fun loadWatchAddress(): String? = prefs.getString(KEY_WATCH, null)
 
     fun saveWatchAddress(address: String?) = prefs.edit { if (address == null) remove(KEY_WATCH) else putString(KEY_WATCH, address) }
 
-    /** URL de AURA Manager elegida en el modo demo; null = la de BuildConfig. */
+    /** AURA Manager URL chosen in demo mode; null = the BuildConfig one. */
     fun loadManagerUrl(): String? = prefs.getString(KEY_MANAGER_URL, null)
 
     fun saveManagerUrl(url: String) = prefs.edit { putString(KEY_MANAGER_URL, url) }

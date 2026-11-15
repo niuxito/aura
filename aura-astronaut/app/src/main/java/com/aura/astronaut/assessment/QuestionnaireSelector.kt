@@ -10,23 +10,23 @@ import com.aura.astronaut.mission.QuestionTrigger
 import com.aura.astronaut.mission.QuestionVariant
 import com.aura.astronaut.mission.SignalKind
 
-/** Una pregunta elegida para el cuestionario de hoy, con la redacción que toca y por qué se hace. */
+/** A question chosen for today's questionnaire, with the wording due today and why it is asked. */
 data class SelectedQuestion(
     val item: QuestionItem,
     val variant: QuestionVariant,
-    /** null en el bloque fijo; en el banco, el `reason` del disparador que la ha elegido. */
+    /** null in the fixed block; in the bank, the `reason` of the trigger that chose it. */
     val reason: String?,
 )
 
 /**
- * Selección de las preguntas del cuestionario diario según AGENTS.md («Cuestionario diario y semáforo»).
- * No hay preguntas ni umbrales en el código: todo sale de `pkg.questionnaire`.
+ * Selection of the daily questionnaire questions according to AGENTS.md ("Daily questionnaire and traffic light").
+ * There are no questions or thresholds in the code: everything comes from `pkg.questionnaire`.
  */
 object QuestionnaireSelector {
 
     /**
-     * @param latestSignals última medida de cada señal por id (las booleanas, 1.0 = verdadera).
-     *        Sin medida, un disparador de señal no dispara.
+     * @param latestSignals latest measurement of each signal by id (booleans: 1.0 = true).
+     *        With no measurement, a signal trigger does not fire.
      */
     fun select(
         pkg: MissionPackage,
@@ -37,13 +37,13 @@ object QuestionnaireSelector {
         val q = pkg.questionnaire ?: return emptyList()
         val crewIndex = pkg.crew.indexOfFirst { it.id == crewId }.coerceAtLeast(0)
 
-        // Bloque fijo: en el orden del paquete; variante = (día + índice del tripulante + índice de la pregunta) % variantes.
+        // Fixed block: in package order; variant = (day + crew member index + question index) % variants.
         val fixed = q.items.filter { it.block == QuestionBlock.FIXED }.take(q.fixedPerDay)
             .mapIndexed { i, item ->
                 SelectedQuestion(item, item.variants[(day.day + crewIndex + i) % item.variants.size], reason = null)
             }
 
-        // Banco: disparadores que se cumplen hoy, por prioridad descendente; preguntas distintas.
+        // Bank: triggers that hold today, by descending priority; distinct questions.
         val bank = q.items.filter { it.block == QuestionBlock.BANK }
         val fired = bank.flatMap { item ->
             item.triggers
@@ -53,7 +53,7 @@ object QuestionnaireSelector {
         val chosen = LinkedHashMap<String, Pair<QuestionItem, QuestionTrigger>>()
         fired.forEach { (item, t) -> if (chosen.size < q.bankPerDay && item.id !in chosen) chosen[item.id] = item to t }
 
-        // Si no llegan, relleno por prioridad.
+        // If there are not enough, fillers by priority.
         if (chosen.size < q.bankPerDay) {
             bank.flatMap { item -> item.triggers.filterIsInstance<QuestionTrigger.Filler>().map { item to it } }
                 .sortedByDescending { it.second.priority }
@@ -76,7 +76,7 @@ object QuestionnaireSelector {
         }
         is QuestionTrigger.Environment -> today.gravity in t.gravity
         is QuestionTrigger.DaysInMicro -> microDaysUpTo(pkg, today) >= t.min
-        // «En los últimos withinDays días de vuelo»: desde hoy hasta withinDays días de vuelo antes.
+        // "In the last withinDays flight days": from today back to withinDays flight days earlier.
         is QuestionTrigger.Event -> pkg.events.any { e ->
             e.kind == t.eventKind && e.day != null && e.day in (today.day - t.withinDays)..today.day
         }
@@ -96,17 +96,17 @@ object QuestionnaireSelector {
         }
     }
 
-    /** Días de vuelo seguidos en microgravedad hasta [today], incluido. */
+    /** Consecutive flight days in microgravity up to [today], inclusive. */
     fun microDaysUpTo(pkg: MissionPackage, today: FlightDay): Int =
         pkg.days.filter { it.day <= today.day }.sortedByDescending { it.day }
             .takeWhile { it.gravity == Gravity.MICRO }.size
 
-    /** Días de vuelo seguidos en microgravedad justo antes del día de la transición [d]. */
+    /** Consecutive flight days in microgravity right before the transition day [d]. */
     private fun microDaysBefore(pkg: MissionPackage, d: FlightDay): Int =
         pkg.days.filter { it.day < d.day }.sortedByDescending { it.day }
             .takeWhile { it.gravity == Gravity.MICRO }.size
 
-    /** Normalización: en todo el sistema alto = peor. Las variantes en positivo se invierten. */
+    /** Normalization: across the system high = worse. Positively phrased variants are inverted. */
     fun normalize(item: QuestionItem, variant: QuestionVariant, answer: Int): Double =
         if (variant.inverted) (item.scale.max + item.scale.min - answer).toDouble() else answer.toDouble()
 }
